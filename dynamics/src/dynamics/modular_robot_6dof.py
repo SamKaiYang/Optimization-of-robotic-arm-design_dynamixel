@@ -190,7 +190,10 @@ if __name__ == '__main__':    # pragma nocover
     
 '''
     robot.teach()
-    deg = pi / 180
+
+
+
+    # deg = pi / 180
     
     # q =  np.array([np.r_[0, 0, 0, 0, 0, 0]*deg, np.r_[30, 0, 0, 0, 0, 0]*deg,np.r_[60, 0, 0, 0, 0, 0]*deg, np.r_[90, 0, 0, 0, 0, 0]*deg])
     # robot.plot(q=q, backend='pyplot', dt =0.5)
@@ -212,28 +215,28 @@ if __name__ == '__main__':    # pragma nocover
 
 
 
-    # # import xlsx
-    # df = load_workbook("./xlsx/task_point.xlsx")
-    # sheets = df.worksheets
-    # sheet1 = sheets[0]
-    # rows = sheet1.rows
-    # cols = sheet1.columns
+    # import xlsx
+    df = load_workbook("./xlsx/task_point.xlsx")
+    sheets = df.worksheets
+    sheet1 = sheets[0]
+    rows = sheet1.rows
+    cols = sheet1.columns
 
-    # T_tmp = []
-    # manipulability_index = []
-    # i = 0
-    # for row in rows:
-    #     row_val = [col.value for col in row]
-    #     T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-    #     # print(T_tmp[i])
-    #     ik_q = robot.ikine_LM(T=T_tmp[i])
-    #     print(ik_q)
-    #     if ik_q.success == True:
-    #         manipulability_index.append(robot.manipulability(q=ik_q.q))
-    #         # robot.plot_ellipse()
-    #         ik_np = np.array(ik_q.q)
-    #         print(ik_np)
-    #         # robot.plot(q=q, backend='pyplot', dt = 0)
-    #         robot.plot(q=ik_np, backend='pyplot', dt = 0.5)
-    #     i = i + 1
-    # # print(np.mean(manipulability_index)) # manipulability 取平均
+    T_tmp = []
+    manipulability_index = []
+    i = 0
+    for row in rows:
+        row_val = [col.value for col in row]
+        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+        # print(T_tmp[i])
+        ik_q = robot.ikine_LM(T=T_tmp[i])
+        print(ik_q)
+        if ik_q.success == True:
+            manipulability_index.append(robot.manipulability(q=ik_q.q))
+            # robot.plot_ellipse()
+            ik_np = np.array(ik_q.q)
+            print(ik_np)
+            # robot.plot(q=q, backend='pyplot', dt = 0)
+            robot.plot(q=ik_np, backend='pyplot', dt = 1)
+        i = i + 1
+    # print(np.mean(manipulability_index)) # manipulability 取平均
