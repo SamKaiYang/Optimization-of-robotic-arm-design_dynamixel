@@ -1,6 +1,0 @@
-<launch>
-    <node name="interface_ui" pkg="interface_control" type="interface_GUI.py" respawn="false" output="screen" cwd="node"  >
-  </node>
-  <node name="dynamics_space" pkg="dynamics" type="dynamics_function_tm.py" respawn="false" output="screen"  cwd="node" >
-  </node>
-</launch>
