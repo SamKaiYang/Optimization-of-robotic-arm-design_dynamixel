@@ -1,0 +1,6 @@
+<launch>
+  <node name="interface_ui" pkg="interface_control" type="interface_GUI.py" output="screen" >
+  </node>
+  <node name="dynamics_space" pkg="dynamics" type="dynamics_function_p560.py" output="screen"  >
+  </node>
+</launch>

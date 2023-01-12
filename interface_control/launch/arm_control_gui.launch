@@ -1,0 +1,4 @@
+<launch>
+    <node name="arm_control_ui" pkg="modbus" type="armcontrol_GUI.py" cwd="node" output="screen" > </node>
+    <node name="control_strategy" pkg="modbus" type="armcontrol_strategy.py" cwd="node" output="screen" > </node>
+</launch>

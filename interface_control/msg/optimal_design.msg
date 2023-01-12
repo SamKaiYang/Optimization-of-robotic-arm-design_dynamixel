@@ -1,0 +1,9 @@
+float32 payload
+int32 dof
+string structure
+float32[] payload_position
+float32[] vel
+float32[] acc
+float64 arm_weight
+float64 cost
+float64 radius

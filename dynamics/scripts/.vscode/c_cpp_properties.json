@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/iclab/Documents/teco_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/iclab/Documents/teco_ws/src/Universal_Robots_ROS_Driver/controller_stopper/include/**",
+        "/home/iclab/Documents/teco_ws/src/dynamics/include/**",
+        "/home/iclab/Documents/teco_ws/src/kinematics/include/**",
+        "/home/iclab/Documents/teco_ws/src/trajectory_generation/include/**",
+        "/home/iclab/Documents/teco_ws/src/Universal_Robots_ROS_Driver/ur_calibration/include/**",
+        "/home/iclab/Documents/teco_ws/src/fmauch_universal_robot/ur_kinematics/include/**",
+        "/home/iclab/Documents/teco_ws/src/Universal_Robots_ROS_Driver/ur_robot_driver/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

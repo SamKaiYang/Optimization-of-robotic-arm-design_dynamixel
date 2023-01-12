@@ -1,0 +1,2 @@
+int32 DoF
+string structure_name

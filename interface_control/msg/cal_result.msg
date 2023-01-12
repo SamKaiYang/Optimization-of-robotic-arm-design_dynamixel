@@ -1,0 +1,1 @@
+int32 dyna_result

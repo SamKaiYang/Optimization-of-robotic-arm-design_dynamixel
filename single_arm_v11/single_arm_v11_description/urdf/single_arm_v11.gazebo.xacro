@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<robot name="single_arm_v11" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="single_arm_v11_gazebo">
+  <!-- Link1 -->
+  <gazebo reference="base_link">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Orange</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- Link2 -->
+  <gazebo reference="Link1">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Grey</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- Link3 -->
+  <gazebo reference="Link2">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Orange</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <gazebo reference="Link3">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Grey</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <gazebo reference="Link4">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Orange</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <gazebo reference="Link5">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Grey</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <gazebo reference="Link6">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Orange</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <gazebo reference="Joint1">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="Joint2">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="Joint3">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="Joint4">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="Joint5">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="Joint6">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo>
+  <!-- <gazebo reference="Joint7">
+    <implicitSpringDamper>True</implicitSpringDamper>
+  </gazebo> -->
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/single_arm_v11</robotNamespace>
+    </plugin>
+  </gazebo>
+
+  </xacro:macro>
+</robot>

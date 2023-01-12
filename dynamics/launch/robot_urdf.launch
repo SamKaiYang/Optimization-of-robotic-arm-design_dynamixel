@@ -1,0 +1,4 @@
+<launch>
+  <node name="robot_urdf" pkg="dynamics" type="robot_urdf.py" respawn="false" output="screen" cwd="node" >
+  </node>
+</launch>

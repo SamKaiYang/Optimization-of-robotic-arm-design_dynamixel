@@ -1,0 +1,8 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/iclab/Documents/teco_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages",
+        "/usr/local/lib/python3.6/dist-packages/cv2",
+        "/opt/installer/open_cv/cv_bridge/lib/python3/dist-packages"
+    ]
+}

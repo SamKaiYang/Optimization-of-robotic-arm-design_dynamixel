@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: tecobot
+    relative_path: urdf/tecobot.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/tecobot.srdf
+  CONFIG:
+    author_name: Sheng Kai Yang
+    author_email: tt00621212@gmail.com
+    generated_timestamp: 1641965547

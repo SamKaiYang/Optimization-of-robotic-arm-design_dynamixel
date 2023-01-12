@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="tecobot">
+  <link name="dummy"/>
+  <joint name="dummy_joint" type="fixed">
+    <parent link="dummy"/>
+    <child link="base_link"/>
+    </joint>
+  <link name='base_link'>
+  <!-- <link
+    name="base_link"> -->
+    <inertial>
+      <origin
+        xyz="-5.89241082937383E-08 -0.000607195511176322 0.0324652849797199"
+        rpy="0 0 0" />
+      <mass
+        value="0.72607336877639" />
+      <inertia
+        ixx="0.00214542503131186"
+        ixy="-1.62560396395711E-09"
+        ixz="1.75967015840072E-09"
+        iyy="0.00217519049431956"
+        iyz="-7.84469380222819E-06"
+        izz="0.0035729713646278" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.909803921568627 0.443137254901961 0.0313725490196078 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="1">
+    <inertial>
+      <origin
+        xyz="-1.55579201081481E-05 0.00265005484815443 -0.00640979059142413"
+        rpy="0 0 0" />
+      <mass
+        value="0.706627496414257" />
+      <inertia
+        ixx="0.00141272985130314"
+        ixy="-3.88244140794133E-07"
+        ixz="-7.81252256421149E-07"
+        iyy="0.00136161707453551"
+        iyz="-1.57137483733753E-05"
+        izz="0.00107347905043597" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j1"
+    type="revolute">
+    <origin
+      xyz="0 0 0.130100000000606"
+      rpy="3.14159265358979 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="1" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="1000"
+      velocity="1.0" />
+  </joint>
+  <link
+    name="2">
+    <inertial>
+      <origin
+        xyz="4.90637956589368E-11 0.205571973027702 -0.00335989805856342"
+        rpy="0 0 0" />
+      <mass
+        value="1.81432701922486" />
+      <inertia
+        ixx="0.0657181782547282"
+        ixy="-4.70754566707126E-06"
+        ixz="1.3134801419487E-11"
+        iyy="0.00340245408914578"
+        iyz="-0.00019327880087556"
+        izz="0.0648885288783243" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j2"
+    type="revolute">
+    <origin
+      xyz="0 0.11115 0"
+      rpy="-1.5708 0 3.1416" />
+    <parent
+      link="1" />
+    <child
+      link="2" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="1000"
+      velocity="1.0" />
+  </joint>
+  <link
+    name="3">
+    <inertial>
+      <origin
+        xyz="-9.75479428030767E-05 0.271025707847572 0.111573843205116"
+        rpy="0 0 0" />
+      <mass
+        value="0.44267362700812" />
+      <inertia
+        ixx="0.00846779109060532"
+        ixy="4.25798083740882E-06"
+        ixz="2.9703298408818E-06"
+        iyy="0.000577298267323756"
+        iyz="-0.000161368520266658"
+        izz="0.00835212590831791" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j3"
+    type="revolute">
+    <origin
+      xyz="0 0.408000000000056 0"
+      rpy="0 0 0" />
+    <parent
+      link="2" />
+    <child
+      link="3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="1000"
+      velocity="1.0" />
+  </joint>
+  <link
+    name="4">
+    <inertial>
+      <origin
+        xyz="-0.000181761828397664 0.00219045749084071 -0.000800397394362884"
+        rpy="0 0 0" />
+      <mass
+        value="0.240053004221894" />
+      <inertia
+        ixx="0.000357585780296645"
+        ixy="-4.01845028318451E-07"
+        ixz="-2.83495321785281E-06"
+        iyy="0.000344725616321976"
+        iyz="-2.81917197935311E-06"
+        izz="0.000285365736577025" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j4"
+    type="revolute">
+    <origin
+      xyz="0 0.372499999999936 0.0109000000011954"
+      rpy="1.57079632675385 0 -3.14159265356591" />
+    <parent
+      link="3" />
+    <child
+      link="4" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="300"
+      velocity="1.0" />
+  </joint>
+  <link
+    name="5">
+    <inertial>
+      <origin
+        xyz="-0.000192919655058627 -0.00232492307126431 0.00352418959262345"
+        rpy="0 0 0" />
+      <mass
+        value="0.22616916171284" />
+      <inertia
+        ixx="0.000319896405798474"
+        ixy="2.78135338346529E-07"
+        ixz="2.71610728082593E-06"
+        iyy="0.000307746360436311"
+        iyz="-4.25141250562973E-06"
+        izz="0.00026883500127194" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j5"
+    type="revolute">
+    <origin
+      xyz="0 0 0.0900000000005329"
+      rpy="1.57079632675672 0 3.14159265358979" />
+    <parent
+      link="4" />
+    <child
+      link="5" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="300"
+      velocity="1.0" />
+  </joint>
+  <link
+    name="6">
+    <inertial>
+      <origin
+        xyz="-4.4856E-13 0 0.025"
+        rpy="0 0 0" />
+      <mass
+        value="0.3927" />
+      <inertia
+        ixx="0.00032725"
+        ixy="1.2071E-31"
+        ixz="-2.9355E-15"
+        iyy="0.00032725"
+        iyz="1.09E-19"
+        izz="0.00049087" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://tecobot/meshes/6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j6"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.047999999999993"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="5" />
+    <child
+      link="6" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="300"
+      velocity="1.0" />
+  </joint>
+
+  <!-- Add the tcp (tutorial 2) -->
+  <link name="prbt_tcp"/>
+      
+  <!-- <joint name="table_joint" type="fixed">
+    <parent link="6"/>
+    <child link="prbt_base_link"/>
+  </joint>
+
+  <joint name="pnoz_joint" type="fixed">
+    <parent link="6"/>
+    <child link="pnoz"/>
+  </joint> -->
+
+  <!-- connect the added tcp and the flange with a joint (tutorial 2)-->
+  <joint name="prbt_fixed_joint_tcp" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <parent link="6"/>
+    <child link="prbt_tcp"/>
+  </joint>
+
+</robot>

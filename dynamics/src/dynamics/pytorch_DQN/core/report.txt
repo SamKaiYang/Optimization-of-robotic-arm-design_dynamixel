@@ -1,0 +1,33 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 2 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: logger.py
+--------------------------------------------------------------------------------
+logger.py:40:12: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+logger.py:122:8: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'logger.py'
+ outputting to 'logger_v2.py'
+--------------------------------------------------------------------------------
+
+23:22: INFO: tf.summary.FileWriter requires manual check. The TF 1.x summary API cannot be automatically migrated to TF 2.0, so symbols have been converted to tf.compat.v1.summary.* and must be migrated manually. Typical usage will only require changes to the summary writing logic, not to individual calls like scalar(). For examples of the new summary API, see the Effective TF 2.0 migration document or check the TF 2.0 TensorBoard tutorials.
+23:22: INFO: Renamed 'tf.summary.FileWriter' to 'tf.compat.v1.summary.FileWriter'
+27:18: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+27:36: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+40:12: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+43:22: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+47:33: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+50:18: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+60:15: INFO: Renamed 'tf.HistogramProto' to 'tf.compat.v1.HistogramProto'
+77:18: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+77:36: INFO: Renamed 'tf.Summary' to 'tf.compat.v1.Summary'
+122:8: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+--------------------------------------------------------------------------------
+

@@ -1,0 +1,17 @@
+controller_list:
+  - name: fake_teco_arm_controller
+    type: $(arg execution_type)
+    joints:
+      - j1
+      - j2
+      - j3
+      - j4
+      - j5
+      - j6
+  - name: fake_hand_controller
+    type: $(arg execution_type)
+    joints:
+      - j6
+initial:  # Define initial robot poses.
+  - group: teco_arm
+    pose: home

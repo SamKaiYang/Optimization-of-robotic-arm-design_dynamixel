@@ -1,0 +1,6 @@
+<launch>
+
+  <node name="move_group_interface_friction" pkg="moveit_plan" type="move_group_interface_friction" respawn="false" output="screen">
+  </node>
+
+</launch>

@@ -1,0 +1,15 @@
+CATKIN_IGNORE
+*.pyc
+/.vscode
+/moveit
+/moveit_msgs
+/moveit_resources
+/moveit_tutorials
+/moveit_visual_tools
+/panda_moveit_config
+/pilz_industrial_motion
+/pilz_robots_tutorials
+/rviz_visual_tools
+/kinematics
+/tecobot/urdf/.vscode/browse.vc.db
+/build/
