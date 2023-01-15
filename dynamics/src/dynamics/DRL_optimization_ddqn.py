@@ -49,7 +49,7 @@ from arm_workspace import arm_workspace_plane
 # from robot_urdf import RandomRobot
 from motor_module import motor_data
 from random_robot import RandomRobot
-
+from modular_robot_6dof import modular_robot_6dof
 # DRL_optimization api
 import sys
 import os
@@ -85,7 +85,7 @@ from pytorch_DQN.ddqn import DDQNAgent
 from pytorch_DQN.core.util import get_output_folder
 
 import matplotlib.pyplot as plt
-from RobotOptEnv import RobotOptEnv
+from RobotOptEnv_dynamixel import RobotOptEnv
 import tensorboardX
 import yaml
 file_path = curr_path + "/outputs/" 
@@ -101,7 +101,7 @@ env_name = 'DDQN_RobotOptEnv'  # 环境名称
 class drl_optimization:
     def __init__(self):
         # self.test = 0
-        self.robot = RandomRobot()
+        self.robot = modular_robot_6dof()
         self.env = RobotOptEnv()
         self.config = Config()
     def env_agent_config(self, cfg, seed=1):
@@ -123,12 +123,12 @@ class drl_optimization:
         self.config.eps_decay = 500 # e-greedy策略中epsilon的衰减率
         self.config.frames = 160000 # 经验回放的容量
         self.config.use_cuda = True
-        self.config.learning_rate = 1e-3  # 学习率
+        self.config.learning_rate = 1e-1  # 学习率 # TODO: fixed
         self.config.max_buff = 1000
         self.config.update_tar_interval = 100
         self.config.batch_size = 128 # mini-batch SGD中的批量大小
         self.config.print_interval = 30 # TODO: fixed 0112 00:22
-        self.config.log_interval = 20
+        self.config.log_interval = 30 # TODO: fixed 0115 14:11
         self.config.win_reward = 198     # CartPole-v0
         self.config.win_break = True
 

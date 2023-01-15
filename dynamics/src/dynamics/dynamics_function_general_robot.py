@@ -60,6 +60,7 @@ from dynamics_function_teco import Dynamics_teco
 from dynamics_function_single_arm import Dynamics_single_arm
 from dynamics_function_tm import Dynamics_tm
 from dynamics_function_ur import Dynamics_ur
+from dynamics_function_6dof_dynamixel import Dynamics_dynamixel
 
 class switch(object):
     def __init__(self, value):

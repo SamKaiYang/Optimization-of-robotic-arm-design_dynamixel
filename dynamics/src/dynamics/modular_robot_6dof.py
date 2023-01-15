@@ -60,6 +60,7 @@ class modular_robot_6dof(DHRobot):
         self.length_1 = robot.joints[3].origin.xyz[1]
         self.length_2 = robot.joints[4].origin.xyz[1]
         self.length_3 = robot.joints[5].origin.xyz[2]
+
         # robot length values (metres)
         # a = [0, -0.314, -0.284, 0, 0, 0] #m # teco
         a = [0, robot.joints[3].origin.xyz[0], robot.joints[4].origin.xyz[0], 0, 0, 0]
@@ -155,7 +156,7 @@ class modular_robot_6dof(DHRobot):
 if __name__ == '__main__':    # pragma nocover
 
     robot = modular_robot_6dof(symbolic=False)
-    print(robot)
+    # print(robot)
     # print(robot.dynamics())
     symbolic = False
     if symbolic:

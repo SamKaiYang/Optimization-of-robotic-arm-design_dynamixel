@@ -454,7 +454,7 @@ class RobotOptEnv(gym.Env):
         for i in range(6):
             # TODO:consider cost & weight 
             # if np.abs(self.state[i]) > self.motor_rated[i]:
-            if np.abs(self.state[i]) > 114: # TODO: fixed 
+            if np.abs(self.state[i]) > 44.7: # TODO: fixed 
                 self.torque_over = True # 超出最大扭矩
                 break # TODO
 

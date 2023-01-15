@@ -80,11 +80,11 @@ class stl_conv_urdf():
             print("line count:", flen)
 
             for i in range(flen):
-                if self.lines[i].startswith("    name=\"2\"") and self.lines[i+2].startswith("      <origin"):
+                if self.lines[i].startswith("    name=\"Link2\"") and self.lines[i+2].startswith("      <origin"):
                     self.L2_line = i+1
                     print("link 2 line number:", self.L2_line)
 
-                elif self.lines[i].startswith("    name=\"3\"") and self.lines[i+2].startswith("      <origin"):
+                elif self.lines[i].startswith("    name=\"Link3\"") and self.lines[i+2].startswith("      <origin"):
                     self.L3_line = i+1
                     print("link 3 line number:", self.L3_line)
 

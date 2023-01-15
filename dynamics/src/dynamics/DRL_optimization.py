@@ -49,7 +49,7 @@ from arm_workspace import arm_workspace_plane
 # from robot_urdf import RandomRobot
 from motor_module import motor_data
 from random_robot import RandomRobot
-
+from modular_robot_6dof import modular_robot_6dof
 # DRL_optimization api
 import sys
 import os
@@ -68,7 +68,7 @@ from common.utils import plot_rewards
 from dqn import DQN
 
 import matplotlib.pyplot as plt
-from RobotOptEnv import RobotOptEnv
+from RobotOptEnv_dynamixel import RobotOptEnv
 import tensorboardX
 import yaml
 file_path = curr_path + "/outputs/" 
@@ -99,7 +99,7 @@ class MLP(nn.Module):
 class drl_optimization:
     def __init__(self):
         # self.test = 0
-        self.robot = RandomRobot()
+        self.robot = modular_robot_6dof()
         self.env = RobotOptEnv()
 
     def env_agent_config(self, cfg, seed=1):

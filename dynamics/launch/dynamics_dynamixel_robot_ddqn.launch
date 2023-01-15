@@ -1,0 +1,11 @@
+<launch>
+  <node name="dynamics_space" pkg="dynamics" type="dynamics_function_6dof_dynamixel.py" respawn="false" output="screen" cwd="node" >
+  </node>
+  <node name="interface_ui" pkg="interface_control" type="interface_GUI.py" respawn="false" output="screen" cwd="node"  >
+  </node>
+  <node name="stl_cal" pkg="dynamics" type="stl_conv_6dof_urdf_dynamixel.py" respawn="false" output="screen" cwd="node" >
+  </node>
+  <node name="optimization" pkg="dynamics" type="DRL_optimization_ddqn.py" respawn="false" output="screen" cwd="node" >
+  </node>
+  
+</launch>

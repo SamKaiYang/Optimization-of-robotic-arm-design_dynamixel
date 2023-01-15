@@ -80,19 +80,19 @@ class stl_conv_urdf():
             print("line count:", flen)
 
             for i in range(flen):
-                if self.lines[i].startswith("    name=\"2\"") and self.lines[i+2].startswith("      <origin"):
+                if self.lines[i].startswith("    name=\"Link2\"") and self.lines[i+2].startswith("      <origin"):
                     self.L2_line = i+1
                     print("link 2 line number:", self.L2_line)
 
-                elif self.lines[i].startswith("    name=\"3\"") and self.lines[i+2].startswith("      <origin"):
+                elif self.lines[i].startswith("    name=\"Link3\"") and self.lines[i+2].startswith("      <origin"):
                     self.L3_line = i+1
                     print("link 3 line number:", self.L3_line)
 
-                elif self.lines[i].startswith("    name=\"j3\"") and self.lines[i+2].startswith("    <origin"):
+                elif self.lines[i].startswith("    name=\"Joint3\"") and self.lines[i+2].startswith("    <origin"):
                     self.J3_line = i+1
                     print("joint 3 line number:", self.J3_line)
 
-                elif self.lines[i].startswith("    name=\"j4\"") and self.lines[i+2].startswith("    <origin"):
+                elif self.lines[i].startswith("    name=\"Joint4\"") and self.lines[i+2].startswith("    <origin"):
                     self.J4_line = i+1
                     print("joint 4 line number:", self.J4_line)
                     print("read urdf data no problem")
@@ -110,10 +110,9 @@ class stl_conv_urdf():
             mesh_lines = int(self.L2_line + 20)
             joint_pos = int(self.J3_line + 2)
             
-            # self.axis_2_length = 281.5 - self.axis_2_length*10
-            # TODO: fixed -------
-            self.axis_2_length = 408.000000000056 - self.axis_2_length*10
-            joint3_pos_y = 0.408000000000056 - self.axis_2_length*0.001
+            # 以軸長12cm為基準
+            self.axis_2_length = 120.000000000000 - self.axis_2_length*10
+            joint3_pos_x = 0.214000000000000 - self.axis_2_length*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -123,7 +122,8 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            self.lines[joint_pos] = ("      xyz=\"0 {0} 0\"\n".format(joint3_pos_y))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.0325\"\n".format(joint3_pos_x))
+            # xyz="0.214 0 -0.0325"
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -134,9 +134,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # TODO: fixed -------
-            self.axis_3_length = 372.50368954 - self.axis_3_length*10
-            joint4_pos_y = 0.37250368954 - self.axis_3_length*0.001
+            # 以軸長12cm為基準
+            self.axis_3_length = 120.000000000000 - self.axis_3_length*10
+            joint4_pos_x = 0.214000000000000 - self.axis_3_length*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -146,23 +146,31 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            self.lines[joint_pos] = ("      xyz=\"0 {0} 0.0203999999999699\"\n".format(joint4_pos_y))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 0.0325\"\n".format(joint4_pos_x))
+            # xyz="0.214 0 0.0325"
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
     def random_generate_write_urdf(self):
-        # TODO: fixed -------
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_25.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_30.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
         vol = volume_2 - volume_1
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_5.0.STL')
+        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_12.0.STL')
+        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
+        vol2 = volume_2 - volume_1
+        cog2 = cog_2 - cog_1
+        inertia2 = inertia_2 - inertia_1
+
         # ===================================
-        self.axis_2_length = 35.0
-        self.axis_3_length = 35.0
+        self.axis_2_length = 12.0
+        self.axis_3_length = 12.0
         self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL")
         self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL")
         self.mesh_2_name = self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL"
@@ -171,14 +179,14 @@ class stl_conv_urdf():
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
         # random axis 2 length
         # TODO: fixed -------
-        random_axis_2_length = random.uniform(self.axis_2_length - 15.0, self.axis_2_length + 15.0)
-        print("random_axis_2_length                    = {0}".format(random_axis_2_length))
+        random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
+        print("dynamixel_axis_2_length                    = {0}".format(random_axis_2_length))
         diff_axis_2_length = random_axis_2_length - self.axis_2_length
         self.axis_2_length = random_axis_2_length
         self.op_axis_2_length = random_axis_2_length
-        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/5)
-        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/5)
-        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/5)
+        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/7)
+        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/7)
+        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/7)
 
         self.L2_volume = self.L2_volume*1000
         self.L2_inertia = self.L2_inertia*1000
@@ -192,14 +200,14 @@ class stl_conv_urdf():
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
         # random axis 3 length
         # TODO: fixed -------
-        random_axis_3_length = random.uniform(self.axis_3_length - 15.0, self.axis_3_length + 15.0)
-        print("random_axis_3_length                    = {0}".format(random_axis_3_length))
+        random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
+        print("dynamixel_axis_3_length                    = {0}".format(random_axis_3_length))
         diff_axis_3_length = random_axis_3_length - self.axis_3_length
         self.axis_3_length = random_axis_3_length
         self.op_axis_3_length = random_axis_3_length
-        self.L3_volume = self.L3_volume + vol*(diff_axis_3_length/5)
-        self.L3_cog = self.L3_cog + cog*(diff_axis_3_length/5)
-        self.L3_inertia = self.L3_inertia + inertia*(diff_axis_3_length/5)
+        self.L3_volume = self.L3_volume + vol2*(diff_axis_3_length/7)
+        self.L3_cog = self.L3_cog + cog2*(diff_axis_3_length/7)
+        self.L3_inertia = self.L3_inertia + inertia2*(diff_axis_3_length/7)
 
         self.L3_volume = self.L3_volume*1000
         self.L3_inertia = self.L3_inertia*1000
@@ -234,7 +242,7 @@ class stl_conv_urdf():
         # self.stl_read_file()
         # self.read_check_urdf()
         # self.data_write_urdf()
-        self.generate_write_urdf()
+        self.random_generate_write_urdf()
         self.pub_cmd.publish(7) # rebuild robot
     # Randomly generated information on the interface
     def interface_control_callback(self,data):
@@ -251,134 +259,27 @@ class stl_conv_urdf():
             self.optimal_random.axis_2_length = self.op_axis_2_length
             self.optimal_random.axis_3_length = self.op_axis_3_length
             self.pub_optimal_random.publish(self.optimal_random)
-
-    # generated information on the interface
-    def generate_write_urdf(self):
-        # 比較求取等差間距
-        # TODO: fixed -------
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_25.0.STL')
-        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_30.0.STL')
-        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
-        cog = cog_2 - cog_1
-        inertia = inertia_2 - inertia_1
-
-        # =================================== 設定標準長度
-        # TODO: fixed -------
-        axis_2_length = 35.0
-        axis_3_length = 35.0
-        self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(axis_2_length) + ".STL")
-        self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(axis_3_length) + ".STL")
-        self.mesh_2_name = self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL"
-        self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
-
-        self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
-        # random axis 2 length
-        # random_axis_2_length = random.uniform(self.axis_2_length - 15.0, self.axis_2_length + 15.0)
-        # print("random_axis_2_length                    = {0}".format(random_axis_2_length))
-        diff_axis_2_length = self.axis_2_length - axis_2_length
-        # self.axis_2_length = self.axis_2_length
-        self.op_axis_2_length = self.axis_3_length
-        # TODO: fixed -------
-        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/5)
-        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/5)
-        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/5)
-
-        self.L2_volume = self.L2_volume*1000
-        self.L2_inertia = self.L2_inertia*1000
-        print("============================================================")
-        print("Volume                                  = {0}".format(self.L2_volume))
-        print("Position of the center of gravity (COG) = {0}".format(self.L2_cog))
-        print("Inertia matrix at expressed at the COG  = {0}".format(self.L2_inertia[0,:]))
-        print("                                          {0}".format(self.L2_inertia[1,:]))
-        print("                                          {0}".format(self.L2_inertia[2,:]))
-
-        self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
-        # random axis 3 length
-        # random_axis_3_length = random.uniform(self.axis_3_length - 15.0, self.axis_3_length + 15.0)
-        # print("random_axis_3_length                    = {0}".format(random_axis_3_length))
-        diff_axis_3_length = self.axis_3_length - axis_3_length
-        # self.axis_3_length = self.axis_3_length
-        self.op_axis_3_length = self.axis_3_length
-        # TODO: fixed -------
-        self.L3_volume = self.L3_volume + vol*(diff_axis_3_length/5)
-        self.L3_cog = self.L3_cog + cog*(diff_axis_3_length/5)
-        self.L3_inertia = self.L3_inertia + inertia*(diff_axis_3_length/5)
-
-        self.L3_volume = self.L3_volume*1000
-        self.L3_inertia = self.L3_inertia*1000
-        print("============================================================")
-        print("Volume                                  = {0}".format(self.L3_volume))
-        print("Position of the center of gravity (COG) = {0}".format(self.L3_cog))
-        print("Inertia matrix at expressed at the COG  = {0}".format(self.L3_inertia[0,:]))
-        print("                                          {0}".format(self.L3_inertia[1,:]))
-        print("                                          {0}".format(self.L3_inertia[2,:]))
-        print("============================================================")
-        # ===================================
-        self.read_check_urdf()
-        self.data_write_urdf()
-
-    # for opt generated information on the interface 標準軸長
-    def opt_generate_write_urdf(self):
-        # 比較求取等差間距
-        # TODO: fixed -------
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_25.0.STL')
-        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_30.0.STL')
-        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
-        cog = cog_2 - cog_1
-        inertia = inertia_2 - inertia_1
-        # =================================== 設定標準長度
-        # TODO: fixed -------
-        axis_2_length = 35.0
-        axis_3_length = 35.0
-        self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(axis_2_length) + ".STL")
-        self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(axis_3_length) + ".STL")
-        self.mesh_2_name = self.robot_name + "_2_"+ str(axis_2_length) + ".STL"
-        self.mesh_3_name = self.robot_name + "_3_"+ str(axis_3_length) + ".STL"
-        self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
-        # specified axis 2 length
-        specified_axis_2_length = axis_2_length
-        diff_axis_2_length = specified_axis_2_length - self.axis_2_length
-        self.axis_2_length = specified_axis_2_length
-        self.op_axis_2_length = specified_axis_2_length
-        # TODO: fixed -------
-        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/5)
-        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/5)
-        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/5)
-        self.L2_volume = self.L2_volume*1000
-        self.L2_inertia = self.L2_inertia*1000
-        self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
-        # specified axis 3 length
-        specified_axis_3_length = axis_3_length
-        diff_axis_3_length = specified_axis_3_length - self.axis_3_length
-        self.axis_3_length = specified_axis_3_length
-        self.op_axis_3_length = specified_axis_3_length
-        # TODO: fixed -------
-        self.L3_volume = self.L3_volume + vol*(diff_axis_3_length/5)
-        self.L3_cog = self.L3_cog + cog*(diff_axis_3_length/5)
-        self.L3_inertia = self.L3_inertia + inertia*(diff_axis_3_length/5)
-
-        self.L3_volume = self.L3_volume*1000
-        self.L3_inertia = self.L3_inertia*1000
-        self.opt_read_check_urdf()
-        self.opt_data_write_urdf(axis_2_length,axis_3_length)
-     
+    # TODO: fixed -------   
     def opt_random_generate_write_urdf(self):
-        # TODO: fixed -------
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_25.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_30.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
         vol = volume_2 - volume_1
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_5.0.STL')
+        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_12.0.STL')
+        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
+        vol2 = volume_2 - volume_1
+        cog2 = cog_2 - cog_1
+        inertia2 = inertia_2 - inertia_1
+
         # ===================================
-        self.axis_2_length = 35.0
-        self.axis_3_length = 35.0
+        self.axis_2_length = 12.0
+        self.axis_3_length = 12.0
         self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL")
         self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL")
         self.mesh_2_name = self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL"
@@ -387,15 +288,14 @@ class stl_conv_urdf():
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
         # random axis 2 length
         # TODO: fixed -------
-        random_axis_2_length = random.uniform(self.axis_2_length - 15.0, self.axis_2_length + 15.0)
-        # print("random_axis_2_length                    = {0}".format(random_axis_2_length))
+        random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
+        print("dynamixel_axis_2_length                    = {0}".format(random_axis_2_length))
         diff_axis_2_length = random_axis_2_length - self.axis_2_length
         self.axis_2_length = random_axis_2_length
         self.op_axis_2_length = random_axis_2_length
-        # TODO: fixed -------
-        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/5)
-        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/5)
-        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/5)
+        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/7)
+        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/7)
+        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/7)
 
         self.L2_volume = self.L2_volume*1000
         self.L2_inertia = self.L2_inertia*1000
@@ -403,15 +303,14 @@ class stl_conv_urdf():
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
         # random axis 3 length
         # TODO: fixed -------
-        random_axis_3_length = random.uniform(self.axis_3_length - 15.0, self.axis_3_length + 15.0)
-        # print("random_axis_3_length                    = {0}".format(random_axis_3_length))
+        random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
+        print("dynamixel_axis_3_length                    = {0}".format(random_axis_3_length))
         diff_axis_3_length = random_axis_3_length - self.axis_3_length
         self.axis_3_length = random_axis_3_length
         self.op_axis_3_length = random_axis_3_length
-        # TODO: fixed -------
-        self.L3_volume = self.L3_volume + vol*(diff_axis_3_length/5)
-        self.L3_cog = self.L3_cog + cog*(diff_axis_3_length/5)
-        self.L3_inertia = self.L3_inertia + inertia*(diff_axis_3_length/5)
+        self.L3_volume = self.L3_volume + vol2*(diff_axis_3_length/7)
+        self.L3_cog = self.L3_cog + cog2*(diff_axis_3_length/7)
+        self.L3_inertia = self.L3_inertia + inertia2*(diff_axis_3_length/7)
 
         self.L3_volume = self.L3_volume*1000
         self.L3_inertia = self.L3_inertia*1000
@@ -430,9 +329,9 @@ class stl_conv_urdf():
             joint_pos = int(self.J3_line + 2)
             
             # self.axis_2_length = 281.5 - self.axis_2_length*10
-            # TODO: fixed -------
-            L2 = 408.000000000056 - L2*10
-            joint3_pos_y = 0.408000000000056 - L2*0.001
+
+            L2 = 120.000000000000 - L2*10
+            joint4_pos_x = 0.214000000000000 - L2*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -442,7 +341,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            self.lines[joint_pos] = ("      xyz=\"0 {0} 0\"\n".format(joint3_pos_y))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.0325\"\n".format(joint4_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -453,9 +352,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # TODO: fixed -------
-            L3 = 372.50368954 - L3*10
-            joint4_pos_y = 0.37250368954 - L3*0.001
+
+            L3 = 120.000000000000 - L3*10
+            joint4_pos_x = 0.214000000000000 - L3*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -465,7 +364,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            self.lines[joint_pos] = ("      xyz=\"0 {0} 0.0203999999999699\"\n".format(joint4_pos_y))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 0.0325\"\n".format(joint4_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -479,57 +378,67 @@ class stl_conv_urdf():
             # print(urdf_config.read())
             flen=len(self.lines)
             for i in range(flen):
-                if self.lines[i].startswith("    name=\"2\"") and self.lines[i+2].startswith("      <origin"):
+                if self.lines[i].startswith("    name=\"Link2\"") and self.lines[i+2].startswith("      <origin"):
                     self.L2_line = i+1
-                elif self.lines[i].startswith("    name=\"3\"") and self.lines[i+2].startswith("      <origin"):
+                elif self.lines[i].startswith("    name=\"Link3\"") and self.lines[i+2].startswith("      <origin"):
                     self.L3_line = i+1
-                elif self.lines[i].startswith("    name=\"j3\"") and self.lines[i+2].startswith("    <origin"):
+                elif self.lines[i].startswith("    name=\"Joint3\"") and self.lines[i+2].startswith("    <origin"):
                     self.J3_line = i+1
-                elif self.lines[i].startswith("    name=\"j4\"") and self.lines[i+2].startswith("    <origin"):
+                elif self.lines[i].startswith("    name=\"Joint4\"") and self.lines[i+2].startswith("    <origin"):
                     self.J4_line = i+1
                     break
                 else:
                     continue
+    # TODO: fixed -------               
     def specified_generate_write_urdf(self,L2, L3):
         # 比較求取等差間距
-        # TODO: fixed -------
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_25.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
-        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" +'random_3_30.0.STL')
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
         vol = volume_2 - volume_1
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
+
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_5.0.STL')
+        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_12.0.STL')
+        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
+        vol2 = volume_2 - volume_1
+        cog2 = cog_2 - cog_1
+        inertia2 = inertia_2 - inertia_1
         # ===================================
         # TODO: fixed -------
-        self.axis_2_length = 35.0
-        self.axis_3_length = 35.0
+        self.axis_2_length = 12.0
+        self.axis_3_length = 12.0
         self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL")
         self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL")
         self.mesh_2_name = self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL"
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
+
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
         # specified axis 2 length
         specified_axis_2_length = L2
         diff_axis_2_length = specified_axis_2_length - self.axis_2_length
         self.axis_2_length = specified_axis_2_length
         self.op_axis_2_length = specified_axis_2_length
-        # TODO: fixed -------
-        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/5)
-        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/5)
-        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/5)
+
+        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/7)
+        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/7)
+        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/7)
         self.L2_volume = self.L2_volume*1000
         self.L2_inertia = self.L2_inertia*1000
+        
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
         # specified axis 3 length
         specified_axis_3_length = L3
         diff_axis_3_length = specified_axis_3_length - self.axis_3_length
         self.axis_3_length = specified_axis_3_length
         self.op_axis_3_length = specified_axis_3_length
-        # TODO: fixed -------
-        self.L3_volume = self.L3_volume + vol*(diff_axis_3_length/5)
-        self.L3_cog = self.L3_cog + cog*(diff_axis_3_length/5)
-        self.L3_inertia = self.L3_inertia + inertia*(diff_axis_3_length/5)
+
+        self.L3_volume = self.L3_volume + vol2*(diff_axis_3_length/7)
+        self.L3_cog = self.L3_cog + cog2*(diff_axis_3_length/7)
+        self.L3_inertia = self.L3_inertia + inertia2*(diff_axis_3_length/7)
 
         self.L3_volume = self.L3_volume*1000
         self.L3_inertia = self.L3_inertia*1000
@@ -542,7 +451,7 @@ if __name__ == '__main__':
 
     rospy.init_node('stl_cal')
     # TODO: fixed -------
-    stl_cal = stl_conv_urdf("random","test")
+    stl_cal = stl_conv_urdf("single_arm_v12","test")
 
     while not rospy.is_shutdown():
         stl_cal.task_set()

@@ -89,8 +89,11 @@ tensorboard --logdir {log}
 1. 使用模組化關節(Dynamixal or TECO) 實現多種構型生成
 
 >>2023/01/02 更新
+
+# DQN
+roslaunch dynamics dynamics_dynamixel_robot_dqn.launch
 # DDQN
-roslaunch dynamics dynamics_general_robot.launch
-~~tensorboard --logdir ~/Documents/teco_ws/src/dynamics/src/dynamics/runs~~
+roslaunch dynamics dynamics_dynamixel_robot_ddqn.launch
+
 # tensorboard 可視化
-tensorboard --logdir ~/Documents/teco_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/runs/
+tensorboard --logdir ~/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/runs/

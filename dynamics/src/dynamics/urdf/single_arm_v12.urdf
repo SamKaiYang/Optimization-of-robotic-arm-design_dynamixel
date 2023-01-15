@@ -4,12 +4,14 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="single_arm_v12">
-  <link name="dummy"/>
+   <link name="dummy"/>
   <joint name="dummy_joint" type="fixed">
     <parent link="dummy"/>
     <child link="base_link"/>
     </joint>
   <link name='base_link'>
+  <!-- <link
+    name="base_link"> -->
     <inertial>
       <origin
         xyz="0.00015625 0.00020296 0.064397"
@@ -110,17 +112,17 @@
     name="Link2">
     <inertial>
       <origin
-        xyz="0.13568 -0.00070506 0.0057888"
+        xyz="0.19712597419466665 -0.00035644956047492597 0.017375496518452115"
         rpy="0 0 0" />
       <mass
-        value="0.61539" />
+        value="0.44844344500975386"  />
       <inertia
-        ixx="0.0005945"
-        ixy="1.0755E-06"
-        ixz="3.5702E-06"
-        iyy="0.00064394"
-        iyz="-8.2912E-08"
-        izz="0.00039018" />
+        ixx="0.0010954652944336841"
+        ixy="-2.32376897023687e-05"
+        ixz="-0.0007610648552185355"
+        iyy="0.004300467398506147"
+        iyz="-1.5308103052458785e-05"
+        izz="0.0034267018587773902" />
     </inertial>
     <visual>
       <origin
@@ -128,7 +130,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link2.STL" />
+          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_2_12.0.STL" />
       </geometry>
       <material
         name="">
@@ -168,17 +170,17 @@
     name="Link3">
     <inertial>
       <origin
-        xyz="0.135406483957112 0.000471066373987292 -0.00759294057285472"
+        xyz="0.2132921501696866 0.00023671539804276588 -0.016299222313201862"
         rpy="0 0 0" />
       <mass
-        value="0.558726771182515" />
+        value="0.41466376837106494"  />
       <inertia
-        ixx="0.000527368072379024"
-        ixy="-8.79483327326058E-07"
-        ixz="-3.57015353375444E-06"
-        iyy="0.000579703994248901"
-        iyz="-8.29116899084273E-08"
-        izz="0.000372569704142056" />
+        ixx="0.0007821431199232053"
+        ixy="1.6165838384488784e-05"
+        ixz="0.0005189334181772869"
+        iyy="0.0041791190263855025"
+        iyz="-8.782685417098746e-06"
+        izz="0.003602336886059131" />
     </inertial>
     <visual>
       <origin
@@ -186,7 +188,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link3.STL" />
+          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_3_12.0.STL" />
       </geometry>
       <material
         name="">
@@ -208,7 +210,7 @@
     name="Joint3"
     type="revolute">
     <origin
-      xyz="0.214 0 -0.0325"
+      xyz="0.25214453759208827 0 -0.0325"
       rpy="0 0 0" />
     <parent
       link="Link2" />
@@ -266,7 +268,7 @@
     name="Joint4"
     type="revolute">
     <origin
-      xyz="0.214 0 0.0325"
+      xyz="0.27476925248418915 0 0.0325"
       rpy="0 0 3.1416" />
     <parent
       link="Link3" />
