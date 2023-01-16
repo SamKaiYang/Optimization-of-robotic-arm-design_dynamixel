@@ -119,7 +119,22 @@ class modular_robot_6dof(DHRobot):
                 [robot.links[6].inertial.inertia.ixx, robot.links[6].inertial.inertia.iyy, robot.links[6].inertial.inertia.izz, robot.links[6].inertial.inertia.ixy,robot.links[6].inertial.inertia.iyz, robot.links[6].inertial.inertia.ixz],
                 [robot.links[7].inertial.inertia.ixx, robot.links[7].inertial.inertia.iyy, robot.links[7].inertial.inertia.izz, robot.links[7].inertial.inertia.ixy,robot.links[7].inertial.inertia.iyz, robot.links[7].inertial.inertia.ixz]
             ]
-
+        # qlim = [
+        #     [-pi,pi],
+        #     [-pi,pi],
+        #     [-pi,pi],
+        #     [-pi,pi],
+        #     [-pi,pi],
+        #     [-pi,pi]
+        # ]
+        # qlim = [
+        #     [-pi,pi],
+        #     [-pi*5/36,pi*43/36], # [-25~215]
+        #     [-pi*8/9,pi*8/9], # [-160~160]
+        #     [-pi,pi],
+        #     [-pi,pi],
+        #     [-pi,pi]
+        # ]
         links = []
 
         for j in range(6):
@@ -132,6 +147,7 @@ class modular_robot_6dof(DHRobot):
                 I=inertia[j],
                 G=G[j]
                 # B=B[j]
+                # qlim=qlim[j]
             )
             links.append(link)
     
@@ -167,13 +183,17 @@ if __name__ == '__main__':    # pragma nocover
         from math import pi
         zero = 0.0
     # Set the desired end-effector pose
-
-    '''# print(robot.q)
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     
     
-    print(robot.fkine(q) * sm.SE3(0, 0, 0.04))
+    # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
+
+    # T = robot.fkine(q)
+    # t = np.round(T.t, 3)
+    # r = np.round(T.rpy(), 3)
+    '''# print(robot.q)
+ 
     # robot.ikine_6s
     # robot.ikine_global
     # robot.ikine_LMS
@@ -190,7 +210,7 @@ if __name__ == '__main__':    # pragma nocover
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
 '''
-    robot.teach()
+    robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 
 
 
@@ -215,7 +235,6 @@ if __name__ == '__main__':    # pragma nocover
     # robot.plot(q=q, backend='pyplot', dt =0.5)
 
 
-
     # import xlsx
     df = load_workbook("./xlsx/task_point.xlsx")
     sheets = df.worksheets
@@ -230,7 +249,7 @@ if __name__ == '__main__':    # pragma nocover
         row_val = [col.value for col in row]
         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
         # print(T_tmp[i])
-        ik_q = robot.ikine_LM(T=T_tmp[i])
+        ik_q = robot.ikine_LM(T=T_tmp[i], search=True, slimit=100)
         print(ik_q)
         if ik_q.success == True:
             manipulability_index.append(robot.manipulability(q=ik_q.q))

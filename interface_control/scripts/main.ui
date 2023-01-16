@@ -4586,7 +4586,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>5.0</string>
+       <string>3.0</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_26">
@@ -5271,7 +5271,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>20</string>
+       <string>1.6</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_op_cost">
@@ -5284,7 +5284,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>1500</string>
+       <string>750</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_62">

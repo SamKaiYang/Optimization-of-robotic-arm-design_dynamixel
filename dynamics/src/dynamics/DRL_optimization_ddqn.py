@@ -129,7 +129,7 @@ class drl_optimization:
         self.config.batch_size = 128 # mini-batch SGD中的批量大小
         self.config.print_interval = 30 # TODO: fixed 0112 00:22
         self.config.log_interval = 30 # TODO: fixed 0115 14:11
-        self.config.win_reward = 198     # CartPole-v0
+        self.config.win_reward = 100     # CartPole-v0
         self.config.win_break = True
 
         self.config.action_dim = n_actions
@@ -294,8 +294,8 @@ if __name__ == "__main__":
     drl = drl_optimization()
     plot_cfg = PlotConfig()
     ros_topic = RosTopic()
-    ddqn_train_eps = 300  # 训练的回合数
-    ddqn_test_eps = 20  # 测试的回合数
+    ddqn_train_eps = 1000  # 训练的回合数 # 改為訓練1000回合
+    ddqn_test_eps = 100  # 测试的回合数
     # train = Trainer()
     while not rospy.is_shutdown():
         # test all
@@ -303,6 +303,7 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
             # 訓練
+            drl.env.point_Workspace_cal_Monte_Carlo()
             train_env, train_agent = drl.env_agent_config(cfg, seed=1)
             train = Trainer(train_agent, train_env, drl.config, plot_cfg.model_path)
             train.train(train_eps = ddqn_train_eps)

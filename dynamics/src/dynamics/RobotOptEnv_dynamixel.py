@@ -27,6 +27,7 @@ import spatialmath as sm
 from urdf_parser_py.urdf import URDF
 import os
 from openpyxl import load_workbook
+from openpyxl import Workbook
 
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotOptEnv(gym.Env):
@@ -124,6 +125,16 @@ class RobotOptEnv(gym.Env):
         self.state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float32)
         self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float32)
 
+
+        #隨機抽樣點位初始化
+        self.T_x = []
+        self.T_y = []
+        self.T_z = []
+        self.T_roll = []
+        self.T_pitch = []
+        self.T_yaw = []
+        self.xlsx_outpath = "./xlsx/"
+
     def optimal_design_callback(self, data):
         # print(data.data)
         # TODO: 目標構型
@@ -153,180 +164,6 @@ class RobotOptEnv(gym.Env):
         self.total_cost = self.op_cost # 元
         self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
         
-    # def step(self, action):
-    #     assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-    #     self.pre_state[0:6] = self.state[0:6]
-    #     # TODO: 向量編碼動作
-    #     if action == 0: # 軸2  # 短 # 型號1
-    #         self.std_L2 -= 1.0
-    #         # 配置軸2 motor 型號1
-    #         motor_type = 0 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 1: # 軸2  # 長 # 型號1
-    #         self.std_L2 += 1.0
-    #         motor_type = 0 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 2: # 軸2  # 短 # 型號2
-    #         self.std_L2 -= 1.0
-    #         motor_type = 1 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 3: # 軸2  # 長 # 型號2
-    #         self.std_L2 += 1.0
-    #         motor_type = 1 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 4: # 軸2  # 短 # 型號3
-    #         self.std_L2 -= 1.0
-    #         motor_type = 2 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 5: # 軸2  # 長 # 型號3
-    #         self.std_L2 += 1.0
-    #         motor_type = 2 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 6: # 軸2  # 短 # 型號4
-    #         self.std_L2 -= 1.0
-    #         motor_type = 3 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 7: # 軸2  # 長 # 型號4
-    #         self.std_L2 += 1.0
-    #         motor_type = 3 # 型號
-    #         axis = 2 # 軸數
-            
-    #     elif action == 8: # 軸3  # 短 # 型號1
-    #         self.std_L3 -= 1.0
-    #         motor_type = 0 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 9: # 軸3  # 長 # 型號1
-    #         self.std_L3 += 1.0
-    #         motor_type = 0 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 10: # 軸3  # 短 # 型號2
-    #         self.std_L3 -= 1.0
-    #         motor_type = 1 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 11: # 軸3  # 長 # 型號2
-    #         self.std_L3 += 1.0
-    #         motor_type = 1 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 12: # 軸3  # 短 # 型號3
-    #         self.std_L3 -= 1.0
-    #         motor_type = 2 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 13: # 軸3  # 長 # 型號3
-    #         self.std_L3 += 1.0
-    #         motor_type = 2 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 14: # 軸3  # 短 # 型號4
-    #         self.std_L3 -= 1.0
-    #         motor_type = 3 # 型號
-    #         axis = 3 # 軸數
-            
-    #     elif action == 15: # 軸3  # 長 # 型號4
-    #         self.std_L3 += 1.0
-    #         motor_type = 3 # 型號
-    #         axis = 3 # 軸數
-            
-        
-        
-    #     # 輸入action後 二,三軸軸長
-    #     self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
-    #     self.robot.__init__() # 重製機器人
-    #     torque = self.dynamics_torque_limit()
-    #     self.state[0:6] = torque
-        
-    #     # TODO: 改為可達性分析
-    #     reach_score = self.reach_evaluate()
-    #     manipulability_score = self.manipulability_evaluate()
-    #     rospy.loginfo("reach_score: %s", reach_score)
-    #     rospy.loginfo("manipulability_score: %s", manipulability_score)
-    #     # 計算最大可達半徑
-    #     L1,L2,L3 = self.robot.return_configuration()
-    #     L_sum = L1+L2+L3
-    #     rospy.loginfo("configuration axis length: %s, %s, %s, %s", L1, L2, L3, L_sum)
-    #     self.state[6] = L_sum
-    #     self.counts += 1
-        
-    #     # 計算成本與重量    
-    #     self.motor_cost[axis-1] = self.res.cost[motor_type]
-    #     self.motor_weight[axis-1] = self.res.weight[motor_type]
-    #     cost = sum(self.motor_cost) 
-    #     weight = sum(self.motor_weight)
-    #     self.state[7] = cost
-    #     self.state[8] = weight
-    #     self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
-    #     rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
-        
-    #     # if down 完成任务 
-        
-    #     torque_reward_close = 0.0
-        
-    #     for i in range(6):
-    #         # TODO:consider cost & weight 
-    #         if np.abs(self.state[i]) > self.motor_rated[i]:
-    #             self.torque_done[i] = True # 已經完成任務
-    #         else:
-    #             if np.abs(self.pre_state[i]) > np.abs(self.state[i]): # 如果前一個狀態比這一個狀態torque大
-    #                 torque_reward_close = torque_reward_close + 2.0
-    #             else:
-    #                 torque_reward_close = torque_reward_close - 2.0
-    #             self.torque_done[i] = False
-
-    #     if cost< self.pre_state[7]: # 成本比上一次低
-    #         torque_reward_close = torque_reward_close + 1.0
-    #     else:
-    #         torque_reward_close = torque_reward_close - 1.0
-    #     if weight< self.pre_state[8]: # 重量比上一次低
-    #         torque_reward_close = torque_reward_close + 1.0
-    #     else:
-    #         torque_reward_close = torque_reward_close - 1.0
-            
-    #     # 如果所有軸都超過最大torque，則結束
-    #     false_done = False in self.torque_done 
-    #     # 終止條件: 可達半徑低於使用者設定 or 超出各軸馬達最大torque 範圍 , 整體手臂重量高於使用者設定, 累計步數大於200次
-    #     if L_sum < self.reach_distance or cost > self.total_cost or weight > self.total_weight:
-    #         false_done = False
-            
-    #     # 走一步修正, 但還未最佳化完成
-    #     if false_done:
-    #         reward = torque_reward_close
-    #         # The episode truncates at 30 time steps.
-    #         if self.counts == 200:
-    #             reward = 30.0
-    #             false_done = False
-                
-    #     # down 完成後, 定義所計算出的torque值, 分數加多少
-    #     else:
-    #         if L_sum < self.reach_distance:
-    #             reward = -20.0
-    #         elif cost > self.total_cost:
-    #             reward = -10.0
-    #         elif weight > self.total_weight:
-    #             reward = -10.0
-    #         else:
-    #             reward = 0.0
-    #             for i in range(6):
-    #                 # 即torque, 超過最大torque 
-    #                 if np.abs(self.state[i]) > self.motor_rated[i]:
-    #                     reward += -5.0
-    #                 else:
-    #                     reward += 0.0
-    #                 # TODO: 新增可操作性評估
-    #                     # manipulability_score = self.manipulability_evaluate()
-    #     done = not false_done # 取bool 反向值
-        
-    #     return self.state, reward, done, {}
     # TODO: fixed
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
@@ -363,16 +200,6 @@ class RobotOptEnv(gym.Env):
             motor_type = 2 # 型號
             axis = 2 # 軸數
             
-        # elif action == 6: # 軸2  # 短 # 型號4
-        #     self.std_L2 -= 1.0
-        #     motor_type = 3 # 型號
-        #     axis = 2 # 軸數
-            
-        # elif action == 7: # 軸2  # 長 # 型號4
-        #     self.std_L2 += 1.0
-        #     motor_type = 3 # 型號
-        #     axis = 2 # 軸數
-            
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
             motor_type = 0 # 型號
@@ -402,26 +229,14 @@ class RobotOptEnv(gym.Env):
             self.std_L3 += 1.0
             motor_type = 2 # 型號
             axis = 3 # 軸數
-            
-        # elif action == 14: # 軸3  # 短 # 型號4
-        #     self.std_L3 -= 1.0
-        #     motor_type = 3 # 型號
-        #     axis = 3 # 軸數
-            
-        # elif action == 15: # 軸3  # 長 # 型號4
-        #     self.std_L3 += 1.0
-        #     motor_type = 3 # 型號
-        #     axis = 3 # 軸數
-            
-        
         
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
         self.state[0:6] = torque
-        # 可達性
-        self.state[6] = self.reach_evaluate()
+        # # 可達性
+        # self.state[6] = self.reach_evaluate()
         # 計算成本與重量    
         self.motor_cost[axis-1] = self.res.cost[motor_type]
         self.motor_weight[axis-1] = self.res.weight[motor_type]
@@ -431,9 +246,11 @@ class RobotOptEnv(gym.Env):
         weight = sum(self.motor_weight)
         self.state[7] = cost
         self.state[8] = weight
-        # 可操作性
-        self.state[9] = self.manipulability_evaluate()
-        # rospy.loginfo("reach_score: %s", self.state[6])
+        
+        # self.state[9] = self.manipulability_evaluate()
+        # 可達性 # 可操作性
+        self.state[6], self.state[9] = self.reach_manipulability_evaluate()
+        rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
@@ -443,7 +260,7 @@ class RobotOptEnv(gym.Env):
         # TODO: fixed
         shaping = (
             # -10 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
-            # + 10 * self.state[6]
+            + 10 * self.state[6]
             - 0.1 * self.state[7]
             - 10 * self.state[8]
             + 1000 * self.state[9]
@@ -463,13 +280,13 @@ class RobotOptEnv(gym.Env):
 
         terminated = False
         # if down 完成任务 
-        if self.state[6] == 0: # TODO: fixed
+        if self.state[6] <= 0.6: # TODO: fixed
             terminated = True
             reward += -50
         if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
             terminated = True
             reward += -100
-        if self.torque_over == False and self.state[6] != 0 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
+        if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
             terminated = True
             reward += +50
         if self.counts == 30:
@@ -479,6 +296,8 @@ class RobotOptEnv(gym.Env):
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
         rospy.loginfo("step_reward: %s", reward)
+        rospy.loginfo("================================")
+        # print("================================")
         return self.state, reward, terminated, {}
 
 
@@ -524,8 +343,10 @@ class RobotOptEnv(gym.Env):
         # consider reach_distance
         # L1,L2,L3 = self.robot.return_configuration()
         # L_sum = L1+L2+L3
-        reach_score = self.reach_evaluate()
-        manipulability_score = self.manipulability_evaluate()
+        self.random_select_point() # 先隨機抽樣30個點位
+        # reach_score = self.reach_evaluate()
+        # manipulability_score = self.manipulability_evaluate()
+        reach_score, manipulability_score = self.reach_manipulability_evaluate()
         self.state[6] = reach_score
         self.state[7] = sum(self.motor_cost_init)
         self.state[8] = sum(self.motor_weight_init)
@@ -628,7 +449,7 @@ class RobotOptEnv(gym.Env):
         return self.torque_dynamics_limit
 
     # TODO: 新增可達性評估
-    def reach_evaluate(self):
+    def reach_manipulability_evaluate(self):
         # import xlsx
         df = load_workbook("./xlsx/task_point.xlsx")
         sheets = df.worksheets
@@ -637,56 +458,152 @@ class RobotOptEnv(gym.Env):
         cols = sheet1.columns
         T_tmp = []
         score = []
-        i = 0
-        false_done = False
-        for row in rows:
-            row_val = [col.value for col in row]
-            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-            ik_q = self.robot.ikine_LM(T=T_tmp[i])
-            # 先判斷逆運動學解是否存在(即平方殘差是否低於1e-12), 當有不存在則評估0分
-            if ik_q.success == True:
-                # 迭代500次以內的迭代次數為評估
-                iterations_count = 500 - ik_q.iterations
-                score.append(iterations_count/500)
-            else:
-                # score[i] = 0
-                false_done = True
-                break
-            i = i + 1
-        if false_done == True:
-            final_score = 0
-            print("FFFFFFFFFFFFFUUUUUUUUUCCCCCCCCCCCKKKKKKK")
-        else:
-            final_score = np.mean(score)
-
-        return(final_score) # 回傳 
-
-    # TODO: 新增可操作性評估
-    def manipulability_evaluate(self):
-        # import xlsx
-        df = load_workbook("./xlsx/task_point.xlsx")
-        sheets = df.worksheets
-        sheet1 = sheets[0]
-        rows = sheet1.rows
-        cols = sheet1.columns
-
-        T_tmp = []
         manipulability_index = []
         i = 0
+        false_done = False
+        count = 0
         for row in rows:
             row_val = [col.value for col in row]
             T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-            # print(T_tmp[i])
-            ik_q = self.robot.ikine_LM(T=T_tmp[i])
+            ik_q = self.robot.ikine_LMS(T=T_tmp[i])
             if ik_q.success == True:
+                count += 1
                 manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-                # robot.plot_ellipse()
-                ik_np = np.array(ik_q.q)
-                # print(ik_np)
-                # self.robot.plot(q=ik_np, backend='pyplot', dt = 0.5)
             i = i + 1
 
-        return(np.mean(manipulability_index)) # 回傳 manipulability 取平均
+        if i == 0:
+            return(0,0)
+        else:
+            final_score = count / i
+            if i == 1:
+                return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
+            else:
+                return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+
+    # def reach_evaluate(self):
+    #     # import xlsx
+    #     df = load_workbook("./xlsx/task_point.xlsx")
+    #     sheets = df.worksheets
+    #     sheet1 = sheets[0]
+    #     rows = sheet1.rows
+    #     cols = sheet1.columns
+    #     T_tmp = []
+    #     score = []
+    #     i = 0
+    #     false_done = False
+    #     count = 0
+    #     for row in rows:
+    #         row_val = [col.value for col in row]
+    #         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+    #         ik_q = self.robot.ikine_LM(T=T_tmp[i])
+    #         if ik_q.success == True:
+    #             count += 1
+    #         i = i + 1
+    #     final_score = count / i
+    #     # TODO: 改為到點率
+    #     return(final_score) # 回傳 
+
+    # # TODO: 新增可操作性評估
+    # def manipulability_evaluate(self):
+    #     # import xlsx
+    #     df = load_workbook("./xlsx/task_point.xlsx")
+    #     sheets = df.worksheets
+    #     sheet1 = sheets[0]
+    #     rows = sheet1.rows
+    #     cols = sheet1.columns
+
+    #     T_tmp = []
+    #     manipulability_index = []
+    #     i = 0
+    #     for row in rows:
+    #         row_val = [col.value for col in row]
+    #         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+    #         # print(T_tmp[i])
+    #         ik_q = self.robot.ikine_LM(T=T_tmp[i], search=False, slimit=100)
+    #         if ik_q.success == True:
+    #             manipulability_index.append(self.robot.manipulability(q=ik_q.q))
+    #         i = i + 1
+    #     if i == 0:
+    #         return(0)
+    #     else:
+    #         return(np.mean(manipulability_index)) # 回傳 manipulability 取平均
+    
+    
+    def point_Workspace_cal_Monte_Carlo(self):
+        """
+        Through the "Work space" page in the interface to calculate of the robot
+        """
+        i = 0
+        # 角度轉換
+        du = pi / 180
+        # 度
+        radian = 180 / pi
+        # 弧度
+
+        # fig = plt.figure()
+        # self.ax = plt.subplot(111, projection='3d')
+        # self.ax_2d = plt.subplot(111)
+
+        self.q1_s = -160
+        self.q1_end = 160
+        self.q2_s = -160
+        self.q2_end = 160
+        self.q3_s = -160
+        self.q3_end = 160
+        self.q4_s = -160
+        self.q4_end = 160
+        self.q5_s = -160
+        self.q5_end = 160
+        self.q6_s = -160
+        self.q6_end = 160
+        N = 1000
+        theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
+        theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
+        theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
+        theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
+        theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
+        theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+
+        for i in range(N):
+            q1 = theta1[i, 0]
+            q2 = theta2[i, 0]
+            q3 = theta3[i, 0]
+            q4 = theta4[i, 0]
+            q5 = theta5[i, 0]
+            q6 = theta6[i, 0]
+            self.T = self.robot.fkine(
+                [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
+            )
+            t = np.round(self.T.t, 3)
+            r = np.round(self.T.rpy('deg'), 3)
+            self.T_x.append(t[0])
+            self.T_y.append(t[1])
+            self.T_z.append(t[2])
+            self.T_roll.append(int(r[0]))
+            self.T_pitch.append(int(r[1]))
+            self.T_yaw.append(int(r[2]))
+            i = i + 1
+        rospy.loginfo("Through the Work space in the interface to calculate of the robot.")
+        
+    def random_select_point(self):
+        excel_file = Workbook()
+        sheet = excel_file.active
+
+        for i in range(10):
+            x = np.random.randint(1,999)
+            sheet.cell(row=i + 1, column=1).value = self.T_x[x]
+            sheet.cell(row=i + 1, column=2).value = self.T_y[x]
+            sheet.cell(row=i + 1, column=3).value = self.T_z[x]
+            sheet.cell(row=i + 1, column=4).value = self.T_roll[x]
+            sheet.cell(row=i + 1, column=5).value = self.T_pitch[x]
+            sheet.cell(row=i + 1, column=6).value = self.T_yaw[x]
+
+        file_name = self.xlsx_outpath + "/task_point" +".xlsx"
+        excel_file.save(file_name)
+        # rospy.loginfo("task point excel write down.")
+        # print("================================")
+        
+
 
 if __name__ == '__main__':
     env = RobotOptEnv()
