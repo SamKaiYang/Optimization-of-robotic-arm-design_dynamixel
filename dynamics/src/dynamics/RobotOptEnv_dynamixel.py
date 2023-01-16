@@ -96,14 +96,14 @@ class RobotOptEnv(gym.Env):
         self.std_L3 = 35.0 # 預設標準值 第三軸 35 cm
         # 觀察參數 motor
         self.motor = motor_data()
-        self.res = self.motor.TECO_member
+        self.res = self.motor.dynamixel_member
         self.high_torque = 120.0 # 預設標準值 馬達極限 120.0 N max
         self.low_torque = 60.0 # 預設標準值 馬達極限 60.0 N rated
-        self.motor_cost_init = np.array([200,200,200,200,200,200], dtype=np.float32) # 預設最大馬達費用
-        self.motor_weight_init = np.array([2.0,2.0,2.0,2.0,2.0,2.0], dtype=np.float32) # 預設最大馬達重量
-        self.motor_cost = np.array([200,200,200,200,200,200], dtype=np.float32) # 預設最大馬達費用
-        self.motor_weight = np.array([2.0,2.0,2.0,2.0,2.0,2.0], dtype=np.float32) # 預設最大馬達重量
-        self.motor_rated = np.array([198,198,198,198,198,198], dtype=np.float32)
+        self.motor_cost_init = np.array([0,400,400,0,0,0], dtype=np.float32) # 預設最大馬達費用
+        self.motor_weight_init = np.array([0,0.855,0.855,0,0,0], dtype=np.float32) # 預設最大馬達重量
+        self.motor_cost = np.array([0,400,400,0,0,0], dtype=np.float32) # 馬達費用
+        self.motor_weight = np.array([0,0.855,0.855,0,0,0], dtype=np.float32) # 馬達重量
+        self.motor_rated = np.array([44.7,44.7,44.7,44.7,44.7,44.7], dtype=np.float32)
         # 使用者設定參數 & 觀察參數
         self.reach_distance = 0.6 # 使用者設定可達半徑最小值
         self.high_reach_eva = 1 # 預設觀測標準值
@@ -114,7 +114,7 @@ class RobotOptEnv(gym.Env):
         self.torque_over = False
         self.prev_shaping = None
         # TODO: 增加馬達模組選型action
-        self.action_space = spaces.Discrete(16)
+        self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
         self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, -float('inf'), -float('inf'), self.low_manipulability ]), 
@@ -363,55 +363,55 @@ class RobotOptEnv(gym.Env):
             motor_type = 2 # 型號
             axis = 2 # 軸數
             
-        elif action == 6: # 軸2  # 短 # 型號4
-            self.std_L2 -= 1.0
-            motor_type = 3 # 型號
-            axis = 2 # 軸數
+        # elif action == 6: # 軸2  # 短 # 型號4
+        #     self.std_L2 -= 1.0
+        #     motor_type = 3 # 型號
+        #     axis = 2 # 軸數
             
-        elif action == 7: # 軸2  # 長 # 型號4
-            self.std_L2 += 1.0
-            motor_type = 3 # 型號
-            axis = 2 # 軸數
+        # elif action == 7: # 軸2  # 長 # 型號4
+        #     self.std_L2 += 1.0
+        #     motor_type = 3 # 型號
+        #     axis = 2 # 軸數
             
-        elif action == 8: # 軸3  # 短 # 型號1
+        elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
             motor_type = 0 # 型號
             axis = 3 # 軸數
             
-        elif action == 9: # 軸3  # 長 # 型號1
+        elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
             motor_type = 0 # 型號
             axis = 3 # 軸數
             
-        elif action == 10: # 軸3  # 短 # 型號2
+        elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
             motor_type = 1 # 型號
             axis = 3 # 軸數
             
-        elif action == 11: # 軸3  # 長 # 型號2
+        elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
             motor_type = 1 # 型號
             axis = 3 # 軸數
             
-        elif action == 12: # 軸3  # 短 # 型號3
+        elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
             motor_type = 2 # 型號
             axis = 3 # 軸數
             
-        elif action == 13: # 軸3  # 長 # 型號3
+        elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
             motor_type = 2 # 型號
             axis = 3 # 軸數
             
-        elif action == 14: # 軸3  # 短 # 型號4
-            self.std_L3 -= 1.0
-            motor_type = 3 # 型號
-            axis = 3 # 軸數
+        # elif action == 14: # 軸3  # 短 # 型號4
+        #     self.std_L3 -= 1.0
+        #     motor_type = 3 # 型號
+        #     axis = 3 # 軸數
             
-        elif action == 15: # 軸3  # 長 # 型號4
-            self.std_L3 += 1.0
-            motor_type = 3 # 型號
-            axis = 3 # 軸數
+        # elif action == 15: # 軸3  # 長 # 型號4
+        #     self.std_L3 += 1.0
+        #     motor_type = 3 # 型號
+        #     axis = 3 # 軸數
             
         
         
@@ -425,6 +425,8 @@ class RobotOptEnv(gym.Env):
         # 計算成本與重量    
         self.motor_cost[axis-1] = self.res.cost[motor_type]
         self.motor_weight[axis-1] = self.res.weight[motor_type]
+        # print(self.motor_cost)
+        # print(self.motor_weight)
         cost = sum(self.motor_cost) 
         weight = sum(self.motor_weight)
         self.state[7] = cost
@@ -436,11 +438,12 @@ class RobotOptEnv(gym.Env):
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
-        
+        rospy.loginfo("self.state: %s", self.state)
         reward = 0
+        # TODO: fixed
         shaping = (
-            -10 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
-            + 10 * self.state[6]
+            # -10 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
+            # + 10 * self.state[6]
             - 0.1 * self.state[7]
             - 10 * self.state[8]
             + 1000 * self.state[9]
@@ -462,21 +465,53 @@ class RobotOptEnv(gym.Env):
         # if down 完成任务 
         if self.state[6] == 0: # TODO: fixed
             terminated = True
-            reward = -50
+            reward += -50
         if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
             terminated = True
-            reward = -100
-        # if self.torque_over == False and self.state[6] != 0 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
-        #     terminated = True
-        #     reward = +100
+            reward += -100
+        if self.torque_over == False and self.state[6] != 0 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
+            terminated = True
+            reward += +50
         if self.counts == 30:
             terminated = True
             self.counts = 0
-            reward = +30
+            reward += +30
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
         rospy.loginfo("step_reward: %s", reward)
         return self.state, reward, terminated, {}
+
+
+    # Define the base reward function
+    def base_reward_function(self, joint_torques, joint_costs, arm_weight, manipulability, reachability):
+        # Calculate the torque reward
+        torque_reward = sum(joint_torques) / len(joint_torques)
+        # Calculate the cost reward
+        cost_reward = sum(joint_costs) / len(joint_costs)
+        # Calculate the weight reward
+        weight_reward = arm_weight
+        # Calculate the manipulability reward
+        manipulability_reward = manipulability
+        # Calculate the reachability reward
+        reachability_reward = reachability
+        # Sum up all rewards and return the final reward
+        base_reward = torque_reward + cost_reward + weight_reward + manipulability_reward + reachability_reward
+        return base_reward
+
+    # Define the shaping reward function
+    def shaping_reward_function(self, current_position, target_position):
+        # Calculate the distance between current position and target position
+        distance = np.linalg.norm(current_position - target_position)
+        # Define the shaping reward
+        shaping_reward = - distance
+        return shaping_reward
+
+    # Combine the base reward function and the shaping reward function
+    def combined_reward_function(self, joint_torques, joint_costs, arm_weight, manipulability, reachability, current_position, target_position):
+        base_reward = self.base_reward_function(joint_torques, joint_costs, arm_weight, manipulability, reachability)
+        shaping_reward = self.shaping_reward_function(current_position, target_position)
+        final_reward = base_reward + shaping_reward
+        return final_reward
     # reset环境状态 
     def reset(self):
         # TODO:改用random state (手臂長度隨機)
@@ -496,7 +531,7 @@ class RobotOptEnv(gym.Env):
         self.state[8] = sum(self.motor_weight_init)
         self.state[9] = manipulability_score
         # rospy.loginfo("configuration: %s, %s, %s, %s", L1, L2, L3, L_sum)
-        rospy.loginfo("self.state: %s", self.state)
+        
         
         # 重置
         # self.std_L2 = 35.0 # 預設標準值 

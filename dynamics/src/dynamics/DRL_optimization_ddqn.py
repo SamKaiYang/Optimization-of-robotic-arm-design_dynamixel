@@ -276,7 +276,7 @@ class Tester(object):
 
                 if episode_steps + 1 > self.test_ep_steps:
                     done = True
-
+                # TODO: 獲取分數高於...的reward結果,
             if debug:
                 # print('[Test] episode: %3d, episode_reward: %5f' % (episode, episode_reward))
                 rospy.loginfo('[Test] episode: {}, episode_reward: {}'.format(episode, episode_reward))
