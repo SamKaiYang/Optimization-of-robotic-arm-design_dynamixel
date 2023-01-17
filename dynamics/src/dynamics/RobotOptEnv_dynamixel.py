@@ -250,12 +250,12 @@ class RobotOptEnv(gym.Env):
         # self.state[9] = self.manipulability_evaluate()
         # 可達性 # 可操作性
         self.state[6], self.state[9] = self.reach_manipulability_evaluate()
-        rospy.loginfo("reach_score: %s", self.state[6])
+        # rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
-        rospy.loginfo("self.state: %s", self.state)
+        # rospy.loginfo("self.state: %s", self.state)
         reward = 0
         # TODO: fixed
         shaping = (
@@ -301,6 +301,12 @@ class RobotOptEnv(gym.Env):
             pass
             
         if self.counts == 30:
+            if self.state[6] <= 0.6: # TODO: fixed
+                terminated = True
+                reward += -50
+            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+                terminated = True
+                reward += -100
             terminated = True
             self.counts = 0
             reward += +30
@@ -326,6 +332,7 @@ class RobotOptEnv(gym.Env):
         # 生成隨機 payload (kg)
         rand_payload = np.random.uniform(low=1, high=4)
         self.payload = rand_payload
+        rospy.loginfo("payload: %s", self.payload)
         self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
         self.random_select_point() # 先隨機抽樣30個點位
         self.prev_shaping = None
@@ -568,7 +575,7 @@ class RobotOptEnv(gym.Env):
             self.T_pitch.append(int(r[1]))
             self.T_yaw.append(int(r[2]))
             i = i + 1
-        rospy.loginfo("Through the Work space in the interface to calculate of the robot.")
+        # rospy.loginfo("Through the Work space in the interface to calculate of the robot.")
         
     def random_select_point(self):
         excel_file = Workbook()

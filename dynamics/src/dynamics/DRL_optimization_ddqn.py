@@ -294,8 +294,8 @@ if __name__ == "__main__":
     drl = drl_optimization()
     plot_cfg = PlotConfig()
     ros_topic = RosTopic()
-    ddqn_train_eps = 1000  # 训练的回合数 # 改為訓練1000回合
-    ddqn_test_eps = 100  # 测试的回合数
+    ddqn_train_eps = 300  # 训练的回合数
+    ddqn_test_eps = 20  # 测试的回合数
     # train = Trainer()
     while not rospy.is_shutdown():
         # test all

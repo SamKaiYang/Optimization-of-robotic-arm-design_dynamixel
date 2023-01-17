@@ -289,7 +289,8 @@ class stl_conv_urdf():
         # random axis 2 length
         # TODO: fixed -------
         random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
-        print("dynamixel_axis_2_length                    = {0}".format(random_axis_2_length))
+        rospy.loginfo("dynamixel_axis_2_length: %s", random_axis_2_length)
+        # print("dynamixel_axis_2_length                    = {0}".format(random_axis_2_length))
         diff_axis_2_length = random_axis_2_length - self.axis_2_length
         self.axis_2_length = random_axis_2_length
         self.op_axis_2_length = random_axis_2_length
@@ -304,7 +305,8 @@ class stl_conv_urdf():
         # random axis 3 length
         # TODO: fixed -------
         random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
-        print("dynamixel_axis_3_length                    = {0}".format(random_axis_3_length))
+        rospy.loginfo("dynamixel_axis_3_length: %s", random_axis_3_length)
+        # print("dynamixel_axis_3_length                    = {0}".format(random_axis_3_length))
         diff_axis_3_length = random_axis_3_length - self.axis_3_length
         self.axis_3_length = random_axis_3_length
         self.op_axis_3_length = random_axis_3_length
