@@ -463,11 +463,11 @@ class RobotOptEnv(gym.Env):
                 manipulability_index.append(self.robot.manipulability(q=ik_q.q))
             i = i + 1
 
-        if i == 0:
+        if count == 0:
             return(0,0)
         else:
             final_score = count / i
-            if i == 1:
+            if count == 1:
                 return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
             else:
                 return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
