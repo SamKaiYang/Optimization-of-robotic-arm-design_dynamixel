@@ -260,10 +260,10 @@ class RobotOptEnv(gym.Env):
         # TODO: fixed
         shaping = (
             # -10 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
-            + 10 * self.state[6]
-            - 0.1 * self.state[7]
-            - 10 * self.state[8]
-            + 1000 * self.state[9]
+            + 100 * self.state[6] # 可達性
+            # - 0.01 * self.state[7] # cost
+            # - 10 * self.state[8] # weight
+            + 1000 * self.state[9] # 可操作性
         ) 
 
         if self.prev_shaping is not None:
@@ -280,15 +280,26 @@ class RobotOptEnv(gym.Env):
 
         terminated = False
         # if down 完成任务 
-        if self.state[6] <= 0.6: # TODO: fixed
-            terminated = True
-            reward += -50
-        if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-            terminated = True
-            reward += -100
-        if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
+        
+        if self.counts == 10:
+            if self.state[6] <= 0.6: # TODO: fixed
+                terminated = True
+                reward += -50
+            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+                terminated = True
+                reward += -100
+        # if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
+        #     terminated = True
+        #     reward += +50
+        if self.torque_over == False and self.state[6] >= 0.9:  # TODO: fixed 不考慮 cost & weight & ... 
             terminated = True
             reward += +50
+        elif self.torque_over == False and self.state[6] == 1:  # TODO: fixed 不考慮 cost & weight & ... 
+            terminated = True
+            reward += +100
+        else: 
+            pass
+            
         if self.counts == 30:
             terminated = True
             self.counts = 0
@@ -300,37 +311,6 @@ class RobotOptEnv(gym.Env):
         # print("================================")
         return self.state, reward, terminated, {}
 
-
-    # Define the base reward function
-    def base_reward_function(self, joint_torques, joint_costs, arm_weight, manipulability, reachability):
-        # Calculate the torque reward
-        torque_reward = sum(joint_torques) / len(joint_torques)
-        # Calculate the cost reward
-        cost_reward = sum(joint_costs) / len(joint_costs)
-        # Calculate the weight reward
-        weight_reward = arm_weight
-        # Calculate the manipulability reward
-        manipulability_reward = manipulability
-        # Calculate the reachability reward
-        reachability_reward = reachability
-        # Sum up all rewards and return the final reward
-        base_reward = torque_reward + cost_reward + weight_reward + manipulability_reward + reachability_reward
-        return base_reward
-
-    # Define the shaping reward function
-    def shaping_reward_function(self, current_position, target_position):
-        # Calculate the distance between current position and target position
-        distance = np.linalg.norm(current_position - target_position)
-        # Define the shaping reward
-        shaping_reward = - distance
-        return shaping_reward
-
-    # Combine the base reward function and the shaping reward function
-    def combined_reward_function(self, joint_torques, joint_costs, arm_weight, manipulability, reachability, current_position, target_position):
-        base_reward = self.base_reward_function(joint_torques, joint_costs, arm_weight, manipulability, reachability)
-        shaping_reward = self.shaping_reward_function(current_position, target_position)
-        final_reward = base_reward + shaping_reward
-        return final_reward
     # reset环境状态 
     def reset(self):
         # TODO:改用random state (手臂長度隨機)
@@ -343,7 +323,12 @@ class RobotOptEnv(gym.Env):
         # consider reach_distance
         # L1,L2,L3 = self.robot.return_configuration()
         # L_sum = L1+L2+L3
+        # 生成隨機 payload (kg)
+        rand_payload = np.random.uniform(low=1, high=4)
+        self.payload = rand_payload
+        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
         self.random_select_point() # 先隨機抽樣30個點位
+        self.prev_shaping = None
         # reach_score = self.reach_evaluate()
         # manipulability_score = self.manipulability_evaluate()
         reach_score, manipulability_score = self.reach_manipulability_evaluate()

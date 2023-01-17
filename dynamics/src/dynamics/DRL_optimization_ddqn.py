@@ -123,13 +123,13 @@ class drl_optimization:
         self.config.eps_decay = 500 # e-greedy策略中epsilon的衰减率
         self.config.frames = 160000 # 经验回放的容量
         self.config.use_cuda = True
-        self.config.learning_rate = 1e-1  # 学习率 # TODO: fixed
+        self.config.learning_rate = 1e-2  # 学习率 # TODO: fixed 0117 11:45 1e-1 -> 1e-2
         self.config.max_buff = 1000
         self.config.update_tar_interval = 100
         self.config.batch_size = 128 # mini-batch SGD中的批量大小
-        self.config.print_interval = 30 # TODO: fixed 0112 00:22
-        self.config.log_interval = 30 # TODO: fixed 0115 14:11
-        self.config.win_reward = 100     # CartPole-v0
+        self.config.print_interval = 50 # TODO: fixed 0117 11:45
+        self.config.log_interval = 50 # TODO: fixed 0117 11:45
+        self.config.win_reward = 100     # TODO: fixed 0116
         self.config.win_break = True
 
         self.config.action_dim = n_actions

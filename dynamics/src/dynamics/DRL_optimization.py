@@ -255,6 +255,7 @@ if __name__ == "__main__":
         if ros_topic.cmd_run == 1:
             ros_topic.cmd_run = 0
             # 訓練
+            drl.env.point_Workspace_cal_Monte_Carlo()
             train_env, train_agent = drl.env_agent_config(cfg, seed=1)
             train_rewards, train_ma_rewards = drl.train(cfg, train_env, train_agent)
             make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
