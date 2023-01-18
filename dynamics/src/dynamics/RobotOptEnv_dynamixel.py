@@ -31,48 +31,6 @@ from openpyxl import Workbook
 
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotOptEnv(gym.Env):
-    """
-    ### Description
-    This environment corresponds to the version of the cart-pole problem described by Barto, Sutton, and Anderson in
-    ["Neuronlike Adaptive Elements That Can Solve Difficult Learning Control Problem"](https://ieeexplore.ieee.org/document/6313077).
-    A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track.
-    The pendulum is placed upright on the cart and the goal is to balance the pole by applying forces
-     in the left and right direction on the cart.
-    ### Action Space
-    The action is a `ndarray` with shape `(1,)` which can take values `{0, 1}` indicating the direction
-     of the fixed force the cart is pushed with.
-    | Num | Action                 |
-    |-----|------------------------|
-    | 0   | length add 1 cm  |
-    | 1   | length del 1 cm |
-    **Note**: The velocity that is reduced or increased by the applied force is not fixed and it depends on the angle
-     the pole is pointing. The center of gravity of the pole varies the amount of energy needed to move the cart underneath it
-    ### Observation Space
-    The observation is a `ndarray` with shape `(4,)` with the values corresponding to the following positions and velocities:
-    | Num | Observation           | Min                 | Max               |
-    |-----|-----------------------|---------------------|-------------------|
-    | 0   | Cart Position         | -4.8                | 4.8               |
-    | 1   | Cart Velocity         | -Inf                | Inf               |
-    | 2   | Pole Angle            | ~ -0.418 rad (-24°) | ~ 0.418 rad (24°) |
-    | 3   | Pole Angular Velocity | -Inf                | Inf               |
-    **Note:** While the ranges above denote the possible values for observation space of each element,
-        it is not reflective of the allowed values of the state space in an unterminated episode. Particularly:
-    -  The cart x-position (index 0) can be take values between `(-4.8, 4.8)`, but the episode terminates
-       if the cart leaves the `(-2.4, 2.4)` range.
-    -  The pole angle can be observed between  `(-.418, .418)` radians (or **±24°**), but the episode terminates
-       if the pole angle is not in the range `(-.2095, .2095)` (or **±12°**)
-    ### Rewards
-    Since the goal is to keep the pole upright for as long as possible, a reward of `+1` for every step taken,
-    including the termination step, is allotted. The threshold for rewards is 475 for v1.
-    ### Starting State
-    All observations are assigned a uniformly random value in `(-0.05, 0.05)`
-    ### Episode End
-    The episode ends if any one of the following occurs:
-    1. Termination: Pole Angle is greater than ±12°
-    2. Termination: Cart Position is greater than ±2.4 (center of the cart reaches the edge of the display)
-    3. Truncation: Episode length is greater than 500 (200 for v0)
-    """
-
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 2
@@ -124,7 +82,6 @@ class RobotOptEnv(gym.Env):
         # TODO: reward 歸一化
         self.state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float32)
         self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float32)
-
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -259,7 +216,7 @@ class RobotOptEnv(gym.Env):
         reward = 0
         # TODO: fixed
         shaping = (
-            # -10 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
+            -1 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
             + 100 * self.state[6] # 可達性
             # - 0.01 * self.state[7] # cost
             # - 10 * self.state[8] # weight
@@ -319,20 +276,15 @@ class RobotOptEnv(gym.Env):
 
     # reset环境状态 
     def reset(self):
-        # TODO:改用random state (手臂長度隨機)
-        # self.robot_urdf.opt_generate_write_urdf() # 啟用標準的L2,L3長度urdf
+        # random state (手臂長度隨機)
         self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
-        # TODO:讀取random後的臂長
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
         self.state[0:6] = torque
-        # consider reach_distance
-        # L1,L2,L3 = self.robot.return_configuration()
-        # L_sum = L1+L2+L3
         # 生成隨機 payload (kg)
         rand_payload = np.random.uniform(low=1, high=4)
         self.payload = rand_payload
-        rospy.loginfo("payload: %s", self.payload)
+        # rospy.loginfo("payload: %s", self.payload)
         self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
         self.random_select_point() # 先隨機抽樣30個點位
         self.prev_shaping = None
@@ -343,13 +295,6 @@ class RobotOptEnv(gym.Env):
         self.state[7] = sum(self.motor_cost_init)
         self.state[8] = sum(self.motor_weight_init)
         self.state[9] = manipulability_score
-        # rospy.loginfo("configuration: %s, %s, %s, %s", L1, L2, L3, L_sum)
-        
-        
-        # 重置
-        # self.std_L2 = 35.0 # 預設標準值 
-        # self.std_L3 = 35.0 # 預設標準值
-        
         self.counts = 0
         return self.state    
     
@@ -435,12 +380,8 @@ class RobotOptEnv(gym.Env):
             append_torque_limit_list.append(temp_torque_min)
             Torque_Max.append(abs(torque[toque_max_index][i]))
             self.torque_dynamics_limit = Torque_Max
-
-
-        # print("torque_dynamics_limit: ", self.torque_dynamics_limit)
         return self.torque_dynamics_limit
 
-    # TODO: 新增可達性評估
     def reach_manipulability_evaluate(self):
         # import xlsx
         df = load_workbook("./xlsx/task_point.xlsx")
@@ -471,55 +412,6 @@ class RobotOptEnv(gym.Env):
                 return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
             else:
                 return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
-
-    # def reach_evaluate(self):
-    #     # import xlsx
-    #     df = load_workbook("./xlsx/task_point.xlsx")
-    #     sheets = df.worksheets
-    #     sheet1 = sheets[0]
-    #     rows = sheet1.rows
-    #     cols = sheet1.columns
-    #     T_tmp = []
-    #     score = []
-    #     i = 0
-    #     false_done = False
-    #     count = 0
-    #     for row in rows:
-    #         row_val = [col.value for col in row]
-    #         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-    #         ik_q = self.robot.ikine_LM(T=T_tmp[i])
-    #         if ik_q.success == True:
-    #             count += 1
-    #         i = i + 1
-    #     final_score = count / i
-    #     # TODO: 改為到點率
-    #     return(final_score) # 回傳 
-
-    # # TODO: 新增可操作性評估
-    # def manipulability_evaluate(self):
-    #     # import xlsx
-    #     df = load_workbook("./xlsx/task_point.xlsx")
-    #     sheets = df.worksheets
-    #     sheet1 = sheets[0]
-    #     rows = sheet1.rows
-    #     cols = sheet1.columns
-
-    #     T_tmp = []
-    #     manipulability_index = []
-    #     i = 0
-    #     for row in rows:
-    #         row_val = [col.value for col in row]
-    #         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-    #         # print(T_tmp[i])
-    #         ik_q = self.robot.ikine_LM(T=T_tmp[i], search=False, slimit=100)
-    #         if ik_q.success == True:
-    #             manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-    #         i = i + 1
-    #     if i == 0:
-    #         return(0)
-    #     else:
-    #         return(np.mean(manipulability_index)) # 回傳 manipulability 取平均
-    
     
     def point_Workspace_cal_Monte_Carlo(self):
         """
@@ -531,10 +423,6 @@ class RobotOptEnv(gym.Env):
         # 度
         radian = 180 / pi
         # 弧度
-
-        # fig = plt.figure()
-        # self.ax = plt.subplot(111, projection='3d')
-        # self.ax_2d = plt.subplot(111)
 
         self.q1_s = -160
         self.q1_end = 160
@@ -575,7 +463,6 @@ class RobotOptEnv(gym.Env):
             self.T_pitch.append(int(r[1]))
             self.T_yaw.append(int(r[2]))
             i = i + 1
-        # rospy.loginfo("Through the Work space in the interface to calculate of the robot.")
         
     def random_select_point(self):
         excel_file = Workbook()
@@ -592,10 +479,6 @@ class RobotOptEnv(gym.Env):
 
         file_name = self.xlsx_outpath + "/task_point" +".xlsx"
         excel_file.save(file_name)
-        # rospy.loginfo("task point excel write down.")
-        # print("================================")
-        
-
 
 if __name__ == '__main__':
     env = RobotOptEnv()
