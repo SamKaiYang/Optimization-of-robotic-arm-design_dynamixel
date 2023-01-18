@@ -62,6 +62,7 @@ add_message_files(
   communicate_matlab.msg
   optimal_design.msg
   optimal_random.msg
+  tested_model_name.msg
 )
 
 ## Generate services in the 'srv' folder

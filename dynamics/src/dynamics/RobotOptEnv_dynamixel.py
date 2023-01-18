@@ -92,6 +92,8 @@ class RobotOptEnv(gym.Env):
         self.T_yaw = []
         self.xlsx_outpath = "./xlsx/"
 
+        self.model_select = "train" # 選擇使用train or test model 
+
     def optimal_design_callback(self, data):
         # print(data.data)
         # TODO: 目標構型
@@ -206,7 +208,7 @@ class RobotOptEnv(gym.Env):
         
         # self.state[9] = self.manipulability_evaluate()
         # 可達性 # 可操作性
-        self.state[6], self.state[9] = self.reach_manipulability_evaluate()
+        self.state[6], self.state[9] = self.reach_manipulability_evaluate(self.model_select)
         # rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
@@ -290,7 +292,7 @@ class RobotOptEnv(gym.Env):
         self.prev_shaping = None
         # reach_score = self.reach_evaluate()
         # manipulability_score = self.manipulability_evaluate()
-        reach_score, manipulability_score = self.reach_manipulability_evaluate()
+        reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
         self.state[6] = reach_score
         self.state[7] = sum(self.motor_cost_init)
         self.state[8] = sum(self.motor_weight_init)
@@ -298,6 +300,32 @@ class RobotOptEnv(gym.Env):
         self.counts = 0
         return self.state    
     
+    # reset环境状态 
+    def tested_reset(self):
+        # random state (手臂長度隨機)
+        self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+        self.robot.__init__() # 重製機器人
+        self.payload = self.op_payload
+        self.payload_position = np.array(self.op_payload_position)
+        self.vel = np.array(self.op_vel[0:6])
+        self.acc = np.array(self.op_acc[0:6])
+        self.total_weight = self.op_weight # Kg
+        self.total_cost = self.op_cost # 元
+        self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
+
+        torque = self.dynamics_torque_limit()
+        self.state[0:6] = torque
+        self.prev_shaping = None
+        # reach_score = self.reach_evaluate()
+        # manipulability_score = self.manipulability_evaluate()
+        reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
+        self.state[6] = reach_score
+        self.state[7] = sum(self.motor_cost_init)
+        self.state[8] = sum(self.motor_weight_init)
+        self.state[9] = manipulability_score
+        self.counts = 0
+        return self.state    
+
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None
@@ -382,36 +410,67 @@ class RobotOptEnv(gym.Env):
             self.torque_dynamics_limit = Torque_Max
         return self.torque_dynamics_limit
 
-    def reach_manipulability_evaluate(self):
-        # import xlsx
-        df = load_workbook("./xlsx/task_point.xlsx")
-        sheets = df.worksheets
-        sheet1 = sheets[0]
-        rows = sheet1.rows
-        cols = sheet1.columns
-        T_tmp = []
-        score = []
-        manipulability_index = []
-        i = 0
-        false_done = False
-        count = 0
-        for row in rows:
-            row_val = [col.value for col in row]
-            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-            ik_q = self.robot.ikine_LMS(T=T_tmp[i])
-            if ik_q.success == True:
-                count += 1
-                manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-            i = i + 1
+    def reach_manipulability_evaluate(self,model_select):
+        if model_select == "train":
+            # import xlsx
+            df = load_workbook("./xlsx/task_point.xlsx")
+            sheets = df.worksheets
+            sheet1 = sheets[0]
+            rows = sheet1.rows
+            cols = sheet1.columns
+            T_tmp = []
+            score = []
+            manipulability_index = []
+            i = 0
+            false_done = False
+            count = 0
+            for row in rows:
+                row_val = [col.value for col in row]
+                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+                if ik_q.success == True:
+                    count += 1
+                    manipulability_index.append(self.robot.manipulability(q=ik_q.q))
+                i = i + 1
 
-        if count == 0:
-            return(0,0)
-        else:
-            final_score = count / i
-            if count == 1:
-                return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
+            if count == 0:
+                return(0,0)
             else:
-                return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+                final_score = count / i
+                if count == 1:
+                    return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
+                else:
+                    return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+        elif model_select == "test":
+            # import xlsx
+            df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
+            sheets = df.worksheets
+            sheet1 = sheets[0]
+            rows = sheet1.rows
+            cols = sheet1.columns
+            T_tmp = []
+            score = []
+            manipulability_index = []
+            i = 0
+            false_done = False
+            count = 0
+            for row in rows:
+                row_val = [col.value for col in row]
+                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+                if ik_q.success == True:
+                    count += 1
+                    manipulability_index.append(self.robot.manipulability(q=ik_q.q))
+                i = i + 1
+
+            if count == 0:
+                return(0,0)
+            else:
+                final_score = count / i
+                if count == 1:
+                    return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
+                else:
+                    return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
     
     def point_Workspace_cal_Monte_Carlo(self):
         """
@@ -480,6 +539,8 @@ class RobotOptEnv(gym.Env):
         file_name = self.xlsx_outpath + "/task_point" +".xlsx"
         excel_file.save(file_name)
 
+    # def select_point_tested(self):
+    #     task_point_6dof_tested
 if __name__ == '__main__':
     env = RobotOptEnv()
     

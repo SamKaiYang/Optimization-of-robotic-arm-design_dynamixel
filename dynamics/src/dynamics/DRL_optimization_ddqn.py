@@ -25,7 +25,7 @@ import sympy as sp
 # import dyna_space
 from interface_control.msg import (cal_cmd, cal_process, cal_result, dyna_data,
                                 dyna_space_data, optimal_design,
-                                optimal_random, specified_parameter_design)
+                                optimal_random, specified_parameter_design, tested_model_name)
 from matplotlib import cm
 from moveit_msgs.msg import DisplayTrajectory, RobotTrajectory
 from mpl_toolkits.mplot3d import Axes3D
@@ -157,6 +157,7 @@ class PlotConfig:
 class RosTopic:
     def __init__(self):
         self.sub_taskcmd = rospy.Subscriber("/cal_command", cal_cmd, self.cmd_callback)
+        self.sub_test_model_name = rospy.Subscriber("/tested_model_name", tested_model_name, self.test_model_name_callback)
         self.cmd_run = 0
     def cmd_callback(self, data):
         self.cmd = data.cmd
@@ -164,6 +165,13 @@ class RosTopic:
         if data.cmd == 22:
             rospy.sleep(10)
             self.cmd_run = 1
+        if data.cmd == 23:
+            rospy.sleep(10)
+            self.cmd_run = 2
+    def test_model_name_callback(self, data):
+        self.test_model_name  = data.tested_model_name
+        print(self.test_model_name)
+
 
 class Trainer:
     def __init__(self, agent, env, config: Config, model_path):
@@ -260,7 +268,7 @@ class Tester(object):
     def test(self, debug=True, visualize=True): # debug = true
         avg_reward = 0
         for episode in range(self.num_episodes):
-            s0 = self.env.reset()
+            s0 = self.env.tested_reset()
             episode_steps = 0
             episode_reward = 0.
 
@@ -303,15 +311,16 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
             # 訓練
+            drl.env.model_select = "train"
             drl.env.point_Workspace_cal_Monte_Carlo()
             train_env, train_agent = drl.env_agent_config(cfg, seed=1)
             train = Trainer(train_agent, train_env, drl.config, plot_cfg.model_path)
             train.train(train_eps = ddqn_train_eps)
             # 測試
-
+            drl.env.model_select = "test"
             plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, seed=10)
-            test = Tester(train_agent, train_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
+            test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
             test.test()
             break
         else:
@@ -330,19 +339,15 @@ if __name__ == "__main__":
             pass
 
         '''
-
-        '''
         # test tested_model
-        if ros_topic.cmd_run == 1:
+        if ros_topic.cmd_run == 2:
             ros_topic.cmd_run = 0
-            # # 訓練
-            train_env, train_agent = drl.env_agent_config(cfg, seed=1)
             # 測試
-            plot_cfg.model_path = '/home/iclab/Documents/teco_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/20230102-163105/models/model_last.pkl'# test 20230102
+            drl.env.model_select = "test"
+            plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
             test_env, test_agent = drl.env_agent_config(cfg, seed=10)
-            test = Tester(train_agent, train_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
+            test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
             test.test()
             break
         else:
             pass
-        '''

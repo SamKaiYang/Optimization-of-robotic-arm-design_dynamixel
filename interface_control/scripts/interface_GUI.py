@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from Ui_main import Ui_MainWindow
 from interface_control.msg import (arm_structure, cal_cmd, dyna_data, dyna_space_data,
                                 specified_parameter_design, cal_process, cal_result, 
-                                communicate_matlab, optimal_design)
+                                communicate_matlab, optimal_design, tested_model_name)
 from std_msgs.msg import String
 import sys
 import importlib
@@ -116,6 +116,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sub_dyna_space_progress = rospy.Subscriber("/dyna_space_progress",cal_process, self.dyna_cal_process_callback)
         # publish select dof and structure 
         self.pub_arm_structure = rospy.Publisher("/arn_structure", arm_structure, queue_size=10)
+        # publish tested model name
+        self.tested_model_name = rospy.Publisher("/tested_model_name", tested_model_name, queue_size=10)
 
         self.cal_cmd = cal_cmd()
         self.dyna_data = dyna_data()
@@ -124,6 +126,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.communicate_matlab = String()
         self.optimal_design = optimal_design()
         self.arm_structure = arm_structure()
+        self.tested_model = tested_model_name()
         
         self.rpb = self.ui.widget
         self.rpb.rpb_setValue(0)
@@ -165,6 +168,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.btn_cjm_select.clicked.connect(self.cjm_select_buttonClicked)
         self.ui.btn_traj_torque_plot.clicked.connect(self.traj_torque_plot_buttonClicked)
         self.ui.btn_structure_select.clicked.connect(self.structure_set_buttonClicked)
+        self.ui.btn_optimization_test.clicked.connect(self.btn_optimization_test_buttonClicked)
         # # Vel. HorizontalSlider
         # self.ui.horizontalSlider_vel.valueChanged.connect(self.VelSliderValue)
         # # Acc. HorizontalSlider
@@ -574,6 +578,60 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         # self.pub
+    def btn_optimization_test_buttonClicked(self):
+        # input data: robot workspace, robot payload, robot joint velocity, robot joint acceleration
+        
+        payload = float(self.ui.lineEdit_op_payload.text())
+        payload_x = float(self.ui.lineEdit_op_payload_x.text())
+        payload_y = float(self.ui.lineEdit_op_payload_y.text())
+        payload_z = float(self.ui.lineEdit_op_payload_z.text())
+        payload_position = [payload_x, payload_y, payload_z]
+
+        vel_0 = float(self.ui.lineEdit_op_vel_1.text())
+        vel_1 = float(self.ui.lineEdit_op_vel_2.text())
+        vel_2 = float(self.ui.lineEdit_op_vel_3.text())
+        vel_3 = float(self.ui.lineEdit_op_vel_4.text())
+        vel_4 = float(self.ui.lineEdit_op_vel_5.text())
+        vel_5 = float(self.ui.lineEdit_op_vel_6.text())
+        vel_6 = float(self.ui.lineEdit_op_vel_7.text())
+        joint_velocity = [vel_0, vel_1, vel_2, vel_3, vel_4, vel_5, vel_6]
+
+        
+
+        acc_0 = float(self.ui.lineEdit_op_acc_1.text())
+        acc_1 = float(self.ui.lineEdit_op_acc_2.text())
+        acc_2 = float(self.ui.lineEdit_op_acc_3.text())
+        acc_3 = float(self.ui.lineEdit_op_acc_4.text())
+        acc_4 = float(self.ui.lineEdit_op_acc_5.text())
+        acc_5 = float(self.ui.lineEdit_op_acc_6.text())
+        acc_6 = float(self.ui.lineEdit_op_acc_7.text())
+        joint_acceleration = [acc_0, acc_1, acc_2, acc_3, acc_4, acc_5, acc_6]
+
+        reachable_radius = float(self.ui.lineEdit_op_reachable_radius.text())
+
+        weight =  float(self.ui.lineEdit_op_weight.text())
+        cost = float(self.ui.lineEdit_op_cost.text())
+        # print ("payload: ", payload)
+        # print ("payload_position: ", payload_position)
+        # print ("joint_velocity: ", joint_velocity)
+        # print ("joint_acceleration: ", joint_acceleration)
+        # print ("Reachable radius: ", reachable_radius)
+
+        # self.optimization_data.payload = payload
+        self.optimal_design.payload = payload
+        self.optimal_design.payload_position = payload_position
+        self.optimal_design.dof = self.dof_select
+        # self.optimal_design.structure = self.structure
+        self.optimal_design.vel = joint_velocity
+        self.optimal_design.acc = joint_acceleration
+        self.optimal_design.radius = reachable_radius
+        self.optimal_design.arm_weight = weight
+        self.optimal_design.cost = cost
+
+        test_model_name =  str(self.ui.lineEdit_op_test_model_name.text())
+        self.tested_model_name.publish(test_model_name)
+        self.pub_optimal_design.publish(self.optimal_design)
+        self.pub_cmd.publish(23)
 
 if __name__=="__main__":
     rospy.init_node("interface_ui")
