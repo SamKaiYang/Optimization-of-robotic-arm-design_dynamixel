@@ -207,7 +207,7 @@ class Trainer:
             epsilon = self.epsilon_by_frame(fr)
             action = self.agent.act(state, epsilon)
 
-            next_state, reward, done, _ = self.env.step(action)
+            next_state, reward, done, info = self.env.step(action)
             self.agent.buffer.add(state, action, reward, next_state, done)
 
             state = next_state
@@ -264,11 +264,15 @@ class Tester(object):
         self.agent.is_training = False
         self.agent.load_weights(model_path)
         self.policy = lambda x: agent.act(x)
+        self.xlsx_outpath = "./xlsx/"
 
     def test(self, debug=True, visualize=True): # debug = true
+        excel_file = Workbook()
+        sheet = excel_file.active
+        i = 0
         avg_reward = 0
         for episode in range(self.num_episodes):
-            s0 = self.env.tested_reset()
+            s0 = self.env.tested_reset() # TODO: 改為陣列儲存
             episode_steps = 0
             episode_reward = 0.
 
@@ -279,6 +283,24 @@ class Tester(object):
 
                 action = self.policy(s0)
                 s0, reward, done, info = self.env.step(action)
+                # TODO: 獲取分數高於...的reward結果,
+                if reward >= 50:
+                    sheet.cell(row=i + 1, column=1).value = s0[0]
+                    sheet.cell(row=i + 1, column=2).value = s0[1]
+                    sheet.cell(row=i + 1, column=3).value = s0[2]
+                    sheet.cell(row=i + 1, column=4).value = s0[3]
+                    sheet.cell(row=i + 1, column=5).value = s0[4]
+                    sheet.cell(row=i + 1, column=6).value = s0[5]
+                    sheet.cell(row=i + 1, column=7).value = s0[6]
+                    sheet.cell(row=i + 1, column=8).value = s0[7]
+                    sheet.cell(row=i + 1, column=9).value = s0[8]
+                    sheet.cell(row=i + 1, column=10).value = s0[9]
+                    sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
+                    sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
+                    sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
+                    sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
+                    sheet.cell(row=i + 1, column=15).value = reward
+                    i = i + 1
                 episode_reward += reward
                 episode_steps += 1
 
@@ -294,6 +316,9 @@ class Tester(object):
         # print("avg reward: %5f" % (avg_reward))
         rospy.loginfo('avg reward: {}'.format(avg_reward))
 
+        file_name = self.xlsx_outpath + "/tested_reward_state" +".xlsx"
+        excel_file.save(file_name)
+
 if __name__ == "__main__":
     rospy.init_node("optimization")
     a = 0
@@ -302,8 +327,8 @@ if __name__ == "__main__":
     drl = drl_optimization()
     plot_cfg = PlotConfig()
     ros_topic = RosTopic()
-    ddqn_train_eps = 300  # 训练的回合数
-    ddqn_test_eps = 20  # 测试的回合数
+    ddqn_train_eps = 1000  # 训练的回合数
+    ddqn_test_eps = 100  # 测试的回合数
     # train = Trainer()
     while not rospy.is_shutdown():
         # test all
@@ -320,7 +345,7 @@ if __name__ == "__main__":
             drl.env.model_select = "test"
             plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, seed=10)
-            test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
+            test = Tester(test_agent, test_env, plot_cfg.model_path, num_episodes = ddqn_test_eps)
             test.test()
             break
         else:

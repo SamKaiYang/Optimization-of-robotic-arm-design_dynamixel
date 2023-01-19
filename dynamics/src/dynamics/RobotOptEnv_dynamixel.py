@@ -274,7 +274,8 @@ class RobotOptEnv(gym.Env):
         rospy.loginfo("step_reward: %s", reward)
         rospy.loginfo("================================")
         # print("================================")
-        return self.state, reward, terminated, {}
+        current_design = [self.std_L2, self.std_L3, self.motor_rated[1], self.motor_rated[2]]
+        return self.state, reward, terminated, current_design
 
     # reset环境状态 
     def reset(self):
