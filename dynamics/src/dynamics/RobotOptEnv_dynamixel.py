@@ -56,8 +56,8 @@ class RobotOptEnv(gym.Env):
         # 觀察參數 motor
         self.motor = motor_data()
         self.res = self.motor.dynamixel_member
-        self.high_torque = 120.0 # 預設標準值 馬達極限 120.0 N max
-        self.low_torque = 60.0 # 預設標準值 馬達極限 60.0 N rated
+        self.high_torque = 44.7 # 預設標準值 馬達極限 120.0 N max
+        self.low_torque = 0.0 # 預設標準值 馬達極限 60.0 N rated
         self.motor_cost_init = np.array([0,400,400,0,0,0], dtype=np.float64) # 預設最大馬達費用
         self.motor_weight_init = np.array([0,0.855,0.855,0,0,0], dtype=np.float64) # 預設最大馬達重量
         self.motor_cost = np.array([0,400,400,0,0,0], dtype=np.float64) # 馬達費用
@@ -69,6 +69,10 @@ class RobotOptEnv(gym.Env):
         self.low_reach_eva = 0 # 預設觀測標準值
         self.high_manipulability = 1  # 預設觀測標準值
         self.low_manipulability = 0  # 預設觀測標準值
+        self.high_std_L2 = 50 # 預設觀測標準值
+        self.low_std_L2 = 0 # 預設觀測標準值
+        self.high_std_L3 = 50 # 預設觀測標準值
+        self.low_std_L3 = 0 # 預設觀測標準值
         self.torque_done = np.array([false, false, false, false, false, false])
         self.torque_over = False
         self.prev_shaping = None
@@ -76,12 +80,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
-        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, -float('inf'), -float('inf'), self.low_manipulability ]), 
-                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.total_cost, self.total_weight, self.high_manipulability]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, -float('inf'), -float('inf'), self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
+                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.total_cost, self.total_weight, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -211,6 +215,8 @@ class RobotOptEnv(gym.Env):
         self.state[6], self.state[9] = self.reach_manipulability_evaluate(self.model_select)
         # rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
+        self.state[10] = self.std_L2
+        self.state[11] = self.std_L3
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
@@ -251,39 +257,43 @@ class RobotOptEnv(gym.Env):
         # if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
         #     terminated = True
         #     reward += +50
-        if self.torque_over == True and self.state[6] < 0.6: 
-            reward += -20
-        elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
-            reward += -10
-        elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
-            reward += -5
-        elif self.torque_over == False and self.state[6] < 0.6: 
-            reward += +5
-        elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
-            reward += +10
-        elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
-            reward += +20
-        elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
-            terminated = True
-            reward += +50
-        elif self.torque_over == False and self.state[6] == 1.0:
-            terminated = True
-            reward += +100
+        if self.state[10] > 0 and self.state[11] > 0:
+            if self.torque_over == True and self.state[6] < 0.6: 
+                reward += -20
+            elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
+                reward += -10
+            elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
+                reward += -5
+            elif self.torque_over == False and self.state[6] < 0.6: 
+                reward += +5
+            elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
+                reward += +10
+            elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
+                reward += +20
+            elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
+                terminated = True
+                reward += +50
+            elif self.torque_over == False and self.state[6] == 1.0:
+                terminated = True
+                reward += +100
         # else:
         #     pass
             
-        if self.counts == 30:
-            if self.state[6] < 0.6: # TODO: fixed
-                reward += -50
-            else:
-                reward += 10
-            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-                reward += -100
-            else:
-                reward += +10
+            if self.counts == 30:
+                if self.state[6] < 0.6: # TODO: fixed
+                    reward += -50
+                else:
+                    reward += 10
+                if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+                    reward += -100
+                else:
+                    reward += +10
+                terminated = True
+                self.counts = 0
+                # reward += +30
+        else:
             terminated = True
-            self.counts = 0
-            # reward += +30
+            reward += -100
 
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
@@ -314,6 +324,8 @@ class RobotOptEnv(gym.Env):
         self.state[7] = sum(self.motor_cost_init)
         self.state[8] = sum(self.motor_weight_init)
         self.state[9] = manipulability_score
+        self.state[10] = self.std_L2
+        self.state[11] = self.std_L3
         self.counts = 0
         return self.state    
     
@@ -340,6 +352,8 @@ class RobotOptEnv(gym.Env):
         self.state[7] = sum(self.motor_cost_init)
         self.state[8] = sum(self.motor_weight_init)
         self.state[9] = manipulability_score
+        self.state[10] = self.std_L2
+        self.state[11] = self.std_L3
         self.counts = 0
         return self.state    
 

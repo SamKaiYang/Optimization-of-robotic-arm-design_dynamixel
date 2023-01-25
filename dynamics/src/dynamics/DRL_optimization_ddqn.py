@@ -283,8 +283,19 @@ class Tester(object):
 
                 action = self.policy(s0)
                 s0, reward, done, info = self.env.step(action)
+                
+                episode_reward += reward
+                episode_steps += 1
+
+
+                
+
+                if episode_steps + 1 > self.test_ep_steps:
+                    done = True
                 # TODO: 獲取分數高於...的reward結果,
-                if reward >= 50:
+            if debug:
+                # TODO: 獲取分數高於...的reward結果,
+                if episode_reward >= 100:
                     sheet.cell(row=i + 1, column=1).value = s0[0]
                     sheet.cell(row=i + 1, column=2).value = s0[1]
                     sheet.cell(row=i + 1, column=3).value = s0[2]
@@ -299,15 +310,8 @@ class Tester(object):
                     sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
                     sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
                     sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
-                    sheet.cell(row=i + 1, column=15).value = reward
+                    sheet.cell(row=i + 1, column=15).value = episode_reward
                     i = i + 1
-                episode_reward += reward
-                episode_steps += 1
-
-                if episode_steps + 1 > self.test_ep_steps:
-                    done = True
-                # TODO: 獲取分數高於...的reward結果,
-            if debug:
                 # print('[Test] episode: %3d, episode_reward: %5f' % (episode, episode_reward))
                 rospy.loginfo('[Test] episode: {}, episode_reward: {}'.format(episode, episode_reward))
                 tb.add_scalar("/tested-model/test_reward/", episode_reward, episode)
@@ -369,7 +373,7 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             # 測試
             drl.env.model_select = "test"
-            plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
+            plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_best.pkl'# test 20230102
             test_env, test_agent = drl.env_agent_config(cfg, seed=10)
             test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
             test.test()
