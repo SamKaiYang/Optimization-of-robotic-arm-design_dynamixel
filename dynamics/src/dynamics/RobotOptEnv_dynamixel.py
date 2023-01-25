@@ -83,12 +83,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
-        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, -float('inf'), -float('inf'), self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.total_cost, self.total_weight, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
+                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -210,16 +210,16 @@ class RobotOptEnv(gym.Env):
         # print(self.motor_weight)
         cost = sum(self.motor_cost) 
         weight = sum(self.motor_weight)
-        self.state[7] = cost
-        self.state[8] = weight
+        # self.state[7] = cost
+        # self.state[8] = weight
         
         # self.state[9] = self.manipulability_evaluate()
         # 可達性 # 可操作性
-        self.state[6], self.state[9] = self.reach_manipulability_evaluate(self.model_select)
+        self.state[6], self.state[7] = self.reach_manipulability_evaluate(self.model_select)
         # rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
@@ -233,7 +233,7 @@ class RobotOptEnv(gym.Env):
             + 100 * self.state[6] # 可達性
             # - 0.01 * self.state[7] # cost
             # - 10 * self.state[8] # weight
-            + 1000 * self.state[9] # 可操作性
+            + 1000 * self.state[7] # 可操作性
         ) 
 
         if self.prev_shaping is not None:
@@ -282,10 +282,10 @@ class RobotOptEnv(gym.Env):
             terminated = True
             self.counts = 0
         # 避免軸長小於0
-        if self.state[10] <= 0 or self.state[11] <=  0:
+        if self.state[8] <= 0 or self.state[9] <=  0:
             terminated = True
             reward = float('-inf')
-            
+
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
         rospy.loginfo("step_reward: %s", reward)
@@ -312,11 +312,11 @@ class RobotOptEnv(gym.Env):
         # manipulability_score = self.manipulability_evaluate()
         reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
         self.state[6] = reach_score
-        self.state[7] = sum(self.motor_cost_init)
-        self.state[8] = sum(self.motor_weight_init)
-        self.state[9] = manipulability_score
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        # self.state[7] = sum(self.motor_cost_init)
+        # self.state[8] = sum(self.motor_weight_init)
+        self.state[7] = manipulability_score
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.counts = 0
         return self.state    
     
@@ -340,11 +340,11 @@ class RobotOptEnv(gym.Env):
         # manipulability_score = self.manipulability_evaluate()
         reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
         self.state[6] = reach_score
-        self.state[7] = sum(self.motor_cost_init)
-        self.state[8] = sum(self.motor_weight_init)
-        self.state[9] = manipulability_score
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        # self.state[7] = sum(self.motor_cost_init)
+        # self.state[8] = sum(self.motor_weight_init)
+        self.state[7] = manipulability_score
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.counts = 0
         return self.state    
 
@@ -741,16 +741,16 @@ class RobotOptEnv_3dof(gym.Env):
         # print(self.motor_weight)
         cost = sum(self.motor_cost) 
         weight = sum(self.motor_weight)
-        self.state[7] = cost
-        self.state[8] = weight
+        # self.state[7] = cost
+        # self.state[8] = weight
         
         # self.state[9] = self.manipulability_evaluate()
         # 可達性 # 可操作性
-        self.state[6], self.state[9] = self.reach_manipulability_evaluate(self.model_select)
+        self.state[6], self.state[7] = self.reach_manipulability_evaluate(self.model_select)
         # rospy.loginfo("reach_score: %s", self.state[6])
         # rospy.loginfo("manipulability_score: %s", self.state[9])
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
@@ -856,11 +856,11 @@ class RobotOptEnv_3dof(gym.Env):
         # manipulability_score = self.manipulability_evaluate()
         reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
         self.state[6] = reach_score
-        self.state[7] = sum(self.motor_cost_init)
-        self.state[8] = sum(self.motor_weight_init)
-        self.state[9] = manipulability_score
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        # self.state[7] = sum(self.motor_cost_init)
+        # self.state[8] = sum(self.motor_weight_init)
+        self.state[7] = manipulability_score
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.counts = 0
         return self.state    
     
@@ -884,11 +884,11 @@ class RobotOptEnv_3dof(gym.Env):
         # manipulability_score = self.manipulability_evaluate()
         reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
         self.state[6] = reach_score
-        self.state[7] = sum(self.motor_cost_init)
-        self.state[8] = sum(self.motor_weight_init)
-        self.state[9] = manipulability_score
-        self.state[10] = self.std_L2
-        self.state[11] = self.std_L3
+        # self.state[7] = sum(self.motor_cost_init)
+        # self.state[8] = sum(self.motor_weight_init)
+        self.state[7] = manipulability_score
+        self.state[8] = self.std_L2
+        self.state[9] = self.std_L3
         self.counts = 0
         return self.state    
 
