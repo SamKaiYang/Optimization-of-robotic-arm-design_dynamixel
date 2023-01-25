@@ -8,7 +8,7 @@ from urdf_parser_py.urdf import URDF
 import os
 # import pandas as pd
 from openpyxl import load_workbook
-
+from openpyxl import Workbook
 class modular_robot_4dof(DHRobot):
     """
     Class that models a TECO TECOARM1 manipulator
@@ -39,6 +39,16 @@ class modular_robot_4dof(DHRobot):
     """  # noqa
 
     def __init__(self, symbolic=False):
+        #隨機抽樣點位初始化
+        self.T_x = []
+        self.T_y = []
+        self.T_z = []
+        self.T_roll = []
+        self.T_pitch = []
+        self.T_yaw = []
+        self.xlsx_outpath = "./xlsx/"
+
+
         self.length_1 = 0.1
         self.length_2 = 0.1
         self.length_3 = 0.1
@@ -46,6 +56,7 @@ class modular_robot_4dof(DHRobot):
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/modular_robot_6dof.urdf")
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/random.urdf")
         robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/single_arm_v12.urdf")
+        # self.robot = robot
         if symbolic:
             import spatialmath.base.symbolic as sym
             zero = sym.zero()
@@ -137,7 +148,21 @@ class modular_robot_4dof(DHRobot):
         # ]
         links = []
 
-        for j in range(4): # TODO: for 4 DoF
+        d[4] = 0
+        d[5] = 0
+        a[4] = 0
+        a[5] = 0
+        alpha[4] = 0
+        alpha[5] = 0
+        mass[4] = 0
+        mass[5] = 0
+        # center_of_mass[4] = 0
+        # center_of_mass[5] = 0
+        # inertia[4] = [0,0,0,0,0,0]
+        # inertia[5] = [0,0,0,0,0,0]
+        # G[4] = 0
+        # G[5] = 0
+        for j in range(6): # TODO: for 4 DoF
             link = RevoluteDH(
                 d=d[j],
                 a=a[j],
@@ -160,15 +185,83 @@ class modular_robot_4dof(DHRobot):
         )
         # print("FFFFUCCCUCUCUCUCCUCUCCKKKKK")
         # zero angles
-        self.addconfiguration("qz", np.array([0, 0, 0, 0]))
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
         # horizontal along the x-axis
-        self.addconfiguration("qr", np.r_[180, 0, 0, 0]*deg)
+        self.addconfiguration("qr", np.r_[180, 0, 0, 0, 0, 0]*deg)
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, 0, 0, 0]))
+        self.addconfiguration("qn", np.array([0, 0, 0, 0, 0, 0]))
         
     def return_configuration(self):
         return self.length_1, self.length_2, self.length_3
+
+
+    def point_Workspace_cal_Monte_Carlo(self, robot):
+        """
+        Through the "Work space" page in the interface to calculate of the robot
+        """
+        i = 0
+        # 角度轉換
+        du = pi / 180
+        # 度
+        radian = 180 / pi
+        # 弧度
+
+        self.q1_s = -160
+        self.q1_end = 160
+        self.q2_s = -160
+        self.q2_end = 160
+        self.q3_s = -160
+        self.q3_end = 160
+        self.q4_s = -160
+        self.q4_end = 160
+        self.q5_s = -160
+        self.q5_end = 160
+        self.q6_s = -160
+        self.q6_end = 160
+        N = 1000
+        theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
+        theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
+        theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
+        theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
+        theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
+        theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+
+        for i in range(N):
+            q1 = theta1[i, 0]
+            q2 = theta2[i, 0]
+            q3 = theta3[i, 0]
+            q4 = theta4[i, 0]
+            q5 = theta5[i, 0]
+            q6 = theta6[i, 0]
+            self.T = robot.fkine(
+                [q1 * du, q2 * du, q3 * du, q4 * du, 0, 0]
+            )
+            t = np.round(self.T.t, 3)
+            r = np.round(self.T.rpy('deg'), 3)
+            self.T_x.append(t[0])
+            self.T_y.append(t[1])
+            self.T_z.append(t[2])
+            self.T_roll.append(int(r[0]))
+            self.T_pitch.append(int(r[1]))
+            self.T_yaw.append(int(r[2]))
+            i = i + 1
+        
+    def random_select_point(self):
+        excel_file = Workbook()
+        sheet = excel_file.active
+
+        for i in range(10):
+            x = np.random.randint(1,999)
+            sheet.cell(row=i + 1, column=1).value = self.T_x[x]
+            sheet.cell(row=i + 1, column=2).value = self.T_y[x]
+            sheet.cell(row=i + 1, column=3).value = self.T_z[x]
+            sheet.cell(row=i + 1, column=4).value = self.T_roll[x]
+            sheet.cell(row=i + 1, column=5).value = self.T_pitch[x]
+            sheet.cell(row=i + 1, column=6).value = self.T_yaw[x]
+
+        file_name = self.xlsx_outpath + "/task_point_4dof" +".xlsx"
+        excel_file.save(file_name)
 if __name__ == '__main__':    # pragma nocover
 
     robot = modular_robot_4dof(symbolic=False)
@@ -185,7 +278,8 @@ if __name__ == '__main__':    # pragma nocover
     # Set the desired end-effector pose
     deg = pi / 180
     q =  np.r_[0, 0, 0]*deg
-    
+    robot.point_Workspace_cal_Monte_Carlo(robot)
+    robot.random_select_point()
     robot.teach()
     # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
 
@@ -211,7 +305,8 @@ if __name__ == '__main__':    # pragma nocover
     
 '''
 
-    df = load_workbook("./xlsx/task_point_3dof.xlsx")
+
+    df = load_workbook("./xlsx/task_point_4dof.xlsx")
     sheets = df.worksheets
     sheet1 = sheets[0]
     rows = sheet1.rows
@@ -222,10 +317,11 @@ if __name__ == '__main__':    # pragma nocover
     i = 0
     for row in rows:
         row_val = [col.value for col in row]
-        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]))
+        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
         # print(T_tmp[i])
-        ik_q = robot.ikine_LMS(T=T_tmp[i], mask = [1,1,1,0,1,0])
+        ik_q = robot.ikine_LMS(T=T_tmp[i], ilimit = 500, tol = 1e-10, mask = [1,1,1,1,1,1])
         print(ik_q)
+        print(robot.fkine(ik_q.q))
     #     if ik_q.success == True:
     #         manipulability_index.append(robot.manipulability(q=ik_q.q))
     #         # robot.plot_ellipse()
@@ -234,3 +330,4 @@ if __name__ == '__main__':    # pragma nocover
     #         # robot.plot(q=ik_np, backend='pyplot', dt = 1)
         i = i + 1
     # print(np.mean(manipulability_index)) # manipulability 取平均
+    
