@@ -25,7 +25,7 @@ import sympy as sp
 # import dyna_space
 from interface_control.msg import (cal_cmd, cal_process, cal_result, dyna_data,
                                 dyna_space_data, optimal_design,
-                                optimal_random, specified_parameter_design, tested_model_name)
+                                optimal_random, specified_parameter_design, tested_model_name, arm_structure)
 from matplotlib import cm
 from moveit_msgs.msg import DisplayTrajectory, RobotTrajectory
 from mpl_toolkits.mplot3d import Axes3D
@@ -85,7 +85,7 @@ from pytorch_DQN.ddqn import DDQNAgent
 from pytorch_DQN.core.util import get_output_folder
 
 import matplotlib.pyplot as plt
-from RobotOptEnv_dynamixel import RobotOptEnv
+from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof
 import tensorboardX
 import yaml
 file_path = curr_path + "/outputs/" 
@@ -158,7 +158,10 @@ class RosTopic:
     def __init__(self):
         self.sub_taskcmd = rospy.Subscriber("/cal_command", cal_cmd, self.cmd_callback)
         self.sub_test_model_name = rospy.Subscriber("/tested_model_name", tested_model_name, self.test_model_name_callback)
+        # Subscriber select dof and structure 
+        self.sub_arm_structure = rospy.Subscriber("/arn_structure", arm_structure, self.arm_structure_callback)
         self.cmd_run = 0
+        self.arm_structure_dof = 6
     def cmd_callback(self, data):
         self.cmd = data.cmd
         rospy.loginfo("I heard command is %s", data.cmd)
@@ -171,6 +174,10 @@ class RosTopic:
     def test_model_name_callback(self, data):
         self.test_model_name  = data.tested_model_name
         print(self.test_model_name)
+
+    def arm_structure_callback(self, data):
+        self.arm_structure_dof = data.DoF
+        print(self.arm_structure_dof)
 
 
 class Trainer:
@@ -335,8 +342,14 @@ if __name__ == "__main__":
     ddqn_test_eps = 100  # 测试的回合数
     # train = Trainer()
     while not rospy.is_shutdown():
-        # test all
+        # test all        
         if ros_topic.cmd_run == 1:
+            if ros_topic.arm_structure_dof == 6:
+                drl.env = RobotOptEnv()
+                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            elif ros_topic.arm_structure_dof == 3:
+                drl.env = RobotOptEnv_3dof()
+                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
             make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
             # 訓練
@@ -370,6 +383,12 @@ if __name__ == "__main__":
         '''
         # test tested_model
         if ros_topic.cmd_run == 2:
+            if ros_topic.arm_structure_dof == 6:
+                drl.env = RobotOptEnv()
+                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            elif ros_topic.arm_structure_dof == 3:
+                drl.env = RobotOptEnv_3dof()
+                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
             # 測試
             drl.env.model_select = "test"
