@@ -59,8 +59,8 @@ class RobotOptEnv(gym.Env):
         # 觀察參數 motor
         self.motor = motor_data()
         self.res = self.motor.dynamixel_member
-        self.high_torque = 120 # 預設標準值 馬達極限 120.0 N max
-        self.low_torque = -120 # 預設標準值 馬達極限 -12.0 N max
+        self.high_torque = float('inf') # 預設標準值 馬達極限 120.0 N max
+        self.low_torque = float('-inf') # 預設標準值 馬達極限 -12.0 N max
         self.motor_cost_init = np.array([0,400,400,0,0,0], dtype=np.float64) # 預設最大馬達費用
         self.motor_weight_init = np.array([0,0.855,0.855,0,0,0], dtype=np.float64) # 預設最大馬達重量
         self.motor_cost = np.array([0,400,400,0,0,0], dtype=np.float64) # 馬達費用
@@ -72,10 +72,10 @@ class RobotOptEnv(gym.Env):
         self.low_reach_eva = 0 # 預設觀測標準值
         self.high_manipulability = 1  # 預設觀測標準值
         self.low_manipulability = 0  # 預設觀測標準值
-        self.high_std_L2 = 50 # 預設觀測標準值
-        self.low_std_L2 = 0 # 預設觀測標準值
-        self.high_std_L3 = 50 # 預設觀測標準值
-        self.low_std_L3 = 0 # 預設觀測標準值
+        self.high_std_L2 = float('inf') # 預設觀測標準值
+        self.low_std_L2 = float('-inf') # 預設觀測標準值
+        self.high_std_L3 = float('inf') # 預設觀測標準值
+        self.low_std_L3 = float('-inf') # 預設觀測標準值
         self.torque_done = np.array([false, false, false, false, false, false])
         self.torque_over = False
         self.prev_shaping = None
@@ -195,7 +195,7 @@ class RobotOptEnv(gym.Env):
             self.std_L3 += 1.0
             motor_type = 2 # 型號
             axis = 3 # 軸數
-        
+
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
@@ -225,6 +225,8 @@ class RobotOptEnv(gym.Env):
         self.counts += 1
         # rospy.loginfo("self.state: %s", self.state)
         reward = 0
+
+        
         # TODO: fixed
         shaping = (
             -1 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
@@ -247,57 +249,43 @@ class RobotOptEnv(gym.Env):
                 break # TODO
 
         terminated = False
-        # if down 完成任务 
         
-        # if self.counts == 10:
-        #     if self.state[6] <= 0.6: # TODO: fixed
-        #         terminated = True
-        #         reward += -50
-        #     if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-        #         terminated = True
-        #         reward += -100
-
-        # if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
-        #     terminated = True
-        #     reward += +50
-        if self.state[10] > 0 and self.state[11] > 0:
-            if self.torque_over == True and self.state[6] < 0.6: 
-                reward += -20
-            elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
-                reward += -10
-            elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
-                reward += -5
-            elif self.torque_over == False and self.state[6] < 0.6: 
-                reward += +5
-            elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
-                reward += +10
-            elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
-                reward += +20
-            elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
-                terminated = True
-                reward += +50
-            elif self.torque_over == False and self.state[6] == 1.0:
-                terminated = True
-                reward += +100
-        # else:
-        #     pass
-            
-            if self.counts == 30:
-                if self.state[6] < 0.6: # TODO: fixed
-                    reward += -50
-                else:
-                    reward += 10
-                if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-                    reward += -100
-                else:
-                    reward += +10
-                terminated = True
-                self.counts = 0
-                # reward += +30
-        else:
+        
+        if self.torque_over == True and self.state[6] < 0.6: 
+            reward += -20
+        elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
+            reward += -10
+        elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
+            reward += -5
+        elif self.torque_over == False and self.state[6] < 0.6: 
+            reward += +5
+        elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
+            reward += +10
+        elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
+            reward += +20
+        elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
             terminated = True
-            reward += -100
-
+            reward += +50
+        elif self.torque_over == False and self.state[6] == 1.0:
+            terminated = True
+            reward += +100
+        
+        if self.counts == 30:
+            if self.state[6] < 0.6: # TODO: fixed
+                reward += -50
+            else:
+                reward += -10
+            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+                reward += -100
+            else:
+                reward += -10
+            terminated = True
+            self.counts = 0
+        # 避免軸長小於0
+        if self.state[10] <= 0 or self.state[11] <=  0:
+            terminated = True
+            reward = float('-inf')
+            
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
         rospy.loginfo("step_reward: %s", reward)
