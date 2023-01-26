@@ -72,10 +72,10 @@ class RobotOptEnv(gym.Env):
         self.low_reach_eva = 0 # 預設觀測標準值
         self.high_manipulability = 1  # 預設觀測標準值
         self.low_manipulability = 0  # 預設觀測標準值
-        self.high_std_L2 = float('inf') # 預設觀測標準值
-        self.low_std_L2 = float('-inf') # 預設觀測標準值
-        self.high_std_L3 = float('inf') # 預設觀測標準值
-        self.low_std_L3 = float('-inf') # 預設觀測標準值
+        self.high_std_L2 = 70 # 預設觀測標準值
+        self.low_std_L2 = -25 # 預設觀測標準值
+        self.high_std_L3 = 70 # 預設觀測標準值
+        self.low_std_L3 = -25 # 預設觀測標準值
         self.torque_done = np.array([false, false, false, false, false, false])
         self.torque_over = False
         self.prev_shaping = None
@@ -284,7 +284,7 @@ class RobotOptEnv(gym.Env):
         # 避免軸長小於0
         if self.state[8] <= 0 or self.state[9] <=  0:
             terminated = True
-            reward = float('-inf')
+            reward = -200
 
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
