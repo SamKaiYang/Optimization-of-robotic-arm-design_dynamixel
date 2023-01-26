@@ -250,7 +250,10 @@ class RobotOptEnv(gym.Env):
 
         terminated = False
         
-        
+        # 避免軸長小於0
+        if self.state[8] <= 0 or self.state[9] <=  0:
+            # terminated = True
+            reward = -1000
         if self.torque_over == True and self.state[6] < 0.6: 
             reward += -20
         elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
@@ -281,10 +284,7 @@ class RobotOptEnv(gym.Env):
                 reward += -10
             terminated = True
             self.counts = 0
-        # 避免軸長小於0
-        if self.state[8] <= 0 or self.state[9] <=  0:
-            terminated = True
-            reward = -200
+        
 
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
