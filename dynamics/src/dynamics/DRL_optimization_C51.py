@@ -278,7 +278,7 @@ class Trainer:
         rospy.loginfo("-------------數據採集------------")
         for _ in range(self.initial_collect_steps):
             self.collect_step(self.env, self.random_policy)
-
+            rospy.loginfo("initial_collect_steps: %s", _)
             # This loop is so common in RL, that we provide standard implementations of
             # these. For more details see the drivers module.
 
@@ -309,15 +309,16 @@ class Trainer:
             # Sample a batch of data from the buffer and update the agent's network.
             experience, unused_info = next(iterator)
             train_loss = self.agent.train(experience)
-
+            tb.add_scalar("/trained-model/Loss_per_frame/", train_loss.loss, _)
             step = self.agent.train_step_counter.numpy()
 
             if step % self.log_interval == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss.loss))
-
+                tb.add_scalar("/trained-model/loss_log/",  train_loss.loss, step)
             if step % self.eval_interval == 0:
                 avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
                 print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
+                tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
                 returns.append(avg_return)
 
         steps = range(0, self.num_iterations + 1, self.eval_interval)
