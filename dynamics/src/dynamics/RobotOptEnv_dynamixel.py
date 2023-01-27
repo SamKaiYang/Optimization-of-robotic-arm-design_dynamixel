@@ -209,7 +209,7 @@ class RobotOptEnv(gym.Env):
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
-        rospy.loginfo("torque: %s", torque)
+        # rospy.loginfo("torque: %s", torque)
         self.state[0:6] = torque
         # # 可達性
         # self.state[6] = self.reach_evaluate()
@@ -316,7 +316,7 @@ class RobotOptEnv(gym.Env):
         self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
-        rospy.loginfo("torque: %s", torque)
+        # rospy.loginfo("torque: %s", torque)
         self.state[0:6] = torque
         # 生成隨機 payload (kg)
         rand_payload = np.random.uniform(low=1, high=4)
