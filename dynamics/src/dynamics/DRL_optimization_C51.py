@@ -228,6 +228,7 @@ class Trainer:
 
         self.random_policy = random_tf_policy.RandomTFPolicy(self.env.time_step_spec(),
                                                 self.env.action_spec())
+        
         self.replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
             data_spec=self.agent.collect_data_spec,
             batch_size=self.env.batch_size,
@@ -241,6 +242,7 @@ class Trainer:
         self.log_interval = 200  # @param {type:"integer"}
         self.eval_interval = 1000  # @param {type:"integer"}
 
+        self.try_avg_return = self.compute_avg_return(self.env, self.random_policy, self.num_eval_episodes)
         self.outputdir = model_path
         # # self.outputdir = get_output_folder(self.config.output, self.config.env)
         # self.outputdir = curr_path + "/outputs/" + self.env_name + \
@@ -248,7 +250,7 @@ class Trainer:
         # self.agent.save_config(self.outputdir)
         
         # self.board_logger = TensorBoardLogger(self.outputdir)
-    def compute_avg_return(environment, policy, num_episodes=10):
+    def compute_avg_return(self, environment, policy, num_episodes=10):
 
         total_return = 0.0
         for _ in range(num_episodes):
