@@ -123,7 +123,7 @@ class drl_optimization:
         self.config.eps_decay = 500 # e-greedy策略中epsilon的衰减率
         self.config.frames = 160000 # 经验回放的容量
         self.config.use_cuda = True
-        self.config.learning_rate = 0.05  # 学习率 # TODO: fixed 0117 11:45 1e-1 -> 1e-2 # TODO: fixed 0126 0.05
+        self.config.learning_rate = 1e-3  # 学习率 # TODO: fixed 0117 11:45 1e-1 -> 1e-2 # TODO: fixed 0126 0.05 # TODO: fixed 0127 1e-3
         self.config.max_buff = 1000
         self.config.update_tar_interval = 100
         self.config.batch_size = 128 # mini-batch SGD中的批量大小
