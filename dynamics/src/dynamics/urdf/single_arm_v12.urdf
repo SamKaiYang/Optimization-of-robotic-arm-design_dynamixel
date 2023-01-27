@@ -4,7 +4,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="single_arm_v12">
-   <link name="dummy"/>
+  <link name="dummy"/>
   <joint name="dummy_joint" type="fixed">
     <parent link="dummy"/>
     <child link="base_link"/>
@@ -105,24 +105,24 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
   <link
     name="Link2">
     <inertial>
       <origin
-        xyz="0.2213591350861552 -0.00034921894228713736 0.017752982932847935"
+        xyz="0.3340910309541594 -0.0003155823358098794 0.019509037759942418"
         rpy="0 0 0" />
       <mass
-        value="0.4567882906510457"  />
+        value="0.49560824790223124"  />
       <inertia
-        ixx="0.0011008059612866328"
-        ixy="-2.7129604258527127e-05"
-        ixz="-0.0008788768469666743"
-        iyy="0.0050168656876711905"
-        iyz="-1.5369501017675343e-05"
-        izz="0.004139950096225537" />
+        ixx="0.0011256505740974922"
+        ixy="-4.523466733455868e-05"
+        ixz="-0.0014269344959553423"
+        iyy="0.008349527806979604"
+        iyz="-1.565512240451354e-05"
+        izz="0.007457958274856624" />
     </inertial>
     <visual>
       <origin
@@ -163,24 +163,24 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
   <link
     name="Link3">
     <inertial>
       <origin
-        xyz="0.2745752023542287 0.00022381188323129206 -0.017434985886337465"
+        xyz="0.14908139885580307 0.0002502353574948433 -0.015109199464366448"
         rpy="0 0 0" />
       <mass
-        value="0.4357805818200342"  />
+        value="0.3925381331655871"  />
       <inertia
-        ixx="0.0007969777427657919"
-        ixy="2.2213201383078872e-05"
-        ixz="0.0006976607747402783"
-        iyy="0.0058402796311102815"
-        iyz="-8.884594170739887e-06"
-        izz="0.005254200199446749" />
+        ixx="0.0007665997968636393"
+        ixy="9.829572357171127e-06"
+        ixz="0.0003316676499727983"
+        iyy="0.00243859914886367"
+        iyz="-8.67590813686384e-06"
+        izz="0.0018715584629959568" />
     </inertial>
     <visual>
       <origin
@@ -210,7 +210,7 @@
     name="Joint3"
     type="revolute">
     <origin
-      xyz="0.2850211600059269 0 -0.0325"
+      xyz="0.43796216473264815 0 -0.0325"
       rpy="0 0 0" />
     <parent
       link="Link2" />
@@ -221,7 +221,7 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
   <link
@@ -268,7 +268,7 @@
     name="Joint4"
     type="revolute">
     <origin
-      xyz="0.3579642526950255 0 0.0325"
+      xyz="0.18759974511353697 0 0.0325"
       rpy="0 0 3.1416" />
     <parent
       link="Link3" />
@@ -279,7 +279,7 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
   <link
@@ -337,24 +337,24 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
   <link
     name="Link6">
     <inertial>
       <origin
-        xyz="-0.20184 0.067993 -0.13565"
+        xyz="-1.11022302462516E-16 1.73472347597681E-18 0.0055"
         rpy="0 0 0" />
       <mass
-        value="5.5581" />
+        value="0.0173494454294496" />
       <inertia
-        ixx="0.039288"
-        ixy="-0.0053509"
-        ixz="-0.046451"
-        iyy="0.22224"
-        iyz="-5.0688E-05"
-        izz="0.21337" />
+        ixx="2.53988652151547E-06"
+        ixy="-2.00729161979554E-22"
+        ixz="-3.90838944351189E-22"
+        iyy="2.53988652151547E-06"
+        iyz="-1.17534537510526E-22"
+        izz="4.79061561920678E-06" />
     </inertial>
     <visual>
       <origin
@@ -385,7 +385,7 @@
     type="revolute">
     <origin
       xyz="0.0346 0.068329 -0.0048371"
-      rpy="3.1416 1.5001 -1.5708" />
+      rpy="1.5708 -1.5708 0" />
     <parent
       link="Link5" />
     <child
@@ -395,7 +395,7 @@
     <limit
       lower="-3.14"
       upper="3.14"
-      effort="0"
+      effort="50"
       velocity="0" />
   </joint>
 </robot>

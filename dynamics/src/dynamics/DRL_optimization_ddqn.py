@@ -161,7 +161,7 @@ class RosTopic:
         # Subscriber select dof and structure 
         self.sub_arm_structure = rospy.Subscriber("/arn_structure", arm_structure, self.arm_structure_callback)
         self.cmd_run = 0
-        self.arm_structure_dof = 6
+        self.arm_structure_dof = None
     def cmd_callback(self, data):
         self.cmd = data.cmd
         rospy.loginfo("I heard command is %s", data.cmd)
@@ -342,14 +342,23 @@ if __name__ == "__main__":
     ddqn_test_eps = 100  # 测试的回合数
     # train = Trainer()
     while not rospy.is_shutdown():
-        # test all        
-        if ros_topic.cmd_run == 1:
-            if ros_topic.arm_structure_dof == 6:
+        # test all
+        if ros_topic.arm_structure_dof == 6:
                 drl.env = RobotOptEnv()
                 rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-            elif ros_topic.arm_structure_dof == 3:
-                drl.env = RobotOptEnv_3dof()
-                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+                ros_topic.arm_structure_dof = 0
+        elif ros_topic.arm_structure_dof == 3:
+            drl.env = RobotOptEnv_3dof()
+            rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            ros_topic.arm_structure_dof = 0
+                    
+        if ros_topic.cmd_run == 1:
+            # if ros_topic.arm_structure_dof == 6:
+            #     drl.env = RobotOptEnv()
+            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            # elif ros_topic.arm_structure_dof == 3:
+            #     drl.env = RobotOptEnv_3dof()
+            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
             make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
             # 訓練
@@ -383,16 +392,16 @@ if __name__ == "__main__":
         '''
         # test tested_model
         if ros_topic.cmd_run == 2:
-            if ros_topic.arm_structure_dof == 6:
-                drl.env = RobotOptEnv()
-                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-            elif ros_topic.arm_structure_dof == 3:
-                drl.env = RobotOptEnv_3dof()
-                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            # if ros_topic.arm_structure_dof == 6:
+            #     drl.env = RobotOptEnv()
+            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            # elif ros_topic.arm_structure_dof == 3:
+            #     drl.env = RobotOptEnv_3dof()
+            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
             # 測試
             drl.env.model_select = "test"
-            plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_best.pkl'# test 20230102
+            plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
             test_env, test_agent = drl.env_agent_config(cfg, seed=10)
             test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
             test.test()

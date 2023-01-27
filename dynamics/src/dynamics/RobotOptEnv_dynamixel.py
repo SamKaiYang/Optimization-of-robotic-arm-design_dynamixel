@@ -41,7 +41,7 @@ class RobotOptEnv(gym.Env):
     def __init__(self):
         self.robot = modular_robot_6dof()
         self.robot_urdf = stl_conv_urdf("single_arm_v12","test")
-        
+        # self.robot_urdf.init_dynamixel_diff_inertia()
         # callback:Enter the parameters of the algorithm to be optimized on the interface
         self.sub_optimal_design = rospy.Subscriber(
             "/optimal_design", optimal_design, self.optimal_design_callback
@@ -100,6 +100,15 @@ class RobotOptEnv(gym.Env):
         self.xlsx_outpath = "./xlsx/"
 
         self.model_select = "train" # 選擇使用train or test model 
+
+        # self.op_dof = None
+        # self.op_payload = None
+        # self.op_payload_position = None
+        # self.op_vel = None
+        # self.op_acc = None
+        # self.op_radius = None
+        # self.op_weight = None
+        # self.op_cost = None
 
     def optimal_design_callback(self, data):
         # print(data.data)
@@ -200,6 +209,7 @@ class RobotOptEnv(gym.Env):
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
+        rospy.loginfo("torque: %s", torque)
         self.state[0:6] = torque
         # # 可達性
         # self.state[6] = self.reach_evaluate()
@@ -253,7 +263,7 @@ class RobotOptEnv(gym.Env):
         # 避免軸長小於0
         if self.state[8] <= 0 or self.state[9] <=  0:
             # terminated = True
-            reward = -1000
+            reward += -200
         if self.torque_over == True and self.state[6] < 0.6: 
             reward += -20
         elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
@@ -274,6 +284,12 @@ class RobotOptEnv(gym.Env):
             reward += +100
         
         if self.counts == 30:
+            # 避免軸長小於0
+            if self.state[8] <= 0 or self.state[9] <=  0:
+                # terminated = True
+                reward += -1500
+            else:
+                reward += -10
             if self.state[6] < 0.6: # TODO: fixed
                 reward += -50
             else:
@@ -300,6 +316,7 @@ class RobotOptEnv(gym.Env):
         self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
+        rospy.loginfo("torque: %s", torque)
         self.state[0:6] = torque
         # 生成隨機 payload (kg)
         rand_payload = np.random.uniform(low=1, high=4)
