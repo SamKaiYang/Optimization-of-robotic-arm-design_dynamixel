@@ -67,22 +67,8 @@ from common.utils import save_results, make_dir
 from common.utils import plot_rewards
 from dqn import DQN
 
-###### DDQN #############
-# from ./pytorch-DQN/config import Config
 import argparse
 import random
-# import gym
-# import torch
-# from torch.optim import Adam
-# from pytorch_DQN.tester import Tester
-# from pytorch_DQN.buffer import ReplayBuffer
-# from pytorch_DQN.config import Config
-# from pytorch_DQN.core.util import get_class_attr_val
-# from pytorch_DQN.model import DQN
-# from pytorch_DQN.trainer import Trainer
-# from pytorch_DQN.config import Config
-# from pytorch_DQN.ddqn import DDQNAgent
-# from pytorch_DQN.core.util import get_output_folder
 
 import matplotlib.pyplot as plt
 from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof
@@ -311,12 +297,12 @@ class Trainer:
             # Sample a batch of data from the buffer and update the agent's network.
             experience, unused_info = next(iterator)
             train_loss = self.agent.train(experience)
-            tb.add_scalar("/trained-model/Loss_per_frame/", train_loss.loss, _)
+            tb.add_scalar("/trained-model/Loss_per_frame/", float(train_loss.loss), _)
             step = self.agent.train_step_counter.numpy()
 
             if step % self.log_interval == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss.loss))
-                tb.add_scalar("/trained-model/loss_log/",  train_loss.loss, step)
+                tb.add_scalar("/trained-model/loss_log/",  float(train_loss.loss), step)
             if step % self.eval_interval == 0:
                 avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
                 print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
