@@ -77,7 +77,8 @@ import yaml
 
 # add
 import tensorflow as tf
-
+from tf_agents.agents.dqn.dqn_agent import DqnAgent, DdqnAgent
+from tf_agents.networks.q_network import QNetwork
 from tf_agents.agents.categorical_dqn import categorical_dqn_agent
 from tf_agents.drivers import dynamic_step_driver
 from tf_agents.environments import suite_gym
@@ -89,10 +90,22 @@ from tf_agents.policies import random_tf_policy
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.trajectories import trajectory
 from tf_agents.utils import common
+from tf_agents.policies import policy_saver # add
+from tf_agents.policies import py_tf_eager_policy # add
+# add
+import io
+import os
+import shutil
+import tempfile
+import zipfile
+files = None
+# add
 
 file_path = curr_path + "/outputs/" 
 curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
-
+# curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
+tempdir = curr_path + "/C51_outputs/" + \
+            '/' + curr_time + '/models/'  # 保存模型的路径
 tb = tensorboardX.SummaryWriter()
 # tensorboard_callback = tensorboardX.(log_dir=log_dir, histogram_freq=1)
 algo_name = "C51"  # 算法名称
@@ -110,26 +123,26 @@ class drl_optimization:
     def env_agent_config(self, cfg, seed=1):
         ''' 创建环境和智能体
         '''
-        num_iterations = 15000 # @param {type:"integer"}
+        # num_iterations = 15000 # @param {type:"integer"}
 
-        initial_collect_steps = 1000  # @param {type:"integer"} 
-        collect_steps_per_iteration = 1  # @param {type:"integer"}
-        replay_buffer_capacity = 100000  # @param {type:"integer"}
+        # initial_collect_steps = 1000  # @param {type:"integer"} 
+        # collect_steps_per_iteration = 1  # @param {type:"integer"}
+        # replay_buffer_capacity = 100000  # @param {type:"integer"}
 
         fc_layer_params = (100,)
 
-        batch_size = 64  # @param {type:"integer"}
+        # batch_size = 64  # @param {type:"integer"}
         learning_rate = 1e-3  # @param {type:"number"}
         gamma = 0.99
-        log_interval = 200  # @param {type:"integer"}
+        # log_interval = 200  # @param {type:"integer"}
 
         num_atoms = 51  # @param {type:"integer"}
         min_q_value = -20  # @param {type:"integer"}
         max_q_value = 20  # @param {type:"integer"}
         n_step_update = 2  # @param {type:"integer"}
 
-        num_eval_episodes = 10  # @param {type:"integer"}
-        eval_interval = 1000  # @param {type:"integer"}
+        # num_eval_episodes = 10  # @param {type:"integer"}
+        # eval_interval = 1000  # @param {type:"integer"}
 
         train_py_env = suite_gym.wrap_env(self.env)
         # eval_py_env = suite_gym.load(self.env)
@@ -143,9 +156,19 @@ class drl_optimization:
             num_atoms=num_atoms,
             fc_layer_params=fc_layer_params)
 
-        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
+        dqn_network = QNetwork(
+            env.observation_spec(),
+            env.action_spec(),
+            fc_layer_params=fc_layer_params)
 
-        train_step_counter = tf.Variable(0)
+        ddqn_network = QNetwork(
+            env.observation_spec(),
+            env.action_spec(),
+            fc_layer_params=fc_layer_params)
+
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
+        self.global_step = tf.compat.v1.train.get_or_create_global_step()
+        # train_step_counter = tf.Variable(0)
         # agent = DDQNAgent(self.config)  # 创建智能体
         agent = categorical_dqn_agent.CategoricalDqnAgent(
             env.time_step_spec(),
@@ -157,25 +180,41 @@ class drl_optimization:
             n_step_update=n_step_update,
             td_errors_loss_fn=common.element_wise_squared_loss,
             gamma=gamma,
-            train_step_counter=train_step_counter)
+            train_step_counter=self.global_step)
         agent.initialize()
+
+        dqn_agent = DqnAgent(
+            env.time_step_spec(),
+            env.action_spec(),
+            q_network = dqn_network,
+            optimizer = optimizer,
+            td_errors_loss_fn = common.element_wise_squared_loss,
+            train_step_counter = self.global_step)
+
+        ddqn_agent = DdqnAgent(
+            env.time_step_spec(),
+            env.action_spec(),
+            q_network = ddqn_network,
+            optimizer = optimizer,
+            td_errors_loss_fn = common.element_wise_squared_loss,
+            train_step_counter = self.global_step)
         return env, agent
     
 
-class PlotConfig:
-    ''' 绘图相关参数设置
-    '''
+# class PlotConfig:
+#     ''' 绘图相关参数设置
+#     '''
 
-    def __init__(self) -> None:
-        self.algo_name = algo_name  # 算法名称
-        self.env_name = env_name  # 环境名称
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")  # 检测GPU
-        self.result_path = curr_path + "/outputs/" + self.env_name + \
-            '/' + curr_time + '/results/'  # 保存结果的路径
-        self.model_path = curr_path + "/outputs/" + self.env_name + \
-            '/' + curr_time + '/models/'  # 保存模型的路径
-        self.save = True  # 是否保存图片
+#     def __init__(self) -> None:
+#         self.algo_name = algo_name  # 算法名称
+#         self.env_name = env_name  # 环境名称
+#         self.device = torch.device(
+#             "cuda" if torch.cuda.is_available() else "cpu")  # 检测GPU
+#         self.result_path = curr_path + "/outputs/" + self.env_name + \
+#             '/' + curr_time + '/results/'  # 保存结果的路径
+#         self.model_path = curr_path + "/outputs/" + self.env_name + \
+#             '/' + curr_time + '/models/'  # 保存模型的路径
+#         self.save = True  # 是否保存图片
 
 class RosTopic:
     def __init__(self):
@@ -207,8 +246,13 @@ class Trainer:
     def __init__(self, agent, env, model_path):
         self.agent = agent
         self.env = env
-        self.num_iterations = 15000 # @param {type:"integer"}
-        self.initial_collect_steps = 1000  # @param {type:"integer"} 
+        # TODO: fixed
+        # self.num_iterations = 15000 # @param {type:"integer"}
+        # test
+        self.num_iterations = 10 # @param {type:"integer"}
+        # self.initial_collect_steps = 1000  # @param {type:"integer"} 
+        # test
+        self.initial_collect_steps = 10  # @param {type:"integer"} 
         self.collect_steps_per_iteration = 1  # @param {type:"integer"}
         self.replay_buffer_capacity = 100000  # @param {type:"integer"}
 
@@ -219,16 +263,35 @@ class Trainer:
             data_spec=self.agent.collect_data_spec,
             batch_size=self.env.batch_size,
             max_length=self.replay_buffer_capacity)
+        # add -----
+        self.collect_driver = dynamic_step_driver.DynamicStepDriver(
+            train_env,
+            self.agent.collect_policy,
+            observers=[self.replay_buffer.add_batch],
+            num_steps=self.collect_steps_per_iteration)
+        # Initial data collection
+        self.collect_driver.run()
 
+        self.checkpoint_dir = os.path.join(tempdir, 'checkpoint')
+        self.train_checkpointer = common.Checkpointer(
+            ckpt_dir=self.checkpoint_dir,
+            max_to_keep=1,
+            agent=self.agent,
+            policy=self.agent.policy,
+            replay_buffer=self.replay_buffer,
+            global_step=self.agent.train_step_counter
+        )
 
-
+        self.policy_dir = os.path.join(tempdir, 'policy')
+        self.tf_policy_saver = policy_saver.PolicySaver(agent.policy)
+        # add -----
         self.batch_size = 64  # @param {type:"integer"}
         self.n_step_update = 2  # @param {type:"integer"}
         self.num_eval_episodes = 10  # @param {type:"integer"}
         self.log_interval = 200  # @param {type:"integer"}
         self.eval_interval = 1000  # @param {type:"integer"}
 
-        self.try_avg_return = self.compute_avg_return(self.env, self.random_policy, self.num_eval_episodes)
+        # self.try_avg_return = self.compute_avg_return(self.env, self.random_policy, self.num_eval_episodes)
         self.outputdir = model_path
         # # self.outputdir = get_output_folder(self.config.output, self.config.env)
         # self.outputdir = curr_path + "/outputs/" + self.env_name + \
@@ -308,63 +371,11 @@ class Trainer:
                 print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
                 tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
                 returns.append(avg_return)
+        self.train_checkpointer.save(self.agent.train_step_counter)
+        self.train_checkpointer.initialize_or_restore()
+        self.agent.global_step = tf.compat.v1.train.get_global_step()
 
-        steps = range(0, self.num_iterations + 1, self.eval_interval)
-        plt.plot(steps, returns)
-        plt.ylabel('Average Return')
-        plt.xlabel('Step')
-        plt.ylim(top=550)
-        # state = self.env.reset()
-        # for fr in range(pre_fr + 1, self.config.frames + 1):
-        #     epsilon = self.epsilon_by_frame(fr)
-        #     action = self.agent.act(state, epsilon)
-
-        #     next_state, reward, done, info = self.env.step(action)
-        #     self.agent.buffer.add(state, action, reward, next_state, done)
-
-        #     state = next_state
-        #     episode_reward += reward
-        #     # rospy.loginfo("aaaa")
-        #     loss = 0
-        #     if self.agent.buffer.size() > self.config.batch_size:
-        #         loss = self.agent.learning(fr)
-        #         losses.append(loss)
-        #         # self.board_logger.scalar_summary('Loss per frame', fr, loss)
-        #         tb.add_scalar("/trained-model/Loss_per_frame/", loss, fr)
-                
-        #     if fr % self.config.print_interval == 0:
-        #         # print("frames: %5d, reward: %5f, loss: %4f episode: %4d" % (fr, np.mean(all_rewards[-10:]), loss, ep_num))
-        #         rospy.loginfo('frames: {}, reward: {}, loss: {} episode: {}'.format(fr, np.mean(all_rewards[-10:]), loss, ep_num))
-        #     if fr % self.config.log_interval == 0:
-        #         # self.board_logger.scalar_summary('Reward per episode', ep_num, all_rewards[-1])
-        #         tb.add_scalar("/trained-model/Reward_per_episode/", all_rewards[-1], ep_num)
-        #     if self.config.checkpoint and fr % self.config.checkpoint_interval == 0:
-        #         self.agent.save_checkpoint(fr, self.outputdir)
-
-        #     if done:
-        #         state = self.env.reset()
-        #         all_rewards.append(episode_reward)
-        #         episode_reward = 0
-        #         ep_num += 1
-        #         avg_reward = float(np.mean(all_rewards[-100:]))
-        #         # self.board_logger.scalar_summary('Best 100-episodes average reward', ep_num, avg_reward)
-        #         tb.add_scalar("/trained-model/Best_100_episodes_average_reward/", avg_reward, ep_num)
-        #         if len(all_rewards) >= 100 and ep_num>=train_eps:
-        #             self.agent.save_model(self.outputdir, 'max_eps')
-        #             rospy.loginfo('Ran {} episodes max {}-episodes average reward is {}. Solved after {} trials ✔'.format(ep_num, train_eps, avg_reward, ep_num - 100))
-        #             if self.config.win_break:
-        #                 break
-        #         if len(all_rewards) >= 100 and avg_reward >= self.config.win_reward and all_rewards[-1] > self.config.win_reward:
-        #             is_win = True
-        #             self.agent.save_model(self.outputdir, 'best')
-        #             # print('Ran %d episodes best 100-episodes average reward is %3f. Solved after %d trials ✔' % (ep_num, avg_reward, ep_num - 100))
-        #             rospy.loginfo('Ran {} episodes best 100-episodes average reward is {}. Solved after {} trials ✔'.format(ep_num, avg_reward, ep_num - 100))
-        #             if self.config.win_break:
-        #                 break
-
-        # if not is_win:
-        #     print('Did not solve after %d episodes' % ep_num)
-        #     self.agent.save_model(self.outputdir, 'last')
+        self.tf_policy_saver.save(self.policy_dir)
 
 
 # class Tester(object):
@@ -443,7 +454,7 @@ if __name__ == "__main__":
     # cfg = DQNConfig()
     cfg = 0
     drl = drl_optimization()
-    plot_cfg = PlotConfig()
+    # plot_cfg = PlotConfig()
     ros_topic = RosTopic()
     ddqn_train_eps = 1000  # 训练的回合数
     ddqn_test_eps = 100  # 测试的回合数
@@ -467,12 +478,13 @@ if __name__ == "__main__":
             #     drl.env = RobotOptEnv_3dof()
             #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
-            make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
+            # make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
             # 訓練
             drl.env.model_select = "train"
             drl.env.point_Workspace_cal_Monte_Carlo()
             train_env, train_agent = drl.env_agent_config(cfg, seed=1)
-            train = Trainer(train_agent, train_env, plot_cfg.model_path)
+            model_path = None
+            train = Trainer(train_agent, train_env, model_path)
             train.train(train_eps = ddqn_train_eps)
             # # 測試
             # drl.env.model_select = "test"
