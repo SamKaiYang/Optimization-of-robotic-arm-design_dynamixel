@@ -168,6 +168,7 @@ class drl_optimization:
 
         optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
         self.global_step = tf.compat.v1.train.get_or_create_global_step()
+        
         # train_step_counter = tf.Variable(0)
         # agent = DDQNAgent(self.config)  # 创建智能体
         agent = categorical_dqn_agent.CategoricalDqnAgent(
@@ -249,10 +250,10 @@ class Trainer:
         # TODO: fixed
         # self.num_iterations = 15000 # @param {type:"integer"}
         # test
-        self.num_iterations = 10 # @param {type:"integer"}
+        self.num_iterations = 20000 # @param {type:"integer"}
         # self.initial_collect_steps = 1000  # @param {type:"integer"} 
         # test
-        self.initial_collect_steps = 10  # @param {type:"integer"} 
+        self.initial_collect_steps = 1000  # @param {type:"integer"} 
         self.collect_steps_per_iteration = 1  # @param {type:"integer"}
         self.replay_buffer_capacity = 100000  # @param {type:"integer"}
 
@@ -265,7 +266,7 @@ class Trainer:
             max_length=self.replay_buffer_capacity)
         # add -----
         self.collect_driver = dynamic_step_driver.DynamicStepDriver(
-            train_env,
+            self.env,
             self.agent.collect_policy,
             observers=[self.replay_buffer.add_batch],
             num_steps=self.collect_steps_per_iteration)
@@ -321,14 +322,16 @@ class Trainer:
         action_step = policy.action(time_step)
         next_time_step = environment.step(action_step.action)
         traj = trajectory.from_transition(time_step, action_step, next_time_step)
-
+        
         # Add trajectory to the replay buffer
         self.replay_buffer.add_batch(traj)
+
+        return next_time_step
 
     def train(self, pre_fr=0, train_eps = 300):
         rospy.loginfo("-------------數據採集------------")
         for _ in range(self.initial_collect_steps):
-            self.collect_step(self.env, self.random_policy)
+            time_step_collect = self.collect_step(self.env, self.random_policy)
             rospy.loginfo("initial_collect_steps: %s", _)
             # This loop is so common in RL, that we provide standard implementations of
             # these. For more details see the drivers module.
@@ -355,13 +358,18 @@ class Trainer:
 
         # Collect a few steps using collect_policy and save to the replay buffer.
             for _ in range(self.collect_steps_per_iteration):
-                self.collect_step(self.env, self.agent.collect_policy)
+                time_step = self.collect_step(self.env, self.agent.collect_policy)
 
             # Sample a batch of data from the buffer and update the agent's network.
             experience, unused_info = next(iterator)
             train_loss = self.agent.train(experience)
             tb.add_scalar("/trained-model/Loss_per_frame/", float(train_loss.loss), _)
             step = self.agent.train_step_counter.numpy()
+            
+            # 開始tensorboard紀錄
+            step_reward = time_step.reward.numpy()[0]
+            tb.add_scalar("/trained-model/train_step_reward/", step_reward, step)
+            # tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
 
             if step % self.log_interval == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss.loss))
@@ -378,75 +386,69 @@ class Trainer:
         self.tf_policy_saver.save(self.policy_dir)
 
 
-# class Tester(object):
+class Tester(object):
 
-#     def __init__(self, agent, env, model_path, num_episodes=50, max_ep_steps=400, test_ep_steps=100):
-#         self.num_episodes = num_episodes
-#         self.max_ep_steps = max_ep_steps
-#         self.test_ep_steps = test_ep_steps
-#         self.agent = agent
-#         self.env = env
-#         self.agent.is_training = False
-#         self.agent.load_weights(model_path)
-#         self.policy = lambda x: agent.act(x)
-#         self.xlsx_outpath = "./xlsx/"
+    def __init__(self, env, model_path, num_episodes=50, max_ep_steps=400, test_ep_steps=100):
+        self.num_episodes = num_episodes
+        self.max_ep_steps = max_ep_steps
+        self.test_ep_steps = test_ep_steps
+        # self.agent = agent
+        self.model_path = model_path
+        self.env = env
+        # self.agent.is_training = False
+        # self.agent.load_weights(model_path)
+        # self.policy = lambda x: agent.act(x)
+        self.xlsx_outpath = "./xlsx/"
 
-#     def test(self, debug=True, visualize=True): # debug = true
-#         excel_file = Workbook()
-#         sheet = excel_file.active
-#         i = 0
-#         avg_reward = 0
-#         for episode in range(self.num_episodes):
-#             s0 = self.env.tested_reset() # TODO: 改為陣列儲存
-#             episode_steps = 0
-#             episode_reward = 0.
+    def test(self, debug=True, visualize=True): # debug = true
+        print("load model ")
+        self.policy_dir = os.path.join(tempdir, 'policy')
+        saved_policy = tf.saved_model.load(self.policy_dir)
 
-#             done = False
-#             while not done:
-#                 if visualize:
-#                     self.env.render()
+        excel_file = Workbook()
+        sheet = excel_file.active
+        # i = 0
+        # avg_reward = 0
+        step = 0
+        episode = 0
+        avg_reward = 0
+        for _ in range(self.num_episodes):
+            time_step = self.env.reset()
+            while not time_step.is_last():
+                # step = self.agent.train_step_counter.numpy()
+                action_step = saved_policy.action(time_step)
+                time_step = self.env.step(action_step.action)
+                step_reward = time_step.reward.numpy()[0]
+                state = time_step.observation
+                step += 1
+                tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
+            episode += 1 
+            episode_reward = step_reward
+            if episode_reward >= 100:
+                    sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
+                    sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
+                    sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
+                    sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
+                    sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
+                    sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
+                    sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
+                    sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
+                    sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
+                    sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
+                    # sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
+                    # sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
+                    # sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
+                    # sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
+                    sheet.cell(row=i + 1, column=11).value = episode_reward
+                    i = i + 1
 
-#                 action = self.policy(s0)
-#                 s0, reward, done, info = self.env.step(action)
-                
-#                 episode_reward += reward
-#                 episode_steps += 1
-
-
-                
-
-#                 if episode_steps + 1 > self.test_ep_steps:
-#                     done = True
-#                 # TODO: 獲取分數高於...的reward結果,
-#             if debug:
-#                 # TODO: 獲取分數高於...的reward結果,
-#                 if episode_reward >= 100:
-#                     sheet.cell(row=i + 1, column=1).value = s0[0]
-#                     sheet.cell(row=i + 1, column=2).value = s0[1]
-#                     sheet.cell(row=i + 1, column=3).value = s0[2]
-#                     sheet.cell(row=i + 1, column=4).value = s0[3]
-#                     sheet.cell(row=i + 1, column=5).value = s0[4]
-#                     sheet.cell(row=i + 1, column=6).value = s0[5]
-#                     sheet.cell(row=i + 1, column=7).value = s0[6]
-#                     sheet.cell(row=i + 1, column=8).value = s0[7]
-#                     sheet.cell(row=i + 1, column=9).value = s0[8]
-#                     sheet.cell(row=i + 1, column=10).value = s0[9]
-#                     sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
-#                     sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
-#                     sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
-#                     sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
-#                     sheet.cell(row=i + 1, column=15).value = episode_reward
-#                     i = i + 1
-#                 # print('[Test] episode: %3d, episode_reward: %5f' % (episode, episode_reward))
-#                 rospy.loginfo('[Test] episode: {}, episode_reward: {}'.format(episode, episode_reward))
-#                 tb.add_scalar("/tested-model/test_reward/", episode_reward, episode)
-#             avg_reward += episode_reward
-#         avg_reward /= self.num_episodes
-#         # print("avg reward: %5f" % (avg_reward))
-#         rospy.loginfo('avg reward: {}'.format(avg_reward))
-
-#         file_name = self.xlsx_outpath + "/tested_reward_state" +".xlsx"
-#         excel_file.save(file_name)
+            tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
+            avg_reward += episode_reward
+        avg_reward /= self.num_episodes
+        # print("avg reward: %5f" % (avg_reward))
+        rospy.loginfo('avg reward: {}'.format(avg_reward))
+        file_name = self.xlsx_outpath + "/tested_reward_state" +".xlsx"
+        excel_file.save(file_name)
 
 if __name__ == "__main__":
     rospy.init_node("optimization")
@@ -487,11 +489,11 @@ if __name__ == "__main__":
             train = Trainer(train_agent, train_env, model_path)
             train.train(train_eps = ddqn_train_eps)
             # # 測試
-            # drl.env.model_select = "test"
+            drl.env.model_select = "test"
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
-            # test_env, test_agent = drl.env_agent_config(cfg, seed=10)
-            # test = Tester(test_agent, test_env, plot_cfg.model_path, num_episodes = ddqn_test_eps)
-            # test.test()
+            test_env, test_agent = drl.env_agent_config(cfg, seed=10)
+            test = Tester(test_env, model_path, num_episodes = 3)
+            test.test()
             break
         # else:
         #     pass

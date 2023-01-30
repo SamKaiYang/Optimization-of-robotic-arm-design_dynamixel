@@ -312,30 +312,59 @@ class RobotOptEnv(gym.Env):
 
     # reset环境状态 
     def reset(self):
-        # random state (手臂長度隨機)
-        self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
-        self.robot.__init__() # 重製機器人
-        torque = self.dynamics_torque_limit()
-        # rospy.loginfo("torque: %s", torque)
-        self.state[0:6] = torque
-        # 生成隨機 payload (kg)
-        rand_payload = np.random.uniform(low=1, high=4)
-        self.payload = rand_payload
-        # rospy.loginfo("payload: %s", self.payload)
-        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-        self.random_select_point() # 先隨機抽樣30個點位
-        self.prev_shaping = None
-        # reach_score = self.reach_evaluate()
-        # manipulability_score = self.manipulability_evaluate()
-        reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
-        self.state[6] = reach_score
-        # self.state[7] = sum(self.motor_cost_init)
-        # self.state[8] = sum(self.motor_weight_init)
-        self.state[7] = manipulability_score
-        self.state[8] = self.std_L2
-        self.state[9] = self.std_L3
-        self.counts = 0
-        return self.state    
+        if self.model_select == "train":
+            rospy.loginfo("model_select:%s", self.model_select)
+            # random state (手臂長度隨機)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            self.robot.__init__() # 重製機器人
+            torque = self.dynamics_torque_limit()
+            # rospy.loginfo("torque: %s", torque)
+            self.state[0:6] = torque
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            self.payload = rand_payload
+            # rospy.loginfo("payload: %s", self.payload)
+            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+            self.random_select_point() # 先隨機抽樣30個點位
+            self.prev_shaping = None
+            # reach_score = self.reach_evaluate()
+            # manipulability_score = self.manipulability_evaluate()
+            reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
+            self.state[6] = reach_score
+            # self.state[7] = sum(self.motor_cost_init)
+            # self.state[8] = sum(self.motor_weight_init)
+            self.state[7] = manipulability_score
+            self.state[8] = self.std_L2
+            self.state[9] = self.std_L3
+            self.counts = 0
+            return self.state
+        elif self.model_select == "test":
+            # random state (手臂長度隨機)
+            rospy.loginfo("model_select:%s", self.model_select)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            self.robot.__init__() # 重製機器人
+            self.payload = self.op_payload
+            self.payload_position = np.array(self.op_payload_position)
+            self.vel = np.array(self.op_vel[0:6])
+            self.acc = np.array(self.op_acc[0:6])
+            self.total_weight = self.op_weight # Kg
+            self.total_cost = self.op_cost # 元
+            self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
+
+            torque = self.dynamics_torque_limit()
+            self.state[0:6] = torque
+            self.prev_shaping = None
+            # reach_score = self.reach_evaluate()
+            # manipulability_score = self.manipulability_evaluate()
+            reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
+            self.state[6] = reach_score
+            # self.state[7] = sum(self.motor_cost_init)
+            # self.state[8] = sum(self.motor_weight_init)
+            self.state[7] = manipulability_score
+            self.state[8] = self.std_L2
+            self.state[9] = self.std_L3
+            self.counts = 0
+            return self.state        
     
     # reset环境状态 
     def tested_reset(self):
@@ -857,29 +886,59 @@ class RobotOptEnv_3dof(gym.Env):
 
     # reset环境状态 
     def reset(self):
-        # random state (手臂長度隨機)
-        self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
-        self.robot.__init__() # 重製機器人
-        torque = self.dynamics_torque_limit()
-        self.state[0:3] = torque# TODO: fixed 3dof
-        # 生成隨機 payload (kg)
-        rand_payload = np.random.uniform(low=1, high=4)
-        self.payload = rand_payload
-        # rospy.loginfo("payload: %s", self.payload)
-        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-        self.random_select_point() # 先隨機抽樣30個點位
-        self.prev_shaping = None
-        # reach_score = self.reach_evaluate()
-        # manipulability_score = self.manipulability_evaluate()
-        reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
-        self.state[6] = reach_score
-        # self.state[7] = sum(self.motor_cost_init)
-        # self.state[8] = sum(self.motor_weight_init)
-        self.state[7] = manipulability_score
-        self.state[8] = self.std_L2
-        self.state[9] = self.std_L3
-        self.counts = 0
-        return self.state    
+        if self.model_select == "train":
+            rospy.loginfo("model_select:%s", self.model_select)
+            # random state (手臂長度隨機)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            self.robot.__init__() # 重製機器人
+            torque = self.dynamics_torque_limit()
+            self.state[0:3] = torque# TODO: fixed 3dof
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            self.payload = rand_payload
+            # rospy.loginfo("payload: %s", self.payload)
+            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+            self.random_select_point() # 先隨機抽樣30個點位
+            self.prev_shaping = None
+            # reach_score = self.reach_evaluate()
+            # manipulability_score = self.manipulability_evaluate()
+            reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
+            self.state[6] = reach_score
+            # self.state[7] = sum(self.motor_cost_init)
+            # self.state[8] = sum(self.motor_weight_init)
+            self.state[7] = manipulability_score
+            self.state[8] = self.std_L2
+            self.state[9] = self.std_L3
+            self.counts = 0
+            return self.state    
+        elif self.model_select == "test":
+            rospy.loginfo("model_select:%s", self.model_select)
+            # random state (手臂長度隨機)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            self.robot.__init__() # 重製機器人
+            self.payload = self.op_payload
+            self.payload_position = np.array(self.op_payload_position)
+            self.vel = np.array(self.op_vel[0:3])# TODO: fixed 3dof
+            self.acc = np.array(self.op_acc[0:3])# TODO: fixed 3dof
+            self.total_weight = self.op_weight # Kg
+            self.total_cost = self.op_cost # 元
+            self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
+
+            torque = self.dynamics_torque_limit()
+            self.state[0:3] = torque# TODO: fixed 3dof
+            self.prev_shaping = None
+            # reach_score = self.reach_evaluate()
+            # manipulability_score = self.manipulability_evaluate()
+            reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
+            self.state[6] = reach_score
+            # self.state[7] = sum(self.motor_cost_init)
+            # self.state[8] = sum(self.motor_weight_init)
+            self.state[7] = manipulability_score
+            self.state[8] = self.std_L2
+            self.state[9] = self.std_L3
+            self.counts = 0
+            return self.state    
+        
     
     # reset环境状态 
     def tested_reset(self):
