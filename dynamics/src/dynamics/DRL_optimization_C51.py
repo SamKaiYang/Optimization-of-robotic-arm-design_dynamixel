@@ -225,6 +225,7 @@ class RosTopic:
         self.sub_arm_structure = rospy.Subscriber("/arn_structure", arm_structure, self.arm_structure_callback)
         self.cmd_run = 0
         self.arm_structure_dof = None
+        self.DRL_algorithm = None
     def cmd_callback(self, data):
         self.cmd = data.cmd
         rospy.loginfo("I heard command is %s", data.cmd)
@@ -240,7 +241,9 @@ class RosTopic:
 
     def arm_structure_callback(self, data):
         self.arm_structure_dof = data.DoF
-        print(self.arm_structure_dof)
+        self.DRL_algorithm = data.structure_name
+        print("DoF:",self.arm_structure_dof)
+        print("DRL algorithm:",self.DRL_algorithm)
 
 
 class Trainer:

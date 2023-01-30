@@ -147,7 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # op design
         self.dof_select = 6
-        self.structure_name = "test"
+        self.algorithm_name = "test"
 
         self.ui.btn_dynamics.clicked.connect(self.dyna_buttonClicked)
         self.ui.btn_dyn_space.clicked.connect(self.dyna_space_buttonClicked)
@@ -201,13 +201,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.comboBox_dof_select.currentIndexChanged.connect(self.display_dof_select)
         self.ui.comboBox_dof_select.setCurrentIndex(5)
         self.display_dof_select()
-        # ComboBox structure name
-        choices = ['random','TECO','UR','TM','Single Arm','SCARA','3DOF']
-        self.ui.comboBox_structure_select.addItems(choices)
-        self.ui.comboBox_structure_select.currentIndexChanged.connect(self.display_structure_select)
-        self.ui.comboBox_structure_select.setCurrentIndex(0)
-        self.display_structure_select()
+        # # ComboBox algorithm name
+        # choices = ['random','TECO','UR','TM','Single Arm','SCARA','3DOF']
+        # self.ui.comboBox_algorithm_select.addItems(choices)
+        # self.ui.comboBox_algorithm_select.currentIndexChanged.connect(self.display_structure_select)
+        # self.ui.comboBox_algorithm_select.setCurrentIndex(0)
+        # self.display_structure_select()
 
+        # ComboBox algorithm name
+        choices = ['DQN','DDQN','C51']
+        self.ui.comboBox_algorithm_select.addItems(choices)
+        self.ui.comboBox_algorithm_select.currentIndexChanged.connect(self.display_structure_select)
+        self.ui.comboBox_algorithm_select.setCurrentIndex(0)
+        self.display_structure_select()
         # self.progressBar_dynamics_space = QtWidgets.QProgressBar(self.ui.graphicsView_2)
     def dyna_cal_process_callback(self,data):
         # dyna_cal_process_callback
@@ -314,29 +320,39 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dof_select = 7
             self.ui.comboBox_dof_select.setCurrentIndex(6)
     
+    # def display_structure_select(self):
+    #     # ['random','TECO','UR','TM','Single Arm','SCARA','3DOF']
+    #     if self.ui.comboBox_algorithm_select.currentText() == "random":
+    #         self.algorithm_name = 'random'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(0)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "TECO":
+    #         self.algorithm_name = 'TECO'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(1)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "UR":
+    #         self.algorithm_name = 'UR'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(2)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "TM":
+    #         self.algorithm_name = 'TM'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(3)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "Single Arm":
+    #         self.algorithm_name = 'Single Arm'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(4)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "SCARA":
+    #         self.algorithm_name = 'SCARA'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(5)
+    #     elif self.ui.comboBox_algorithm_select.currentText() == "3DOF":
+    #         self.algorithm_name = '3DOF'
+    #         self.ui.comboBox_algorithm_select.setCurrentIndex(6)
     def display_structure_select(self):
-        # ['random','TECO','UR','TM','Single Arm','SCARA','3DOF']
-        if self.ui.comboBox_structure_select.currentText() == "random":
-            self.structure_name = 'random'
-            self.ui.comboBox_structure_select.setCurrentIndex(0)
-        elif self.ui.comboBox_structure_select.currentText() == "TECO":
-            self.structure_name = 'TECO'
-            self.ui.comboBox_structure_select.setCurrentIndex(1)
-        elif self.ui.comboBox_structure_select.currentText() == "UR":
-            self.structure_name = 'UR'
-            self.ui.comboBox_structure_select.setCurrentIndex(2)
-        elif self.ui.comboBox_structure_select.currentText() == "TM":
-            self.structure_name = 'TM'
-            self.ui.comboBox_structure_select.setCurrentIndex(3)
-        elif self.ui.comboBox_structure_select.currentText() == "Single Arm":
-            self.structure_name = 'Single Arm'
-            self.ui.comboBox_structure_select.setCurrentIndex(4)
-        elif self.ui.comboBox_structure_select.currentText() == "SCARA":
-            self.structure_name = 'SCARA'
-            self.ui.comboBox_structure_select.setCurrentIndex(5)
-        elif self.ui.comboBox_structure_select.currentText() == "3DOF":
-            self.structure_name = '3DOF'
-            self.ui.comboBox_structure_select.setCurrentIndex(6)
+        if self.ui.comboBox_algorithm_select.currentText() == "DQN":
+            self.algorithm_name = 'DQN'
+            self.ui.comboBox_algorithm_select.setCurrentIndex(0)
+        elif self.ui.comboBox_algorithm_select.currentText() == "DDQN":
+            self.algorithm_name = 'DDQN'
+            self.ui.comboBox_algorithm_select.setCurrentIndex(1)
+        elif self.ui.comboBox_algorithm_select.currentText() == "C51":
+            self.algorithm_name = 'C51'
+            self.ui.comboBox_algorithm_select.setCurrentIndex(2)
 
     
     def dyna_set_buttonClicked(self):
@@ -572,7 +588,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pub_cmd.publish(10)
         
     def structure_set_buttonClicked(self):
-        self.arm_structure.structure_name = self.structure_name
+        self.arm_structure.structure_name = self.algorithm_name
         self.arm_structure.DoF = self.dof_select
         self.pub_arm_structure.publish(self.arm_structure)
         

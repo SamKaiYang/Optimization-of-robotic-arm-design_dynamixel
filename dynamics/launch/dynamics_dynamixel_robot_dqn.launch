@@ -5,7 +5,7 @@
   </node>
   <node name="stl_cal" pkg="dynamics" type="stl_conv_6dof_urdf_dynamixel.py" respawn="false" output="screen" cwd="node" >
   </node>
-  <node name="optimization" pkg="dynamics" type="DRL_optimization.py" respawn="false" output="screen" cwd="node" >
+  <node name="optimization" pkg="dynamics" type="DRL_optimization_dqn.py" respawn="false" output="screen" cwd="node" >
   </node>
   
 </launch>

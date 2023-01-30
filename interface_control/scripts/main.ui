@@ -5016,7 +5016,7 @@
        <string>DoF</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox_structure_select">
+     <widget class="QComboBox" name="comboBox_algorithm_select">
       <property name="geometry">
        <rect>
         <x>440</x>
@@ -5029,14 +5029,14 @@
      <widget class="QLabel" name="label_dof_2">
       <property name="geometry">
        <rect>
-        <x>320</x>
+        <x>340</x>
         <y>50</y>
         <width>91</width>
         <height>26</height>
        </rect>
       </property>
       <property name="text">
-       <string>Structure</string>
+       <string>algorithm</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_optimization_analysis">
