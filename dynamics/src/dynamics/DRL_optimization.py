@@ -424,7 +424,7 @@ class Tester(object):
 
         excel_file = Workbook()
         sheet = excel_file.active
-        # i = 0
+        i = 0
         # avg_reward = 0
         step = 0
         episode = 0
@@ -520,7 +520,7 @@ if __name__ == "__main__":
             drl.env.model_select = "test"
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 50)
+            test = Tester(test_env, model_path, num_episodes = 100)
             test.test()
             break
 
@@ -540,7 +540,7 @@ if __name__ == "__main__":
             drl.env.model_select = "test"
             # model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 50)
+            test = Tester(test_env, model_path, num_episodes = 100)
             test.test()
             break
         else:
