@@ -636,8 +636,8 @@ class RobotOptEnv_3dof(gym.Env):
         # 觀察參數 motor
         self.motor = motor_data()
         self.res = self.motor.dynamixel_member
-        self.high_torque = 120 # 預設標準值 馬達極限 120.0 N max
-        self.low_torque = -120 # 預設標準值 馬達極限 -12.0 N max
+        self.high_torque = float('inf') # 預設標準值 馬達極限 120.0 N max
+        self.low_torque = float('-inf') # 預設標準值 馬達極限 -12.0 N max
         self.motor_cost_init = np.array([0,400,400,0,0,0], dtype=np.float64) # 預設最大馬達費用
         self.motor_weight_init = np.array([0,0.855,0.855,0,0,0], dtype=np.float64) # 預設最大馬達重量
         self.motor_cost = np.array([0,400,400,0,0,0], dtype=np.float64) # 馬達費用 # TODO: fixed 3dof
@@ -649,10 +649,10 @@ class RobotOptEnv_3dof(gym.Env):
         self.low_reach_eva = 0 # 預設觀測標準值
         self.high_manipulability = 1  # 預設觀測標準值
         self.low_manipulability = 0  # 預設觀測標準值
-        self.high_std_L2 = 50 # 預設觀測標準值
-        self.low_std_L2 = 0 # 預設觀測標準值
-        self.high_std_L3 = 50 # 預設觀測標準值
-        self.low_std_L3 = 0 # 預設觀測標準值
+        self.high_std_L2 = 70 # 預設觀測標準值
+        self.low_std_L2 = -25 # 預設觀測標準值
+        self.high_std_L3 = 70 # 預設觀測標準值
+        self.low_std_L3 = -25 # 預設觀測標準值
         self.torque_done = np.array([false, false, false])# TODO: fixed 3dof
         self.torque_over = False
         self.prev_shaping = None
@@ -660,11 +660,11 @@ class RobotOptEnv_3dof(gym.Env):
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
-        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, -float('inf'), -float('inf'), self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.total_cost, self.total_weight, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque,self.low_torque, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
+                                            np.array([self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque,self.high_torque, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0,0,0,0,0], dtype=np.float64)
         # self.pre_state = np.array([0,0,0,0,0,0,0,0,0,0,0,0], dtype=np.float64)# TODO: fixed 3dof
 
         #隨機抽樣點位初始化
@@ -809,7 +809,7 @@ class RobotOptEnv_3dof(gym.Env):
             + 100 * self.state[6] # 可達性
             # - 0.01 * self.state[7] # cost
             # - 10 * self.state[8] # weight
-            + 1000 * self.state[9] # 可操作性
+            + 1000 * self.state[7] # 可操作性
         ) 
 
         if self.prev_shaping is not None:
@@ -825,56 +825,46 @@ class RobotOptEnv_3dof(gym.Env):
                 break # TODO
 
         terminated = False
-        # if down 完成任务 
-        
-        # if self.counts == 10:
-        #     if self.state[6] <= 0.6: # TODO: fixed
-        #         terminated = True
-        #         reward += -50
-        #     if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-        #         terminated = True
-        #         reward += -100
-
-        # if self.torque_over == False and self.state[6] == 1 and self.state[8] < self.op_weight and self.state[7] < self.op_cost:  # TODO: fixed 增加 cost & weight & ... 
-        #     terminated = True
-        #     reward += +50
-        if self.state[10] > 0 and self.state[11] > 0:
-            if self.torque_over == True and self.state[6] < 0.6: 
-                reward += -20
-            elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
-                reward += -10
-            elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
-                reward += -5
-            elif self.torque_over == False and self.state[6] < 0.6: 
-                reward += +5
-            elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
-                reward += +10
-            elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
-                reward += +20
-            elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
-                terminated = True
-                reward += +50
-            elif self.torque_over == False and self.state[6] == 1.0:
-                terminated = True
-                reward += +100
-        # else:
-        #     pass
-            
-            if self.counts == 30:
-                if self.state[6] < 0.6: # TODO: fixed
-                    reward += -50
-                else:
-                    reward += 10
-                if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-                    reward += -100
-                else:
-                    reward += +10
-                terminated = True
-                self.counts = 0
-                # reward += +30
-        else:
+        # 避免軸長小於0
+        if self.state[8] <= 0 or self.state[9] <=  0:
+            # terminated = True
+            reward += -200
+        if self.torque_over == True and self.state[6] < 0.6: 
+            reward += -20
+        elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
+            reward += -10
+        elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
+            reward += -5
+        elif self.torque_over == False and self.state[6] < 0.6: 
+            reward += +5
+        elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
+            reward += +10
+        elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
+            reward += +20
+        elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
             terminated = True
-            reward += -100
+            reward += +50
+        elif self.torque_over == False and self.state[6] == 1.0:
+            terminated = True
+            reward += +100
+        
+        if self.counts == 30:
+            # 避免軸長小於0
+            if self.state[8] <= 0 or self.state[9] <=  0:
+                # terminated = True
+                reward += -1500
+            else:
+                reward += -10
+            if self.state[6] < 0.6: # TODO: fixed
+                reward += -50
+            else:
+                reward += -10
+            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+                reward += -100
+            else:
+                reward += -10
+            terminated = True
+            self.counts = 0
 
         self.torque_over = False #reset
         rospy.loginfo("counts: %s", self.counts)
@@ -1185,7 +1175,7 @@ class RobotOptEnv_5dof(gym.Env):
         'video.frames_per_second': 2
     }
     def __init__(self):
-        self.robot = modular_robot_6dof()
+        self.robot = modular_robot_5dof() # TODO: fixed 5dof
         self.robot_urdf = stl_conv_urdf("single_arm_v12","test")
         # self.robot_urdf.init_dynamixel_diff_inertia()
         # callback:Enter the parameters of the algorithm to be optimized on the interface
@@ -1195,8 +1185,8 @@ class RobotOptEnv_5dof(gym.Env):
         # 使用者設定參數
         self.payload = 5.0
         self.payload_position = np.array([0, 0, 0.04])
-        self.vel = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194, 2.356194])
-        self.acc = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194, 2.356194])
+        self.vel = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194]) # TODO: fixed 5dof
+        self.acc = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194]) # TODO: fixed 5dof
         self.total_weight = 20 # Kg
         self.total_cost = 1800 # 元
         # 預設二,三軸軸長
@@ -1209,9 +1199,9 @@ class RobotOptEnv_5dof(gym.Env):
         self.low_torque = float('-inf') # 預設標準值 馬達極限 -12.0 N max
         self.motor_cost_init = np.array([0,400,400,0,0,0], dtype=np.float64) # 預設最大馬達費用
         self.motor_weight_init = np.array([0,0.855,0.855,0,0,0], dtype=np.float64) # 預設最大馬達重量
-        self.motor_cost = np.array([0,400,400,0,0,0], dtype=np.float64) # 馬達費用
-        self.motor_weight = np.array([0,0.855,0.855,0,0,0], dtype=np.float64) # 馬達重量
-        self.motor_rated = np.array([44.7,44.7,44.7,44.7,44.7,44.7], dtype=np.float64)
+        self.motor_cost = np.array([0,400,400,0,0], dtype=np.float64) # 馬達費用 # TODO: fixed 5dof
+        self.motor_weight = np.array([0,0.855,0.855,0,0], dtype=np.float64) # 馬達重量 # TODO: fixed 5dof
+        self.motor_rated = np.array([44.7,44.7,44.7,44.7,44.7], dtype=np.float64) # TODO: fixed 5dof
         # 使用者設定參數 & 觀察參數
         self.reach_distance = 0.6 # 使用者設定可達半徑最小值
         self.high_reach_eva = 1 # 預設觀測標準值
@@ -1222,7 +1212,7 @@ class RobotOptEnv_5dof(gym.Env):
         self.low_std_L2 = -25 # 預設觀測標準值
         self.high_std_L3 = 70 # 預設觀測標準值
         self.low_std_L3 = -25 # 預設觀測標準值
-        self.torque_done = np.array([false, false, false, false, false, false])
+        self.torque_done = np.array([false, false, false, false, false]) # TODO: fixed 5dof
         self.torque_over = False
         self.prev_shaping = None
         # TODO: 增加馬達模組選型action
@@ -1279,8 +1269,8 @@ class RobotOptEnv_5dof(gym.Env):
         
         self.payload = self.op_payload
         self.payload_position = np.array(self.op_payload_position)
-        self.vel = np.array(self.op_vel[0:6])
-        self.acc = np.array(self.op_acc[0:6])
+        self.vel = np.array(self.op_vel[0:5]) # TODO: fixed 5dof
+        self.acc = np.array(self.op_acc[0:5]) # TODO: fixed 5dof
         self.total_weight = self.op_weight # Kg
         self.total_cost = self.op_cost # 元
         self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
@@ -1288,7 +1278,7 @@ class RobotOptEnv_5dof(gym.Env):
     # TODO: fixed
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-        self.pre_state[0:6] = self.state[0:6]
+        # self.pre_state[0:6] = self.state[0:6] # TODO: fixed 5dof
         # TODO: 向量編碼動作
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
@@ -1356,7 +1346,7 @@ class RobotOptEnv_5dof(gym.Env):
         self.robot.__init__() # 重製機器人
         torque = self.dynamics_torque_limit()
         # rospy.loginfo("torque: %s", torque)
-        self.state[0:6] = torque
+        self.state[0:5] = torque # TODO: fixed 5dof
         # # 可達性
         # self.state[6] = self.reach_evaluate()
         # 計算成本與重量    
@@ -1385,7 +1375,8 @@ class RobotOptEnv_5dof(gym.Env):
         
         # TODO: fixed
         shaping = (
-            -1 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4] + self.state[5] * self.state[5])
+            # TODO: fixed 5dof
+            -1 * np.sqrt(self.state[0] * self.state[0] + self.state[1] * self.state[1] + self.state[2] * self.state[2] + self.state[3] * self.state[3] + self.state[4] * self.state[4])
             + 100 * self.state[6] # 可達性
             # - 0.01 * self.state[7] # cost
             # - 10 * self.state[8] # weight
@@ -1397,7 +1388,7 @@ class RobotOptEnv_5dof(gym.Env):
         self.prev_shaping = shaping
 
         # 判斷超出最大扭矩
-        for i in range(6):
+        for i in range(5): # TODO: fixed 5dof
             # TODO:consider cost & weight 
             # if np.abs(self.state[i]) > self.motor_rated[i]:
             if np.abs(self.state[i]) > 44.7: # TODO: fixed 
@@ -1465,7 +1456,7 @@ class RobotOptEnv_5dof(gym.Env):
             self.robot.__init__() # 重製機器人
             torque = self.dynamics_torque_limit()
             # rospy.loginfo("torque: %s", torque)
-            self.state[0:6] = torque
+            self.state[0:5] = torque # TODO: fixed 5dof
             # 生成隨機 payload (kg)
             rand_payload = np.random.uniform(low=1, high=4)
             self.payload = rand_payload
@@ -1491,14 +1482,14 @@ class RobotOptEnv_5dof(gym.Env):
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
-            self.vel = np.array(self.op_vel[0:6])
-            self.acc = np.array(self.op_acc[0:6])
+            self.vel = np.array(self.op_vel[0:5]) # TODO: fixed 5dof
+            self.acc = np.array(self.op_acc[0:5]) # TODO: fixed 5dof
             self.total_weight = self.op_weight # Kg
             self.total_cost = self.op_cost # 元
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
 
             torque = self.dynamics_torque_limit()
-            self.state[0:6] = torque
+            self.state[0:5] = torque # TODO: fixed 5dof
             self.prev_shaping = None
             # reach_score = self.reach_evaluate()
             # manipulability_score = self.manipulability_evaluate()
@@ -1519,14 +1510,14 @@ class RobotOptEnv_5dof(gym.Env):
         self.robot.__init__() # 重製機器人
         self.payload = self.op_payload
         self.payload_position = np.array(self.op_payload_position)
-        self.vel = np.array(self.op_vel[0:6])
-        self.acc = np.array(self.op_acc[0:6])
+        self.vel = np.array(self.op_vel[0:5]) # TODO: fixed 5dof
+        self.acc = np.array(self.op_acc[0:5]) # TODO: fixed 5dof
         self.total_weight = self.op_weight # Kg
         self.total_cost = self.op_cost # 元
         self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
 
         torque = self.dynamics_torque_limit()
-        self.state[0:6] = torque
+        self.state[0:5] = torque # TODO: fixed 5dof
         self.prev_shaping = None
         # reach_score = self.reach_evaluate()
         # manipulability_score = self.manipulability_evaluate()
@@ -1553,7 +1544,7 @@ class RobotOptEnv_5dof(gym.Env):
 
         each axis when the arm of each axis is the longest and the acceleration is the highest
         """
-        torque = np.array([np.zeros(shape=6)])
+        torque = np.array([np.zeros(shape=5)]) # TODO: fixed 5dof
         # axis_angle = np.array([np.zeros(shape=6)])
         axis_angle = []
         append_torque_limit_list = []
@@ -1566,17 +1557,17 @@ class RobotOptEnv_5dof(gym.Env):
         # radian = 180 / pi
         # 弧度
         self.robot.payload(self.payload, self.payload_position)  # set payload
-        torque = np.array([np.zeros(shape=6)])
+        torque = np.array([np.zeros(shape=5)]) # TODO: fixed 5dof
         q_list = [0, 90, -90, 180, -180]
+        # TODO: fixed 5dof
         T_cell = (
             len(q_list)
             * len(q_list)
             * len(q_list)
             * len(q_list)
             * len(q_list)
-            * len(q_list)
         )
-
+        # TODO: fixed 5dof
         for i in range(len(q_list)):
             q1 = q_list[i]
             percent = i / T_cell * 100
@@ -1588,28 +1579,25 @@ class RobotOptEnv_5dof(gym.Env):
                         q4 = q_list[l]
                         for m in range(len(q_list)):
                             q5 = q_list[m]
-                            for n in range(len(q_list)):
-                                q6 = q_list[n]
-                                axis_angle.append([q1, q2, q3, q4, q5, q6])
-                                load = np.array(
-                                    [
-                                        self.robot.rne(
-                                            [
-                                                q1 * du,
-                                                q2 * du,
-                                                q3 * du,
-                                                q4 * du,
-                                                q5 * du,
-                                                q6 * du,
-                                            ],
-                                            self.vel,
-                                            self.acc
-                                        )
-                                    ]
-                                )
-                                torque = np.append(torque, load, axis=0)
-
-        for i in range(6):
+                            axis_angle.append([q1, q2, q3, q4, q5])
+                            load = np.array(
+                                [
+                                    self.robot.rne(
+                                        [
+                                            q1 * du,
+                                            q2 * du,
+                                            q3 * du,
+                                            q4 * du,
+                                            q5 * du,
+                                        ],
+                                        self.vel,
+                                        self.acc
+                                    )
+                                ]
+                            )
+                            torque = np.append(torque, load, axis=0)
+        # TODO: fixed 5dof
+        for i in range(5):
             axis = i
             toque_max_index = np.argmax(torque[:, axis])
             toque_min_index = np.argmin(torque[:, axis])
@@ -1627,7 +1615,7 @@ class RobotOptEnv_5dof(gym.Env):
     def reach_manipulability_evaluate(self,model_select):
         if model_select == "train":
             # import xlsx
-            df = load_workbook("./xlsx/task_point.xlsx")
+            df = load_workbook("./xlsx/task_point_5dof.xlsx") # TODO: fixed 5dof
             sheets = df.worksheets
             sheet1 = sheets[0]
             rows = sheet1.rows
@@ -1640,8 +1628,8 @@ class RobotOptEnv_5dof(gym.Env):
             count = 0
             for row in rows:
                 row_val = [col.value for col in row]
-                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])])) # TODO: fixed 5dof
+                ik_q = self.robot.ikine_LMS(T=T_tmp[i]) # TODO: fixed 5dof
                 if ik_q.success == True:
                     count += 1
                     manipulability_index.append(self.robot.manipulability(q=ik_q.q))
@@ -1657,7 +1645,7 @@ class RobotOptEnv_5dof(gym.Env):
                     return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
         elif model_select == "test":
             # import xlsx
-            df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
+            df = load_workbook("./xlsx/task_point_5dof_tested.xlsx")
             sheets = df.worksheets
             sheet1 = sheets[0]
             rows = sheet1.rows
@@ -1670,8 +1658,8 @@ class RobotOptEnv_5dof(gym.Env):
             count = 0
             for row in rows:
                 row_val = [col.value for col in row]
-                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])])) # TODO: fixed 5dof
+                ik_q = self.robot.ikine_LMS(T=T_tmp[i]) # TODO: fixed 5dof
                 if ik_q.success == True:
                     count += 1
                     manipulability_index.append(self.robot.manipulability(q=ik_q.q))
@@ -1707,15 +1695,17 @@ class RobotOptEnv_5dof(gym.Env):
         self.q4_end = 160
         self.q5_s = -160
         self.q5_end = 160
-        self.q6_s = -160
-        self.q6_end = 160
+        # TODO: fixed 5dof
+        # self.q6_s = -160
+        # self.q6_end = 160
         N = 1000
         theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
         theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
         theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
         theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
         theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
-        theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+        # TODO: fixed 5dof
+        # theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
 
         for i in range(N):
             q1 = theta1[i, 0]
@@ -1723,9 +1713,10 @@ class RobotOptEnv_5dof(gym.Env):
             q3 = theta3[i, 0]
             q4 = theta4[i, 0]
             q5 = theta5[i, 0]
-            q6 = theta6[i, 0]
+            # TODO: fixed 5dof
+            # q6 = theta6[i, 0]
             self.T = self.robot.fkine(
-                [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
+                [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du]# TODO: fixed 5dof
             )
             t = np.round(self.T.t, 3)
             r = np.round(self.T.rpy('deg'), 3)
@@ -1750,7 +1741,7 @@ class RobotOptEnv_5dof(gym.Env):
             sheet.cell(row=i + 1, column=5).value = self.T_pitch[x]
             sheet.cell(row=i + 1, column=6).value = self.T_yaw[x]
 
-        file_name = self.xlsx_outpath + "/task_point" +".xlsx"
+        file_name = self.xlsx_outpath + "/task_point_5dof" +".xlsx" # TODO: fixed 5dof
         excel_file.save(file_name)
 
     # def select_point_tested(self):
