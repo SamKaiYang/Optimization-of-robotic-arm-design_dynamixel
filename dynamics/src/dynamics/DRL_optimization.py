@@ -71,7 +71,7 @@ import argparse
 import random
 
 import matplotlib.pyplot as plt
-from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof
+from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
 import tensorboardX
 import yaml
 
@@ -101,11 +101,11 @@ import zipfile
 files = None
 # add
 
-file_path = curr_path + "/outputs/" 
+file_path = curr_path + "/outputs/"
 curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
 # curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
-tempdir = curr_path + "/C51_outputs/" + \
-            '/' + curr_time + '/models/'  # 保存模型的路径
+# tempdir = curr_path + "/C51_outputs/" + \
+#             '/' + curr_time + '/models/'  # 保存模型的路径
 tb = tensorboardX.SummaryWriter()
 # tensorboard_callback = tensorboardX.(log_dir=log_dir, histogram_freq=1)
 algo_name = "C51"  # 算法名称
@@ -119,13 +119,13 @@ class drl_optimization:
         self.robot = modular_robot_6dof()
         self.env = RobotOptEnv()
         # self.config = Config()
-        
+
     def env_agent_config(self, cfg, algorithm, seed=1):
         ''' 创建环境和智能体
         '''
         # num_iterations = 15000 # @param {type:"integer"}
 
-        # initial_collect_steps = 1000  # @param {type:"integer"} 
+        # initial_collect_steps = 1000  # @param {type:"integer"}
         # collect_steps_per_iteration = 1  # @param {type:"integer"}
         # replay_buffer_capacity = 100000  # @param {type:"integer"}
 
@@ -168,7 +168,7 @@ class drl_optimization:
 
         optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
         self.global_step = tf.compat.v1.train.get_or_create_global_step()
-        
+
         # train_step_counter = tf.Variable(0)
         # agent = DDQNAgent(self.config)  # 创建智能体
         if algorithm == 'DQN':
@@ -180,6 +180,7 @@ class drl_optimization:
                 td_errors_loss_fn = common.element_wise_squared_loss,
                 train_step_counter = self.global_step)
             agent.initialize()
+            rospy.loginfo("DRL algorithm init: %s", algorithm)
         elif algorithm == 'DDQN':
             agent = DdqnAgent(
                 env.time_step_spec(),
@@ -189,6 +190,7 @@ class drl_optimization:
                 td_errors_loss_fn = common.element_wise_squared_loss,
                 train_step_counter = self.global_step)
             agent.initialize()
+            rospy.loginfo("DRL algorithm init: %s", algorithm)
         elif algorithm == 'C51':
             agent = categorical_dqn_agent.CategoricalDqnAgent(
                 env.time_step_spec(),
@@ -202,6 +204,7 @@ class drl_optimization:
                 gamma=gamma,
                 train_step_counter=self.global_step)
             agent.initialize()
+            rospy.loginfo("DRL algorithm init: %s", algorithm)
 
         # dqn_agent = DqnAgent(
         #     env.time_step_spec(),
@@ -219,7 +222,7 @@ class drl_optimization:
         #     td_errors_loss_fn = common.element_wise_squared_loss,
         #     train_step_counter = self.global_step)
         return env, agent
-    
+
 
 # class PlotConfig:
 #     ''' 绘图相关参数设置
@@ -240,7 +243,7 @@ class RosTopic:
     def __init__(self):
         self.sub_taskcmd = rospy.Subscriber("/cal_command", cal_cmd, self.cmd_callback)
         self.sub_test_model_name = rospy.Subscriber("/tested_model_name", tested_model_name, self.test_model_name_callback)
-        # Subscriber select dof and structure 
+        # Subscriber select dof and structure
         self.sub_arm_structure = rospy.Subscriber("/arn_structure", arm_structure, self.arm_structure_callback)
         self.cmd_run = 0
         self.arm_structure_dof = None
@@ -261,27 +264,27 @@ class RosTopic:
     def arm_structure_callback(self, data):
         self.arm_structure_dof = data.DoF
         self.DRL_algorithm = data.structure_name
-        print("DoF:",self.arm_structure_dof)
-        print("DRL algorithm:",self.DRL_algorithm)
-
+        # rospy.loginfo("DoF: %s", self.arm_structure_dof)
+        # rospy.loginfo("DRL algorithm: %s", self.DRL_algorithm)
 
 class Trainer:
     def __init__(self, agent, env, model_path):
         self.agent = agent
         self.env = env
+        self.model_path = model_path
         # TODO: fixed
         # self.num_iterations = 15000 # @param {type:"integer"}
         # test
         self.num_iterations = 20000 # @param {type:"integer"}
-        # self.initial_collect_steps = 1000  # @param {type:"integer"} 
+        # self.initial_collect_steps = 1000  # @param {type:"integer"}
         # test
-        self.initial_collect_steps = 1000  # @param {type:"integer"} 
+        self.initial_collect_steps = 1000  # @param {type:"integer"}
         self.collect_steps_per_iteration = 1  # @param {type:"integer"}
         self.replay_buffer_capacity = 100000  # @param {type:"integer"}
 
         self.random_policy = random_tf_policy.RandomTFPolicy(self.env.time_step_spec(),
                                                 self.env.action_spec())
-        
+
         self.replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
             data_spec=self.agent.collect_data_spec,
             batch_size=self.env.batch_size,
@@ -295,7 +298,7 @@ class Trainer:
         # Initial data collection
         self.collect_driver.run()
 
-        self.checkpoint_dir = os.path.join(tempdir, 'checkpoint')
+        self.checkpoint_dir = os.path.join(self.model_path, 'checkpoint')
         self.train_checkpointer = common.Checkpointer(
             ckpt_dir=self.checkpoint_dir,
             max_to_keep=1,
@@ -305,7 +308,7 @@ class Trainer:
             global_step=self.agent.train_step_counter
         )
 
-        self.policy_dir = os.path.join(tempdir, 'policy')
+        self.policy_dir = os.path.join(self.model_path, 'policy')
         self.tf_policy_saver = policy_saver.PolicySaver(agent.policy)
         # add -----
         self.batch_size = 64  # @param {type:"integer"}
@@ -314,14 +317,6 @@ class Trainer:
         self.log_interval = 200  # @param {type:"integer"}
         self.eval_interval = 1000  # @param {type:"integer"}
 
-        # self.try_avg_return = self.compute_avg_return(self.env, self.random_policy, self.num_eval_episodes)
-        self.outputdir = model_path
-        # # self.outputdir = get_output_folder(self.config.output, self.config.env)
-        # self.outputdir = curr_path + "/outputs/" + self.env_name + \
-        #     '/' + curr_time + '/models/'  # 保存模型的路径
-        # self.agent.save_config(self.outputdir)
-        
-        # self.board_logger = TensorBoardLogger(self.outputdir)
     def compute_avg_return(self, environment, policy, num_episodes=10):
 
         total_return = 0.0
@@ -344,7 +339,7 @@ class Trainer:
         action_step = policy.action(time_step)
         next_time_step = environment.step(action_step.action)
         traj = trajectory.from_transition(time_step, action_step, next_time_step)
-        
+
         # Add trajectory to the replay buffer
         self.replay_buffer.add_batch(traj)
 
@@ -387,7 +382,7 @@ class Trainer:
             train_loss = self.agent.train(experience)
             tb.add_scalar("/trained-model/Loss_per_frame/", float(train_loss.loss), _)
             step = self.agent.train_step_counter.numpy()
-            
+
             # 開始tensorboard紀錄
             step_reward = time_step.reward.numpy()[0]
             tb.add_scalar("/trained-model/train_step_reward/", step_reward, step)
@@ -424,7 +419,7 @@ class Tester(object):
 
     def test(self, debug=True, visualize=True): # debug = true
         print("load model ")
-        self.policy_dir = os.path.join(tempdir, 'policy')
+        self.policy_dir = os.path.join(self.model_path, 'policy')
         saved_policy = tf.saved_model.load(self.policy_dir)
 
         excel_file = Workbook()
@@ -444,7 +439,7 @@ class Tester(object):
                 state = time_step.observation
                 step += 1
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
-            episode += 1 
+            episode += 1
             episode_reward = step_reward
             if episode_reward >= 100:
                     sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
@@ -477,6 +472,8 @@ if __name__ == "__main__":
     a = 0
     # cfg = DQNConfig()
     cfg = 0
+    arm_structure_dof = 0
+    model_path = None
     drl = drl_optimization()
     # plot_cfg = PlotConfig()
     ros_topic = RosTopic()
@@ -486,68 +483,65 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         # test all
         if ros_topic.arm_structure_dof == 6:
-                drl.env = RobotOptEnv()
-                rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-                ros_topic.arm_structure_dof = 0
+            drl.env = RobotOptEnv()
+            rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            arm_structure_dof = ros_topic.arm_structure_dof
+            ros_topic.arm_structure_dof = 0
         elif ros_topic.arm_structure_dof == 3:
             drl.env = RobotOptEnv_3dof()
             rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            arm_structure_dof = ros_topic.arm_structure_dof
             ros_topic.arm_structure_dof = 0
-                    
+        elif ros_topic.arm_structure_dof == 5:
+            drl.env = RobotOptEnv_5dof()
+            rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
+            arm_structure_dof = ros_topic.arm_structure_dof
+            ros_topic.arm_structure_dof = 0
+
         if ros_topic.cmd_run == 1:
-            # if ros_topic.arm_structure_dof == 6:
-            #     drl.env = RobotOptEnv()
-            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-            # elif ros_topic.arm_structure_dof == 3:
-            #     drl.env = RobotOptEnv_3dof()
-            #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
             ros_topic.cmd_run = 0
-            # make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
+            if ros_topic.DRL_algorithm == 'DQN':
+                model_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
+                '/' + curr_time + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'DDQN':
+                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
+                '/' + curr_time + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'C51':
+                model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                '/' + curr_time + '/models/'  # 保存模型的路径
             # 訓練
             drl.env.model_select = "train"
             drl.env.point_Workspace_cal_Monte_Carlo()
             train_env, train_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=1)
-            model_path = None
+            # model_path = None
             train = Trainer(train_agent, train_env, model_path)
             train.train(train_eps = ddqn_train_eps)
             # # 測試
             drl.env.model_select = "test"
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 3)
+            test = Tester(test_env, model_path, num_episodes = 50)
             test.test()
             break
-        # else:
-        #     pass
-        # '''
-        # # test trained_model
-        # if ros_topic.cmd_run == 1:
-        #     ros_topic.cmd_run = 0
-        #     make_dir(plot_cfg.result_path, plot_cfg.model_path)  # 创建保存结果和模型路径的文件夹
-        #     # 訓練
-        #     train_env, train_agent = drl.env_agent_config(cfg, seed=1)
-        #     train = Trainer(train_agent, train_env, drl.config, plot_cfg.model_path)
-        #     train.train(train_eps = ddqn_train_eps)
-        #     break
-        # else:
-        #     pass
 
-        # '''
-        # # test tested_model
-        # if ros_topic.cmd_run == 2:
-        #     # if ros_topic.arm_structure_dof == 6:
-        #     #     drl.env = RobotOptEnv()
-        #     #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-        #     # elif ros_topic.arm_structure_dof == 3:
-        #     #     drl.env = RobotOptEnv_3dof()
-        #     #     rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
-        #     ros_topic.cmd_run = 0
-        #     # 測試
-        #     drl.env.model_select = "test"
-        #     plot_cfg.model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
-        #     test_env, test_agent = drl.env_agent_config(cfg, seed=10)
-        #     test = Tester(test_agent, test_env, plot_cfg.model_path, test_ep_steps = ddqn_test_eps)
-        #     test.test()
-        #     break
-        # else:
-        #     pass
+        # test tested_model
+        if ros_topic.cmd_run == 2:
+            ros_topic.cmd_run = 0
+            # 測試
+            if ros_topic.DRL_algorithm == 'DQN':
+                model_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'DDQN':
+                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'C51':
+                model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+            drl.env.model_select = "test"
+            # model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
+            test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
+            test = Tester(test_env, model_path, num_episodes = 50)
+            test.test()
+            break
+        else:
+            pass
