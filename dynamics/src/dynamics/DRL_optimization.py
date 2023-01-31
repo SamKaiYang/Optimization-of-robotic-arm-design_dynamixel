@@ -177,7 +177,9 @@ class drl_optimization:
                 env.action_spec(),
                 q_network = dqn_network,
                 optimizer = optimizer,
+                n_step_update=n_step_update,
                 td_errors_loss_fn = common.element_wise_squared_loss,
+                gamma=gamma,
                 train_step_counter = self.global_step)
             agent.initialize()
             rospy.loginfo("DRL algorithm init: %s", algorithm)
@@ -187,7 +189,9 @@ class drl_optimization:
                 env.action_spec(),
                 q_network = ddqn_network,
                 optimizer = optimizer,
+                n_step_update=n_step_update,
                 td_errors_loss_fn = common.element_wise_squared_loss,
+                gamma=gamma,
                 train_step_counter = self.global_step)
             agent.initialize()
             rospy.loginfo("DRL algorithm init: %s", algorithm)

@@ -97,3 +97,6 @@ roslaunch dynamics dynamics_dynamixel_robot_ddqn.launch
 
 # tensorboard 可視化
 tensorboard --logdir ~/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/runs/
+
+# notebook
+tensorboard --logdir ~/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design_dynamixel/dynamics/src/dynamics/runs/
