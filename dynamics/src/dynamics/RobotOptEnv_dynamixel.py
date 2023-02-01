@@ -260,6 +260,46 @@ class RobotOptEnv(gym.Env):
 
         terminated = False
         
+        # # 避免軸長小於0
+        # if self.state[8] <= 0 or self.state[9] <=  0:
+        #     # terminated = True
+        #     reward += -200
+        # if self.torque_over == True and self.state[6] < 0.6: 
+        #     reward += -20
+        # elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
+        #     reward += -10
+        # elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
+        #     reward += -5
+        # elif self.torque_over == False and self.state[6] < 0.6: 
+        #     reward += +5
+        # elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
+        #     reward += +10
+        # elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
+        #     reward += +20
+        # elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
+        #     terminated = True
+        #     reward += +50
+        # elif self.torque_over == False and self.state[6] == 1.0:
+        #     terminated = True
+        #     reward += +100
+        
+        # if self.counts == 30:
+        #     # 避免軸長小於0
+        #     if self.state[8] <= 0 or self.state[9] <=  0:
+        #         # terminated = True
+        #         reward += -1500
+        #     else:
+        #         reward += -10
+        #     if self.state[6] < 0.6: # TODO: fixed
+        #         reward += -50
+        #     else:
+        #         reward += -10
+        #     if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+        #         reward += -100
+        #     else:
+        #         reward += -10
+        #     terminated = True
+        #     self.counts = 0
         # 避免軸長小於0
         if self.state[8] <= 0 or self.state[9] <=  0:
             # terminated = True
@@ -277,27 +317,28 @@ class RobotOptEnv(gym.Env):
         elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
             reward += +20
         elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
-            terminated = True
+            # terminated = True
             reward += +50
         elif self.torque_over == False and self.state[6] == 1.0:
             terminated = True
             reward += +100
+            self.counts = 0
         
-        if self.counts == 30:
-            # 避免軸長小於0
-            if self.state[8] <= 0 or self.state[9] <=  0:
-                # terminated = True
-                reward += -1500
-            else:
-                reward += -10
-            if self.state[6] < 0.6: # TODO: fixed
-                reward += -50
-            else:
-                reward += -10
-            if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-                reward += -100
-            else:
-                reward += -10
+        if self.counts == 50: # max_steps
+            # # 避免軸長小於0
+            # if self.state[8] <= 0 or self.state[9] <=  0:
+            #     # terminated = True
+            #     reward += -1500
+            # else:
+            #     reward += -10
+            # if self.state[6] < 0.6: # TODO: fixed
+            #     reward += -50
+            # else:
+            #     reward += -10
+            # if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
+            #     reward += -100
+            # else:
+            #     reward += -10
             terminated = True
             self.counts = 0
         
