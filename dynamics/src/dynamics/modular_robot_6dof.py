@@ -45,7 +45,7 @@ class modular_robot_6dof(DHRobot):
 
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/modular_robot_6dof.urdf")
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/random.urdf")
-        robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/single_arm_v12.urdf")
+        robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/single_arm_v12_ori.urdf")
         if symbolic:
             import spatialmath.base.symbolic as sym
             zero = sym.zero()
@@ -172,7 +172,7 @@ class modular_robot_6dof(DHRobot):
 if __name__ == '__main__':    # pragma nocover
 
     robot = modular_robot_6dof(symbolic=False)
-    # print(robot)
+    print(robot)
     # print(robot.dynamics())
     symbolic = False
     if symbolic:
@@ -186,7 +186,7 @@ if __name__ == '__main__':    # pragma nocover
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     
-    robot.teach()
+    # robot.teach()
     # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
 
     # T = robot.fkine(q)
@@ -210,30 +210,30 @@ if __name__ == '__main__':    # pragma nocover
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
 '''
-    # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
-    # import xlsx
-    df = load_workbook("./xlsx/task_point_6dof.xlsx")
-    sheets = df.worksheets
-    sheet1 = sheets[0]
-    rows = sheet1.rows
-    cols = sheet1.columns
+    robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
+    # # import xlsx
+    # df = load_workbook("./xlsx/task_point_6dof.xlsx")
+    # sheets = df.worksheets
+    # sheet1 = sheets[0]
+    # rows = sheet1.rows
+    # cols = sheet1.columns
 
-    T_tmp = []
-    manipulability_index = []
-    i = 0
-    for row in rows:
-        row_val = [col.value for col in row]
-        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-        # print(T_tmp[i])
-        ik_q = robot.ikine_LMS(T=T_tmp[i])
-        print(ik_q)
-        ik_np = np.array(ik_q.q)
-        robot.plot(q=ik_np, backend='pyplot', dt = 1)
-        # if ik_q.success == True:
-        #     manipulability_index.append(robot.manipulability(q=ik_q.q))
-            # robot.plot_ellipse()
-            # ik_np = np.array(ik_q.q)
-            # print(ik_np)
-            # robot.plot(q=ik_np, backend='pyplot', dt = 1)
-        i = i + 1
-    # print(np.mean(manipulability_index)) # manipulability 取平均
+    # T_tmp = []
+    # manipulability_index = []
+    # i = 0
+    # for row in rows:
+    #     row_val = [col.value for col in row]
+    #     T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+    #     # print(T_tmp[i])
+    #     ik_q = robot.ikine_LMS(T=T_tmp[i])
+    #     print(ik_q)
+    #     ik_np = np.array(ik_q.q)
+    #     robot.plot(q=ik_np, backend='pyplot', dt = 1)
+    #     # if ik_q.success == True:
+    #     #     manipulability_index.append(robot.manipulability(q=ik_q.q))
+    #         # robot.plot_ellipse()
+    #         # ik_np = np.array(ik_q.q)
+    #         # print(ik_np)
+    #         # robot.plot(q=ik_np, backend='pyplot', dt = 1)
+    #     i = i + 1
+    # # print(np.mean(manipulability_index)) # manipulability 取平均
