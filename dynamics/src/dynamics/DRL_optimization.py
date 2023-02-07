@@ -445,23 +445,23 @@ class Tester(object):
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
             episode += 1
             episode_reward = step_reward
-            if episode_reward >= 100:
-                    sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
-                    sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
-                    sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
-                    sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
-                    sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
-                    sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
-                    sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
-                    sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
-                    sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
-                    sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
-                    # sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
-                    # sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
-                    # sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
-                    # sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
-                    sheet.cell(row=i + 1, column=11).value = episode_reward
-                    i = i + 1
+            
+            sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
+            sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
+            sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
+            sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
+            sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
+            sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
+            sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
+            sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
+            sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
+            sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
+            # sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
+            # sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
+            # sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
+            # sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
+            sheet.cell(row=i + 1, column=11).value = episode_reward
+            i = i + 1
 
             tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
             avg_reward += episode_reward

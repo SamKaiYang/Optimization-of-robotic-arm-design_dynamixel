@@ -245,11 +245,11 @@ class RobotOptEnv(gym.Env):
             # - 10 * self.state[8] # weight
             + 1000 * self.state[7] # 可操作性
         ) 
-
+        # rospy.loginfo("shaping: %s", shaping)
         if self.prev_shaping is not None:
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
-
+        # rospy.loginfo("step_reward: %s", reward)
         # 判斷超出最大扭矩
         for i in range(6):
             # TODO:consider cost & weight 
