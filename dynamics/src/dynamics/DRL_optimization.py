@@ -71,7 +71,8 @@ import argparse
 import random
 
 import matplotlib.pyplot as plt
-from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+# from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+from RobotOptEnv_dynamixel_v2 import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
 import tensorboardX
 import yaml
 
@@ -453,13 +454,10 @@ class Tester(object):
             sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
             sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
             sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
-            sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
-            sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
-            sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
-            # sheet.cell(row=i + 1, column=11).value = info[0] #axis 2
-            # sheet.cell(row=i + 1, column=12).value = info[1] #axis 3
-            # sheet.cell(row=i + 1, column=13).value = info[2] #motor 2
-            # sheet.cell(row=i + 1, column=14).value = info[3] #motor 3
+            # sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
+            # sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
+            # sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
+            
             sheet.cell(row=i + 1, column=11).value = episode_reward
             i = i + 1
 

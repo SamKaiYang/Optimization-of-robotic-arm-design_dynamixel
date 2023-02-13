@@ -210,30 +210,98 @@ if __name__ == '__main__':    # pragma nocover
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
 '''
-    robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
-    # # import xlsx
-    # df = load_workbook("./xlsx/task_point_6dof.xlsx")
-    # sheets = df.worksheets
-    # sheet1 = sheets[0]
-    # rows = sheet1.rows
-    # cols = sheet1.columns
+    # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 
-    # T_tmp = []
-    # manipulability_index = []
-    # i = 0
-    # for row in rows:
-    #     row_val = [col.value for col in row]
-    #     T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-    #     # print(T_tmp[i])
-    #     ik_q = robot.ikine_LMS(T=T_tmp[i])
-    #     print(ik_q)
-    #     ik_np = np.array(ik_q.q)
-    #     robot.plot(q=ik_np, backend='pyplot', dt = 1)
-    #     # if ik_q.success == True:
-    #     #     manipulability_index.append(robot.manipulability(q=ik_q.q))
-    #         # robot.plot_ellipse()
-    #         # ik_np = np.array(ik_q.q)
-    #         # print(ik_np)
-    #         # robot.plot(q=ik_np, backend='pyplot', dt = 1)
-    #     i = i + 1
-    # # print(np.mean(manipulability_index)) # manipulability 取平均
+    
+    # import xlsx
+    df = load_workbook("./xlsx/task_point_6dof.xlsx")
+    sheets = df.worksheets
+    sheet1 = sheets[0]
+    rows = sheet1.rows
+    cols = sheet1.columns
+    robot.payload( 1.5, [0,0,0.04])  # set payload
+    
+    T_tmp = []
+    num_torque = np.array([np.zeros(shape=6)])
+    manipulability_index = []
+    i = 0
+    for row in rows:
+        row_val = [col.value for col in row]
+        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+        # print(T_tmp[i])
+        if i >= 1:
+            # 完成动作的总时间
+            total_time = 20
+            # 采样间隔
+            sample_interval = 0.056
+            # 生成时间向量
+            traj_time = total_time/10
+            time_vector = np.linspace(0, traj_time, int(traj_time/sample_interval) + 1)
+            # t=[0:0.056:2]
+            traj = robot.jtraj(T_tmp[i-1],T_tmp[i],time_vector)
+            # print(traj.s)
+            # print(traj.sd)
+            # # print(traj.sdd)
+            # print(traj.t)
+            # robot.plot(traj.s)
+            # np.append(torque, load, axis=0)
+            # print(traj.sd)
+            # print(traj.sd[0])
+            if np.amax(traj.sd) > 3.04:
+                print("Fail")
+            torque = robot.rne(traj.s,traj.sd,traj.sdd)
+            if np.amax(torque) > 44.7:
+                print(torque)
+            num_torque = np.append(num_torque, torque)
+            
+        ik_q = robot.ikine_LMS(T=T_tmp[i])
+        # print(ik_q)
+        ik_np = np.array(ik_q.q)
+        # robot.plot(q=ik_np, backend='pyplot', dt = 1)
+        # if ik_q.success == True:
+        #     manipulability_index.append(robot.manipulability(q=ik_q.q))
+            # robot.plot_ellipse()
+            # ik_np = np.array(ik_q.q)
+            # print(ik_np)
+            # robot.plot(q=ik_np, backend='pyplot', dt = 1)
+        i = i + 1
+    # print(np.mean(manipulability_index)) # manipulability 取平均
+    time_interval = 0.056 # in seconds
+    time_total = 20 # in seconds
+    num_samples = int(time_total / time_interval)
+
+    # Example motor power data
+    motor_power = num_torque
+
+    total_energy = 0
+    for i in range(num_samples):
+        energy = motor_power[i] * time_interval
+        total_energy += energy
+    print(total_energy)
+
+    import numpy as np
+
+    # num_actions = 12
+    # one_hot_array = np.eye(num_actions)
+    # print(one_hot_array)
+    # action = 5
+    # one_hot_vector = one_hot_array[action, :]
+    # action = 8
+    # one_hot_vector = one_hot_array[action, :]
+    # print(one_hot_vector)
+
+    matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    # threshold = 5
+    # result = np.where(matrix > threshold, axis=0)
+    # print(result)
+    # row_max = np.amax(matrix, axis=1)
+    # print(row_max)
+
+    # if np.amax(matrix, axis=1) > 5:
+    #     print("false")
+    m = 3 # 行数，从0开始算
+    threshold = 9 # 阈值
+
+    row = matrix[:,m-1] # 取出第m-1行
+    result = row[row > threshold] # 取出大于阈值的数字
+    print(len(result))
