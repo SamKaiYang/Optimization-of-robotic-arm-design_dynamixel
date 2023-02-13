@@ -137,8 +137,8 @@ class drl_optimization:
         # log_interval = 200  # @param {type:"integer"}
 
         num_atoms = 51  # @param {type:"integer"}
-        min_q_value = -20  # @param {type:"integer"}
-        max_q_value = 20  # @param {type:"integer"}
+        min_q_value = -205  # @param {type:"integer"}
+        max_q_value = 110  # @param {type:"integer"}
         n_step_update = 2  # @param {type:"integer"}
 
         # num_eval_episodes = 10  # @param {type:"integer"}
