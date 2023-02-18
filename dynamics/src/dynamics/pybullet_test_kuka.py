@@ -65,6 +65,19 @@ SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12_ori.urdf')
 
 # start_j = [0,1,2,3,5,8,9]
 # start_k = [0,30,40,50,60,8,9]
+
+# TODO: gtotkththth
+
+# FIXME: htotot
+
+def random_obstacle():
+    pass
+
+def motion_planning():
+    pass
+def pybullet_init():
+    pass
+
 for _ in range(2):
     viewer = True
     connect(use_gui=viewer)
@@ -148,10 +161,12 @@ for _ in range(2):
             continue
         else:
             wait_for_user('a motion plan is found! Press enter to start simulating!')
-
+        
+        cprint('path:{}'.format(path), 'cyan')
     # adjusting this number will adjust the simulation speed
         time_step = 0.03
         for conf in path:
+            cprint('path:{}'.format(conf), 'cyan')
             set_joint_positions(Robot, arm_joints, conf)
             wait_for_duration(time_step)
     # rrt_connect(start_j,start_k,distance_fn = 0.1,sample_fn= ,extend_fn = , collision_fn=True)
