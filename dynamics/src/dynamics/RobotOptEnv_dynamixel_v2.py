@@ -525,7 +525,7 @@ class RobotOptEnv(gym.Env):
         self.q5_end = 160
         self.q6_s = -160
         self.q6_end = 160
-        N = 1000
+        N = 10 # 改為直接random 10個點
         theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
         theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
         theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
@@ -558,13 +558,13 @@ class RobotOptEnv(gym.Env):
         sheet = excel_file.active
 
         for i in range(10):
-            x = np.random.randint(1,999)
-            sheet.cell(row=i + 1, column=1).value = self.T_x[x]
-            sheet.cell(row=i + 1, column=2).value = self.T_y[x]
-            sheet.cell(row=i + 1, column=3).value = self.T_z[x]
-            sheet.cell(row=i + 1, column=4).value = self.T_roll[x]
-            sheet.cell(row=i + 1, column=5).value = self.T_pitch[x]
-            sheet.cell(row=i + 1, column=6).value = self.T_yaw[x]
+            # x = np.random.randint(1,999)
+            sheet.cell(row=i + 1, column=1).value = self.T_x[i]
+            sheet.cell(row=i + 1, column=2).value = self.T_y[i]
+            sheet.cell(row=i + 1, column=3).value = self.T_z[i]
+            sheet.cell(row=i + 1, column=4).value = self.T_roll[i]
+            sheet.cell(row=i + 1, column=5).value = self.T_pitch[i]
+            sheet.cell(row=i + 1, column=6).value = self.T_yaw[i]
 
         file_name = self.xlsx_outpath + "/task_point" +".xlsx"
         excel_file.save(file_name)
