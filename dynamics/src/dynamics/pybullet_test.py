@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 # coding: utf-8
 import importlib
+import rospy
 import sys
 importlib.reload(sys)
-import sympy as sp
+import os
 import numpy as np
-from math import pi
-# from sympy import false
-# from interface_control.msg import optimal_design
+curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
+parent_path = os.path.dirname(curr_path)  # 父路径
+sys.path.append(parent_path)  # 添加路径到系统路径
+
+
 from stl_conv_6dof_urdf_dynamixel import stl_conv_urdf
 from RobotOptEnv_dynamixel_v2 import RobotOptEnv
-import rospy
+
 import pybullet as p
 import time
 import pybullet_data

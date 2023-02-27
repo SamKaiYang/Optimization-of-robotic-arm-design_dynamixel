@@ -364,9 +364,10 @@ class RobotOptEnv(gym.Env):
         self.payload = 3
         op_payload_position = [0, 0, 0.04]
         self.payload_position = [np.array(op_payload_position)]
-        mission_time = 30
+        # mission_time = 30
         model_select = "test"
-        rospy.loginfo("mission_time: %s", mission_time)
+        # rospy.loginfo("mission_time: %s", mission_time)
+        self.mission_time = 30
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # torque = self.dynamics_torque_limit()
@@ -677,6 +678,7 @@ class RobotOptEnv(gym.Env):
                 row_val = [col.value for col in row]
                 T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
                 ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+
                 if ik_q.success == True:
                     count += 1
                     manipulability_index.append(self.robot.manipulability(q=ik_q.q))
