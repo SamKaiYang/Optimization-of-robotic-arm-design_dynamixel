@@ -7,3 +7,5 @@
 ## 後續事項
 1. 測試使用ERobot 的 robot_urdf.py 是否會導入動態參數
 2. 並且測試看看, 匯入dynamics_function_random.py 中 看有沒有辦法做分析
+
+# ModuleNotFoundError: No module named 'dynamics'

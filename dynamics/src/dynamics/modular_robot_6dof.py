@@ -170,7 +170,7 @@ class modular_robot_6dof(DHRobot):
     def return_configuration(self):
         return self.length_1, self.length_2, self.length_3
 if __name__ == '__main__':    # pragma nocover
-
+    
     robot = modular_robot_6dof(symbolic=False)
     print(robot)
     # print(robot.dynamics())
@@ -185,6 +185,7 @@ if __name__ == '__main__':    # pragma nocover
     # Set the desired end-effector pose
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
+    
     
     # robot.teach()
     # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
@@ -209,6 +210,8 @@ if __name__ == '__main__':    # pragma nocover
     print(robot.manipulability(q=q))
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
+'''
+
 '''
     # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 
@@ -305,3 +308,4 @@ if __name__ == '__main__':    # pragma nocover
     row = matrix[:,m-1] # 取出第m-1行
     result = row[row > threshold] # 取出大于阈值的数字
     print(len(result))
+'''

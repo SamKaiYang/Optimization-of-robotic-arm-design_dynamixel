@@ -355,7 +355,30 @@ class RobotOptEnv(gym.Env):
             self.state[6] = self.std_L3
             self.counts = 0
             return self.state        
-
+    def original_design(self,std_L2,std_L3):
+        #  指定手臂長度
+        self.robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
+        self.robot.__init__() # 重製機器人
+        motor_type_axis_2 = 5.1
+        motor_type_axis_3 = 5.1
+        self.payload = 3
+        op_payload_position = [0, 0, 0.04]
+        self.payload_position = [np.array(op_payload_position)]
+        mission_time = 30
+        model_select = "test"
+        rospy.loginfo("mission_time: %s", mission_time)
+        ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
+        # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+        # torque = self.dynamics_torque_limit()
+        rospy.loginfo("ratio_over: %s", ratio_over)
+        rospy.loginfo("torque_over: %s", torque_over)
+        rospy.loginfo("consumption: %s", consumption)
+        # 生成隨機 payload (kg)
+        rospy.loginfo("reach_score: %s", reach_score)
+        rospy.loginfo("manipulability_score: %s", manipulability_score)
+        rospy.loginfo("std_L2: %s", std_L2)
+        rospy.loginfo("std_L3: %s", std_L3)
+        
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None

@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
 # coding: utf-8
+import importlib
+import sys
+importlib.reload(sys)
+import sympy as sp
+import numpy as np
+from math import pi
+# from sympy import false
+# from interface_control.msg import optimal_design
+from stl_conv_6dof_urdf_dynamixel import stl_conv_urdf
+from RobotOptEnv_dynamixel_v2 import RobotOptEnv
 import rospy
 import pybullet as p
 import time
 import pybullet_data
 import os
 from termcolor import cprint
-import numpy as np
+
 from pybullet_planning import BASE_LINK, RED, BLUE, GREEN
 from pybullet_planning import load_pybullet, connect, wait_for_user, LockRenderer, has_gui, WorldSaver, HideOutput, \
     reset_simulation, disconnect, set_camera_pose, has_gui, set_camera, wait_for_duration, wait_if_gui, apply_alpha
@@ -23,7 +33,8 @@ from pybullet_planning import pairwise_collision, pairwise_collision_info, draw_
 from pybullet_planning import rrt_connect
 
 import trimesh
-from stl_conv_6dof_urdf_dynamixel import stl_conv_urdf
+# import dynamics.RobotOptEnv_dynamixel_v2
+
 
 HERE = os.path.dirname(__file__)
 SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12_motion.urdf')
@@ -176,6 +187,11 @@ class motion_model(object):
 if __name__ == "__main__":
 
     rospy.init_node("pybullet_test")
+    
+    original_design_test = RobotOptEnv()
+    original_design_test.original_design(12,12)
+    
+    
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(60,60)
     motion_bullet.stl_trimesh_scaling(60, 60)
