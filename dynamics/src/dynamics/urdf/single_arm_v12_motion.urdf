@@ -130,7 +130,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_2_12.0.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_2.STL" />
       </geometry>
       <material
         name="">
@@ -144,7 +144,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link2.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -188,7 +188,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_3_12.0.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_3.STL" />
       </geometry>
       <material
         name="">
@@ -202,7 +202,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link3.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_3.STL" />
       </geometry>
     </collision>
   </link>
