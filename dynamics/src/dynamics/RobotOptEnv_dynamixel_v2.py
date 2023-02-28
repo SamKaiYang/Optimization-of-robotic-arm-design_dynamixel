@@ -355,19 +355,19 @@ class RobotOptEnv(gym.Env):
             self.state[6] = self.std_L3
             self.counts = 0
             return self.state        
-    def original_design(self,std_L2,std_L3):
+    def original_design(self,std_L2,std_L3, motor_1, motor_2, payload, mission_time):
         #  指定手臂長度
         self.robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
         self.robot.__init__() # 重製機器人
-        motor_type_axis_2 = 5.1
-        motor_type_axis_3 = 5.1
-        self.payload = 3
+        motor_type_axis_2 = motor_1
+        motor_type_axis_3 = motor_2
+        self.payload = payload
         op_payload_position = [0, 0, 0.04]
         self.payload_position = [np.array(op_payload_position)]
         # mission_time = 30
         model_select = "test"
         # rospy.loginfo("mission_time: %s", mission_time)
-        self.mission_time = 30
+        self.mission_time = mission_time
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # torque = self.dynamics_torque_limit()

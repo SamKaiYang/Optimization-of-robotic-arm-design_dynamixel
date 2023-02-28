@@ -50,11 +50,25 @@ class motion_model(object):
     def random_obstacle(self):
         # create a box to be picked up
         # see: https://pybullet-planning.readthedocs.io/en/latest/reference/generated/pybullet_planning.interfaces.env_manager.create_box.html#pybullet_planning.interfaces.env_manager.create_box
-        self.block = create_box(0.01, 0.01, 0.01)
-        block_x = 0.3
-        block_y = 0.3
-        block_z = 0.3
-        set_pose(self.block, Pose(Point(x=block_x, y=block_y, z=block_z), Euler(yaw=np.pi/2)))
+        '''0.06	-0.17	-0.45
+        -0.36	-0.06	0.40
+        0.09	-0.32	-0.36
+        0.06	-0.15	0.22
+        -0.04	-0.15	1.02
+        0.08	0.05	0.21
+        0.02	-0.12	-0.25
+        0.29	-0.19	0.72
+        -0.06	-0.45	0.52
+        0.00	-0.04	0.38'''
+        self.block = [create_box(0.03, 0.03, 0.03) for _ in range(10)]
+        block_positions = [ \
+        (0.06, -0.17, -0.45), (-0.36, -0.06, 0.40), (0.09, -0.32, -0.36), (0.06, -0.15, 0.22), \
+        (-0.04, -0.15, 1.02), (0.08, 0.05, 0.21), (0.02, -0.12, -0.25), (0.29, -0.19, 0.72), \
+        (-0.06, -0.45, 0.52), (0.00, -0.04, 0.38)]
+
+        for i, pos in enumerate(block_positions):
+            set_pose(self.block[i], Pose(Point(x=pos[0], y=pos[1], z=pos[2]), Euler(yaw=np.pi/2)))
+            p.addUserDebugText(str(block_positions[i]), block_positions[i], textColorRGB=[1, 0, 0], textSize=1)
 
     def motion_planning(self):
         pass
@@ -133,6 +147,8 @@ class motion_model(object):
     def motion_planning_init(self, viewer=True):
         viewer = True
         connect(use_gui=viewer)
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # planeId = p.loadURDF("plane.urdf")
         robot_path = SINGLE_ARM
         self.Robot = load_pybullet(robot_path, fixed_base=True)
         arm='right'
@@ -168,10 +184,10 @@ class motion_model(object):
             q2 = list(self.sample_fn())
             q2[0] = 0.5
             q2[1] = 3.0
-            q2 = [0.3,0.3,0.3,0.3,0.3,0.3]
+            q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
             cprint('Sampled end conf: {}'.format(q2), 'cyan')
             # 預設使用rrt connect motion planning
-            path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=[self.block], self_collisions=True,
+            path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block, self_collisions=True,
                 custom_limits={self.arm_joints[0]:[0.0, 1.2]})
             if path is None:
                 cprint('no plan found', 'red')
@@ -190,14 +206,14 @@ class motion_model(object):
 if __name__ == "__main__":
 
     rospy.init_node("pybullet_test")
-    
-    original_design_test = RobotOptEnv()
-    original_design_test.original_design(12,12)
+    # origin design compare
+    # original_design_test = RobotOptEnv()
+    # original_design_test.original_design(12,12,44.7,44.7,1.5,50)
     
     
     motion_bullet= motion_model()
-    motion_bullet.reset_robot_urdf(60,60)
-    motion_bullet.stl_trimesh_scaling(60, 60)
+    motion_bullet.reset_robot_urdf(12,12)
+    motion_bullet.stl_trimesh_scaling(12, 12)
     motion_bullet.motion_planning_init(True)
     motion_bullet.random_obstacle()
     motion_bullet.motion_plan()
