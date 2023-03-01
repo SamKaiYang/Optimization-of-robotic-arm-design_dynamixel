@@ -33,27 +33,27 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 
 # pybullet motion planning import 
-import pybullet as p
+# import pybullet as p
 import time
-import pybullet_data
+# import pybullet_data
 import os
 from termcolor import cprint
 import numpy as np
-from pybullet_planning import BASE_LINK, RED, BLUE, GREEN
-from pybullet_planning import load_pybullet, connect, wait_for_user, LockRenderer, has_gui, WorldSaver, HideOutput, \
-    reset_simulation, disconnect, set_camera_pose, has_gui, set_camera, wait_for_duration, wait_if_gui, apply_alpha
-from pybullet_planning import Pose, Point, Euler
-from pybullet_planning import multiply, invert, get_distance
-from pybullet_planning import create_obj, create_attachment, Attachment
-from pybullet_planning import link_from_name, get_link_pose, get_moving_links, get_link_name, get_disabled_collisions, \
-    get_body_body_disabled_collisions, has_link, are_links_adjacent
-from pybullet_planning import get_num_joints, get_joint_names, get_movable_joints, set_joint_positions, joint_from_name, \
-    joints_from_names, get_sample_fn,get_extend_fn, plan_joint_motion, get_difference_fn,get_collision_fn
-from pybullet_planning import dump_world, set_pose
-from pybullet_planning import get_collision_fn, get_floating_body_collision_fn, expand_links, create_box
-from pybullet_planning import pairwise_collision, pairwise_collision_info, draw_collision_diagnosis, body_collision_info
-from pybullet_planning import rrt_connect
-
+# from pybullet_planning import BASE_LINK, RED, BLUE, GREEN
+# from pybullet_planning import load_pybullet, connect, wait_for_user, LockRenderer, has_gui, WorldSaver, HideOutput, \
+#     reset_simulation, disconnect, set_camera_pose, has_gui, set_camera, wait_for_duration, wait_if_gui, apply_alpha
+# from pybullet_planning import Pose, Point, Euler
+# from pybullet_planning import multiply, invert, get_distance
+# from pybullet_planning import create_obj, create_attachment, Attachment
+# from pybullet_planning import link_from_name, get_link_pose, get_moving_links, get_link_name, get_disabled_collisions, \
+#     get_body_body_disabled_collisions, has_link, are_links_adjacent
+# from pybullet_planning import get_num_joints, get_joint_names, get_movable_joints, set_joint_positions, joint_from_name, \
+#     joints_from_names, get_sample_fn,get_extend_fn, plan_joint_motion, get_difference_fn,get_collision_fn
+# from pybullet_planning import dump_world, set_pose
+# from pybullet_planning import get_collision_fn, get_floating_body_collision_fn, expand_links, create_box
+# from pybullet_planning import pairwise_collision, pairwise_collision_info, draw_collision_diagnosis, body_collision_info
+# from pybullet_planning import rrt_connect
+from pybullet_test import motion_model
 HERE = os.path.dirname(__file__)
 SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12.urdf')
 
@@ -67,6 +67,7 @@ class RobotOptEnv(gym.Env):
     def __init__(self):
         self.robot = modular_robot_6dof()
         self.robot_urdf = stl_conv_urdf("single_arm_v12","test")
+        self.motion_plan = motion_model()
         # self.robot_urdf.init_dynamixel_diff_inertia()
         # callback:Enter the parameters of the algorithm to be optimized on the interface
         self.sub_optimal_design = rospy.Subscriber(
@@ -243,6 +244,7 @@ class RobotOptEnv(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # TODO: 撰寫motion planning 
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # rospy.loginfo("reach_score: %s", reach_score)
@@ -329,6 +331,7 @@ class RobotOptEnv(gym.Env):
             self.motor_type_axis_3 = 5.1
             self.mission_time = np.random.uniform(low = 20, high = 50)
             rospy.loginfo("mission_time: %s", self.mission_time)
+            # TODO: 撰寫motion planning 
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # torque = self.dynamics_torque_limit()
@@ -368,6 +371,7 @@ class RobotOptEnv(gym.Env):
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
+            # TODO: 撰寫motion planning 
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # torque = self.dynamics_torque_limit()
@@ -419,7 +423,7 @@ class RobotOptEnv(gym.Env):
         self.q5_end = 160
         self.q6_s = -160
         self.q6_end = 160
-        N = 1000
+        N = 10 # 改為直接random 10個點
         theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
         theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
         theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
@@ -428,23 +432,23 @@ class RobotOptEnv(gym.Env):
         theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
 
         for i in range(N):
-            self.joint_1.append(theta1[i, 0])
-            self.joint_2.append(theta2[i, 0])
-            self.joint_3.append(theta3[i, 0])
-            self.joint_4.append(theta4[i, 0])
-            self.joint_5.append(theta5[i, 0])
-            self.joint_6.append(theta6[i, 0])
-            # self.T = self.robot.fkine(
-            #     [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
-            # )
-            # t = np.round(self.T.t, 3)
-            # r = np.round(self.T.rpy('deg'), 3)
-            # self.T_x.append(t[0])
-            # self.T_y.append(t[1])
-            # self.T_z.append(t[2])
-            # self.T_roll.append(int(r[0]))
-            # self.T_pitch.append(int(r[1]))
-            # self.T_yaw.append(int(r[2]))
+            q1 = theta1[i, 0]
+            q2 = theta2[i, 0]
+            q3 = theta3[i, 0]
+            q4 = theta4[i, 0]
+            q5 = theta5[i, 0]
+            q6 = theta6[i, 0]
+            self.T = self.robot.fkine(
+                [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
+            )
+            t = np.round(self.T.t, 3)
+            r = np.round(self.T.rpy('deg'), 3)
+            self.T_x.append(t[0])
+            self.T_y.append(t[1])
+            self.T_z.append(t[2])
+            self.T_roll.append(int(r[0]))
+            self.T_pitch.append(int(r[1]))
+            self.T_yaw.append(int(r[2]))
             i = i + 1
         
     def random_select_point_joint(self):
@@ -460,33 +464,13 @@ class RobotOptEnv(gym.Env):
             sheet.cell(row=i + 1, column=5).value = self.joint_5[x]
             sheet.cell(row=i + 1, column=6).value = self.joint_6[x]
 
-        file_name = self.xlsx_outpath + "/task_point_joint" +".xlsx"
+        file_name = self.xlsx_outpath + "/task_point_motion" +".xlsx"
         excel_file.save(file_name)
-    # TODO:隨機生成障礙物, 要考慮本身生成障礙物不會重疊於機械手臂本身
-    def create_obstacles_box(self):
-        block = create_box(0.01, 0.01, 0.01)
-        block_x = 0.3
-        block_y = 0.3
-        block_z = 0.3
-        set_pose(block, Pose(Point(x=block_x, y=block_y, z=block_z), Euler(yaw=np.pi/2)))
 
-    def motion_planning_performance_evaluate(self,model_select,axis2_motor_type, axis3_motor_type):
-        viewer = True
-        connect(use_gui=viewer)
-        robot_path = SINGLE_ARM
-        Robot = load_pybullet(robot_path, fixed_base=True)
-        set_camera(yaw=0, pitch=-70, distance=2, target_position=(0, 0, 0))
-        arm_joint_names = ['Joint1',
-                            'Joint2',
-                            'Joint3',
-                            'Joint4',
-                            'Joint5',
-                            'Joint6']
-        arm_joints = joints_from_names(Robot, arm_joint_names)
-        # sample_fn = get_sample_fn(Robot, arm_joints)
+    def motion_planning_performance_evaluate(self, std_L2, std_L3, model_select,axis2_motor_type, axis3_motor_type):
         if model_select == "train":
             # import xlsx
-            df = load_workbook("./xlsx/task_point_joint.xlsx")
+            df = load_workbook("./xlsx/task_point_motion.xlsx")
         elif model_select == "test":
             # import xlsx
             df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
@@ -495,6 +479,7 @@ class RobotOptEnv(gym.Env):
         sheet1 = sheets[0]
         rows = sheet1.rows
         cols = sheet1.columns
+        T_tmp = []
         ratio_over = 0
         torque_over = 0
         num_torque = np.array([np.zeros(shape=6)])
@@ -505,48 +490,32 @@ class RobotOptEnv(gym.Env):
         i = 0
         false_done = False
         count = 0
+        plan_success_count = 0
+        self.motion_plan.stl_trimesh_scaling(std_L2, std_L3)
+        self.motion_plan.motion_planning_init(True)
+        self.motion_plan.random_obstacle()
         for row in rows:
             row_val = [col.value for col in row]
-            Joint_tmp.append(row_val[0], row_val[1], row_val[2], row_val[3], row_val[4], row_val[5])
-            # TODO: 撰寫motion planning 
-            if i >= 1: # 上一刻點位至下一刻點位
-                # Joint_tmp
-                time_vector = 0.03 # motion planning time step
-                set_joint_positions(Robot, arm_joints, Joint_tmp[i-1])
-                path = plan_joint_motion(Robot, arm_joints, Joint_tmp[i], obstacles=[block], self_collisions=True,
-                    custom_limits={arm_joints[0]:[0.0, 1.2]})
-                if path is None:
-                    continue
-                else:
-                    count = count + 1
-                # FIXME: 增加joint space traj
-                if np.amax(traj.sd) > 3.04:
-                    ratio_over = ratio_over + 1
-                torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
-
-                row = torque[:,1] # 取出第2行
-                result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
-                row = torque[:,2] # 取出第3行
-                result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
-                if len(result_2)>0 or len(result_3) >0:
-                    torque_over = torque_over + 1
-                num_torque = np.append(num_torque, torque)
-            i = i + 1
-
-        num_samples = int(total_time / sample_interval)
-        total_energy = 0
-        for j in range(num_samples):
-            energy = num_torque[j] * sample_interval
-            total_energy += energy
+            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+            ik_q = self.robot.ikine_LMS(T=T_tmp[i])
             
+            # TODO: 撰寫motion planning 
+            if ik_q.success == True:
+                Joint_tmp.append(ik_q.q)
+                if count >= 1:
+                    plan_success, path = self.motion_plan.motion_planning(Joint_tmp[count-1], Joint_tmp[count], wait_duration = False)
+                    if plan_success == True:
+                        plan_success_count = plan_success_count + 1 
+                count += 1
+            else:
+                pass
+            i = i + 1
         if count == 0:
-            return(ratio_over, torque_over, total_energy,0)
+            return(0,0)
         else:
             final_score = count / i
-            if count == 1:
-                return(ratio_over, torque_over, total_energy, final_score) # 回傳 manipulability[0]
-            else:
-                return(ratio_over, torque_over, total_energy, final_score) # 回傳 manipulability 取平均
+            plan_success_score = plan_success_count / i
+            return(final_score, plan_success_score) # 回傳 可達性 與 可運動規劃
 
 # class RobotOptEnv_3dof(gym.Env):
 #     metadata = {

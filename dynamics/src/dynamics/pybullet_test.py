@@ -31,10 +31,11 @@ from pybullet_planning import link_from_name, get_link_pose, get_moving_links, g
 from pybullet_planning import get_num_joints, get_joint_names, get_movable_joints, set_joint_positions, joint_from_name, \
     joints_from_names, get_sample_fn,get_extend_fn, plan_joint_motion, get_difference_fn,get_collision_fn
 from pybullet_planning import dump_world, set_pose
-from pybullet_planning import get_collision_fn, get_floating_body_collision_fn, expand_links, create_box
+from pybullet_planning import get_collision_fn, get_floating_body_collision_fn, expand_links, create_box, create_sphere
 from pybullet_planning import pairwise_collision, pairwise_collision_info, draw_collision_diagnosis, body_collision_info
 from pybullet_planning import rrt_connect
-
+import random
+import math
 import trimesh
 # import dynamics.RobotOptEnv_dynamixel_v2
 
@@ -47,6 +48,11 @@ class motion_model(object):
         self.length_1 = 0.1
         self.length_2 = 0.1
         self.length_3 = 0.1
+    def random_exclude_range(self, start, end, exclude_start, exclude_end):
+        while True:
+            random_num = random.uniform(start, end)
+            if not exclude_start <= random_num <= exclude_end:
+                return random_num
     def random_obstacle(self):
         # create a box to be picked up
         # see: https://pybullet-planning.readthedocs.io/en/latest/reference/generated/pybullet_planning.interfaces.env_manager.create_box.html#pybullet_planning.interfaces.env_manager.create_box
@@ -60,15 +66,25 @@ class motion_model(object):
         0.29	-0.19	0.72
         -0.06	-0.45	0.52
         0.00	-0.04	0.38'''
-        self.block = [create_box(0.03, 0.03, 0.03) for _ in range(10)]
-        block_positions = [ \
-        (0.06, -0.17, -0.45), (-0.36, -0.06, 0.40), (0.09, -0.32, -0.36), (0.06, -0.15, 0.22), \
-        (-0.04, -0.15, 1.02), (0.08, 0.05, 0.21), (0.02, -0.12, -0.25), (0.29, -0.19, 0.72), \
-        (-0.06, -0.45, 0.52), (0.00, -0.04, 0.38)]
+        
+        # self.block = [create_sphere(0.01) for _ in range(10)]
+        # # self.block = [create_box(0.03, 0.03, 0.03) for _ in range(10)]
+        # block_positions = [ \
+        # (0.06, -0.17, -0.45), (-0.36, -0.06, 0.40), (0.09, -0.32, -0.36), (0.06, -0.15, 0.22), \
+        # (-0.04, -0.15, 1.02), (0.08, 0.05, 0.21), (0.02, -0.12, -0.25), (0.29, -0.19, 0.72), \
+        # (-0.06, -0.45, 0.52), (0.00, -0.04, 0.38)]
 
-        for i, pos in enumerate(block_positions):
-            set_pose(self.block[i], Pose(Point(x=pos[0], y=pos[1], z=pos[2]), Euler(yaw=np.pi/2)))
-            p.addUserDebugText(str(block_positions[i]), block_positions[i], textColorRGB=[1, 0, 0], textSize=1)
+        # for i, pos in enumerate(block_positions):
+        #     set_pose(self.block[i], Pose(Point(x=pos[0], y=pos[1], z=pos[2]), Euler(yaw=np.pi/2)))
+        #     p.addUserDebugText(str(block_positions[i]), block_positions[i], textColorRGB=[1, 0, 0], textSize=1)
+
+        self.block_obstacles = [create_box(0.04, 0.04, 0.04) for _ in range(10)]
+        # # Generate random spheres
+        for i in range(10):
+            radius = self.random_exclude_range(-0.5, 0.5, -0.2, 0.2)
+            position = [self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), radius]
+            set_pose(self.block_obstacles[i], Pose(Point(x=position[0], y=position[1], z=position[2]), Euler(yaw=np.pi/2)))
+            p.addUserDebugText(str(position), position, textColorRGB=[1, 0, 0], textSize=1)
 
     def motion_planning(self):
         pass
@@ -145,11 +161,13 @@ class motion_model(object):
         # new_mesh.show()
 
     def motion_planning_init(self, viewer=True):
-        viewer = True
+        # viewer = True
         connect(use_gui=viewer)
-        p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # planeId = p.loadURDF("plane.urdf")
+        
         robot_path = SINGLE_ARM
+
         self.Robot = load_pybullet(robot_path, fixed_base=True)
         arm='right'
         set_camera(yaw=0, pitch=-70, distance=2, target_position=(0, 0, 0))
@@ -187,7 +205,7 @@ class motion_model(object):
             q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
             cprint('Sampled end conf: {}'.format(q2), 'cyan')
             # 預設使用rrt connect motion planning
-            path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block, self_collisions=True,
+            path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=True,
                 custom_limits={self.arm_joints[0]:[0.0, 1.2]})
             if path is None:
                 cprint('no plan found', 'red')
@@ -203,6 +221,27 @@ class motion_model(object):
                 set_joint_positions(self.Robot, self.arm_joints, conf)
                 wait_for_duration(time_step)
         # rrt_connect(start_j,start_k,distance_fn = 0.1,sample_fn= ,extend_fn = , collision_fn=True)
+    def motion_planning(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
+        # q1 = [0,0,0,0,0,0]
+        set_joint_positions(self.Robot, self.arm_joints, q1)
+        # q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        # 預設使用rrt connect motion planning
+        path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
+            custom_limits={self.arm_joints[0]:[0.0, 1.2]})
+        if path is None:
+            # cprint('no plan found', 'red')
+            plan_success = False
+        # adjusting this number will adjust the simulation speed
+        else:
+            plan_success = True
+            
+        time_step = 0.03
+        if wait_duration == True:
+            for conf in path:
+                cprint('path:{}'.format(conf), 'cyan')
+                set_joint_positions(self.Robot, self.arm_joints, conf)
+                wait_for_duration(time_step)
+        return plan_success, path
 if __name__ == "__main__":
 
     rospy.init_node("pybullet_test")
@@ -210,10 +249,16 @@ if __name__ == "__main__":
     # original_design_test = RobotOptEnv()
     # original_design_test.original_design(12,12,44.7,44.7,1.5,50)
     
-    
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(12,12)
     motion_bullet.stl_trimesh_scaling(12, 12)
-    motion_bullet.motion_planning_init(True)
-    motion_bullet.random_obstacle()
-    motion_bullet.motion_plan()
+    for _ in range(2):
+        motion_bullet.motion_planning_init(True)
+        motion_bullet.random_obstacle()
+        # motion_bullet.motion_plan()
+        q1 = [0,0,0,0,0,0]
+        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        plan,path = motion_bullet.motion_planning(q1, q2, wait_duration = True)
+        # sys.stdout = sys.__stdout__
+        cprint("success:{}".format(plan), 'cyan')
+        motion_bullet.motion_planning_disconnect()
