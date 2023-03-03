@@ -327,7 +327,7 @@ class RobotOptEnv(gym.Env):
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
-            self.mission_time = self.op_vel[0]
+            # self.mission_time = self.op_vel[0] # 改為yaml輸入
             rospy.loginfo("mission_time: %s", self.mission_time)
             # self.acc = np.array(self.op_acc[0:6])
             self.total_weight = self.op_weight # Kg

@@ -236,7 +236,7 @@ class motion_model(object):
             plan_success = True
             
         time_step = 0.03
-        if wait_duration == True:
+        if wait_duration == True and plan_success == True:
             for conf in path:
                 cprint('path:{}'.format(conf), 'cyan')
                 set_joint_positions(self.Robot, self.arm_joints, conf)

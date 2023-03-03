@@ -486,6 +486,8 @@ if __name__ == "__main__":
     
     with open(curr_path+'/drl_param.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.Loader)
+    op_function_flag = config['op_function']
+    rospy.loginfo("Input op_function_flag: %s" % op_function_flag)    
     ros_topic.arm_structure_dof = config['arm_structure_dof']
     rospy.loginfo("Input arm_structure_dof: %d" % ros_topic.arm_structure_dof)
     ros_topic.DRL_algorithm = config['DRL_algorithm']
@@ -506,6 +508,10 @@ if __name__ == "__main__":
     # rospy.loginfo("Input op_payload_position: %d" % drl.env.op_payload_position)
     rospy.loginfo('Input op_payload_position: {}'.format(drl.env.op_payload_position))
 
+    drl.env.mission_time = config['mission_time']
+    # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
+    rospy.loginfo('Input mission_time: {}'.format(drl.env.mission_time))
+    
     drl.env.op_vel = config['op_vel']
     # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
     rospy.loginfo('Input op_vel: {}'.format(drl.env.op_vel))
@@ -531,6 +537,12 @@ if __name__ == "__main__":
     # train = Trainer()
     while not rospy.is_shutdown():
         # test all
+        if op_function_flag == "case1":
+            from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+        elif op_function_flag == "case2":
+            from RobotOptEnv_dynamixel_v2 import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+        elif op_function_flag == "case3":
+            from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv
         if ros_topic.arm_structure_dof == 6:
             drl.env = RobotOptEnv()
             rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))

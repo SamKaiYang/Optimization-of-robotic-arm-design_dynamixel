@@ -1,3 +1,4 @@
+op_function: case1
 arm_structure_dof: 6
 DRL_algorithm: 'C51'
 cmd_run: 1
@@ -5,7 +6,8 @@ test_model_name: 'true'
 op_dof: 6
 op_payload: 1.5
 op_payload_position: [0 ,0 , 0.04]
-op_vel: [30, 1.57, 1.57, 1.57, 1.57, 1.57]
+mission_time: 30
+op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
 op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
 op_radius: 8
 op_weight: 1.5
