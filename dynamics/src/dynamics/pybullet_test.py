@@ -242,6 +242,28 @@ class motion_model(object):
                 set_joint_positions(self.Robot, self.arm_joints, conf)
                 wait_for_duration(time_step)
         return plan_success, path
+    
+    def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
+        q1 = [0,0,0,0,0,0]
+        set_joint_positions(self.Robot, self.arm_joints, q1)
+        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        # 預設使用rrt connect motion planning
+        path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
+            custom_limits={self.arm_joints[0]:[0.0, 1.2]})
+        if path is None:
+            # cprint('no plan found', 'red')
+            plan_success = False
+        # adjusting this number will adjust the simulation speed
+        else:
+            plan_success = True
+            
+            time_step = 0.03
+            if wait_duration == True:
+                for conf in path:
+                    cprint('path:{}'.format(conf), 'cyan')
+                    set_joint_positions(self.Robot, self.arm_joints, conf)
+                    wait_for_duration(time_step)
+        return plan_success, path
 if __name__ == "__main__":
 
     rospy.init_node("pybullet_test")
@@ -252,13 +274,13 @@ if __name__ == "__main__":
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(12,12)
     motion_bullet.stl_trimesh_scaling(12, 12)
-    for _ in range(2):
+    for _ in range(20):
         motion_bullet.motion_planning_init(True)
         motion_bullet.random_obstacle()
         # motion_bullet.motion_plan()
         q1 = [0,0,0,0,0,0]
         q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
-        plan,path = motion_bullet.motion_planning(q1, q2, wait_duration = True)
+        plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
         # sys.stdout = sys.__stdout__
         cprint("success:{}".format(plan), 'cyan')
         motion_bullet.motion_planning_disconnect()
