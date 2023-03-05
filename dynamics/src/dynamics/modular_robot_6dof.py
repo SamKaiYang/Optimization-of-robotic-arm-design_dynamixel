@@ -211,7 +211,12 @@ if __name__ == '__main__':    # pragma nocover
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
 '''
+    T_tmp = []
+    T_tmp.append(SE3(0.25, 0.113, 0.199) * SE3.RPY([np.deg2rad(-173), np.deg2rad(-59), np.deg2rad(-147)]))
+    T_tmp.append(SE3(-0.06, -0.09, 0.20) * SE3.RPY([np.deg2rad(-79), np.deg2rad(27), np.deg2rad(-99)]))
 
+    print(robot.ikine_LM(T=T_tmp[0]))
+    print(robot.ikine_LMS(T=T_tmp[1]))
 '''
     # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 

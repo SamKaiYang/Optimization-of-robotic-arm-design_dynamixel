@@ -38,7 +38,9 @@ import random
 import math
 import trimesh
 # import dynamics.RobotOptEnv_dynamixel_v2
-
+from spatialmath import SE3
+import spatialmath as sm
+from modular_robot_6dof import modular_robot_6dof
 
 HERE = os.path.dirname(__file__)
 SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12_motion.urdf')
@@ -244,9 +246,22 @@ class motion_model(object):
         return plan_success, path
     
     def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
-        q1 = [0,0,0,0,0,0]
+        robot = modular_robot_6dof(symbolic=False)
+        T_tmp = []
+        T_tmp.append(SE3(0.25, 0.113, 0.199) * SE3.RPY([np.deg2rad(-173), np.deg2rad(-59), np.deg2rad(-147)]))
+        T_tmp.append(SE3(-0.06, -0.09, 0.20) * SE3.RPY([np.deg2rad(-79), np.deg2rad(27), np.deg2rad(-99)]))
+
+        print(robot.ikine_LMS(T=T_tmp[0]))
+        print(robot.ikine_LMS(T=T_tmp[1]))
+        ik_q1 = robot.ikine_LMS(T=T_tmp[0])
+        ik_q2 = robot.ikine_LMS(T=T_tmp[1])
+        # q1 = [0,0,0,0,0,0]
+        q1 = ik_q1.q
         set_joint_positions(self.Robot, self.arm_joints, q1)
-        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        print(q1)
+        # q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        q2 = ik_q2.q
+        print(q2)
         # 預設使用rrt connect motion planning
         path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
             custom_limits={self.arm_joints[0]:[0.0, 1.2]})
@@ -274,13 +289,20 @@ if __name__ == "__main__":
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(12,12)
     motion_bullet.stl_trimesh_scaling(12, 12)
-    for _ in range(20):
-        motion_bullet.motion_planning_init(True)
-        motion_bullet.random_obstacle()
-        # motion_bullet.motion_plan()
-        q1 = [0,0,0,0,0,0]
-        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
-        plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-        # sys.stdout = sys.__stdout__
-        cprint("success:{}".format(plan), 'cyan')
-        motion_bullet.motion_planning_disconnect()
+    # for _ in range(20):
+    #     motion_bullet.motion_planning_init(True)
+    #     motion_bullet.random_obstacle()
+    #     # motion_bullet.motion_plan()
+        
+    #     q1 = [0,0,0,0,0,0]
+    #     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+    #     plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+    #     # sys.stdout = sys.__stdout__
+    #     cprint("success:{}".format(plan), 'cyan')
+    #     motion_bullet.motion_planning_disconnect()
+    q1 = [0,0,0,0,0,0]
+    q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+    motion_bullet.motion_planning_init(True)
+    motion_bullet.random_obstacle()
+    plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+    
