@@ -187,7 +187,7 @@ if __name__ == '__main__':    # pragma nocover
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     
     
-    # robot.teach()
+    robot.teach()
     # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
 
     # T = robot.fkine(q)

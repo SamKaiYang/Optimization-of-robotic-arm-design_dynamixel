@@ -226,10 +226,11 @@ class motion_model(object):
     def motion_planning(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
         # q1 = [0,0,0,0,0,0]
         set_joint_positions(self.Robot, self.arm_joints, q1)
+        # wait_for_duration(0.5)
         # q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
         # 預設使用rrt connect motion planning
         path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
-            custom_limits={self.arm_joints[0]:[0.0, 1.2]})
+            custom_limits={})
         if path is None:
             # cprint('no plan found', 'red')
             plan_success = False
@@ -246,6 +247,38 @@ class motion_model(object):
         return plan_success, path
     
     def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
+        q_test = [np.array([  0.9235,    1.325,    0.599,    -2.26,    1.509,   -1.272]), \
+        np.array([ -0.2475,   -1.497,    1.077,    2.115,   0.8647,   0.5595]), \
+        np.array([   2.906,  -0.2699,    0.555,   0.5306,   0.8783,  -0.3165]),\
+        np.array([ 0.06005,    1.803,   -2.099,   -1.284,   0.7437,  -0.2536]), \
+        np.array([    1.24,    1.395,   -1.422, -0.09892,  -0.5599,  -0.1143]), \
+        np.array([   1.662,   0.6777,    1.837,   -1.644,    -1.95,    1.452]), \
+        np.array([   1.857, -0.08954,   -1.314,    1.235,   0.4439,    2.709]), \
+        np.array([ -0.8522,    3.062,    1.905,   -2.086,  -0.1727,   0.9519]), \
+        np.array([ -0.8376,    1.661,   -1.618,    3.005,  0.08707,   -1.117]), \
+        np.array([ -0.5099,   -1.943,    2.853,    1.774,   0.5494,   -1.742])]
+        for i in range(10):
+            if i>1:
+                set_joint_positions(self.Robot, self.arm_joints, q_test[i-1])
+                # wait_for_duration(5)
+                # 預設使用rrt connect motion planning
+                path = plan_joint_motion(self.Robot, self.arm_joints, q_test[i], obstacles=self.block_obstacles, self_collisions=collision,
+                    custom_limits={})
+                if path is None:
+                    # cprint('no plan found', 'red')
+                    plan_success = False
+                # adjusting this number will adjust the simulation speed
+                else:
+                    plan_success = True
+                    
+                    time_step = 0.03
+                    if wait_duration == True:
+                        for conf in path:
+                            cprint('path:{}'.format(conf), 'cyan')
+                            set_joint_positions(self.Robot, self.arm_joints, conf)
+                            wait_for_duration(time_step)
+                # return plan_success, path
+        '''
         robot = modular_robot_6dof(symbolic=False)
         T_tmp = []
         T_tmp.append(SE3(0.25, 0.113, 0.199) * SE3.RPY([np.deg2rad(-173), np.deg2rad(-59), np.deg2rad(-147)]))
@@ -264,7 +297,7 @@ class motion_model(object):
         print(q2)
         # 預設使用rrt connect motion planning
         path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
-            custom_limits={self.arm_joints[0]:[0.0, 1.2]})
+            custom_limits={})
         if path is None:
             # cprint('no plan found', 'red')
             plan_success = False
@@ -279,6 +312,31 @@ class motion_model(object):
                     set_joint_positions(self.Robot, self.arm_joints, conf)
                     wait_for_duration(time_step)
         return plan_success, path
+        '''
+    def angle_test(self):
+        # robot = modular_robot_6dof(symbolic=False)
+        # TODO: 第三軸, 第五軸, 第六軸 方向相反
+
+
+        q0 = [0,0,0,0,0,0]
+        for i in range(0, 360, 15):
+            if i >=180:
+                q = np.deg2rad([0, 0, 0, 0, 0, 180-i])
+            else:
+                q = np.deg2rad([0, 0, 0, 0, 0, i])
+            print(i)
+            set_joint_positions(self.Robot, self.arm_joints, q0)
+            path = plan_joint_motion(self.Robot, self.arm_joints, q, self_collisions=True,
+            custom_limits={self.arm_joints[0]:[0.0, 1.2]})
+            time_step = 0.03
+            for conf in path:
+                    cprint('path:{}'.format(conf), 'cyan')
+                    set_joint_positions(self.Robot, self.arm_joints, conf)
+                    wait_for_duration(time_step)
+            wait_for_duration(1)
+
+
+        
 if __name__ == "__main__":
 
     rospy.init_node("pybullet_test")
@@ -300,9 +358,14 @@ if __name__ == "__main__":
     #     # sys.stdout = sys.__stdout__
     #     cprint("success:{}".format(plan), 'cyan')
     #     motion_bullet.motion_planning_disconnect()
+    
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
     motion_bullet.motion_planning_init(True)
     motion_bullet.random_obstacle()
-    plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+    motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
     
+    '''
+    motion_bullet.motion_planning_init(True)
+    motion_bullet.angle_test()
+    '''

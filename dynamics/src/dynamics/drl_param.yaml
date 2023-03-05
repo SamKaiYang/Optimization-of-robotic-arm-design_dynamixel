@@ -1,4 +1,4 @@
-op_function: case1
+op_function: case3
 arm_structure_dof: 6
 DRL_algorithm: 'C51'
 cmd_run: 1

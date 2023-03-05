@@ -468,19 +468,19 @@ class RobotOptEnv(gym.Env):
         # 度
         radian = 180 / pi
         # 弧度
-
-        self.q1_s = -160
-        self.q1_end = 160
-        self.q2_s = -160
-        self.q2_end = 160
-        self.q3_s = -160
-        self.q3_end = 160
-        self.q4_s = -160
-        self.q4_end = 160
-        self.q5_s = -160
-        self.q5_end = 160
-        self.q6_s = -160
-        self.q6_end = 160
+        # TODO: 真實情況下機構極限
+        self.q1_s = -180
+        self.q1_end = 180
+        self.q2_s = -125
+        self.q2_end = 125
+        self.q3_s = -125
+        self.q3_end = 125
+        self.q4_s = -180
+        self.q4_end = 180
+        self.q5_s = -180
+        self.q5_end = 180
+        self.q6_s = -180
+        self.q6_end = 180
         N = 10 # 改為直接random 10個點
         theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
         theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
@@ -491,7 +491,8 @@ class RobotOptEnv(gym.Env):
 
         for i in range(N):
             q1 = theta1[i, 0]
-            q2 = theta2[i, 0]
+            # TODO: 真實情況下機構極限
+            q2 = theta2[i, 0]-90
             q3 = theta3[i, 0]
             q4 = theta4[i, 0]
             q5 = theta5[i, 0]
@@ -558,11 +559,16 @@ class RobotOptEnv(gym.Env):
             
             # TODO: 撰寫motion planning 
             if ik_q.success == True:
+                # TODO: 将第三、五、六轴的值加上负号
+                ik_q.q[2] = -ik_q.q[2]
+                ik_q.q[4] = -ik_q.q[4]
+                ik_q.q[5] = -ik_q.q[5]
                 Joint_tmp.append(ik_q.q)
+                # print(Joint_tmp)
                 if count >= 1:
                     # self.motion_plan.motion_planning_init(True)
                     # self.motion_plan.random_obstacle()
-                    plan_success, path = self.motion_plan.motion_planning(Joint_tmp[count-1], Joint_tmp[count], wait_duration = False)
+                    plan_success, path = self.motion_plan.motion_planning(Joint_tmp[count-1], Joint_tmp[count], collision = False, wait_duration = False)
                     
                     if plan_success == True:
                         plan_success_count = plan_success_count + 1 
@@ -575,6 +581,7 @@ class RobotOptEnv(gym.Env):
             return(0)
         else:
             # final_score = count / i
+            # rospy.loginfo("final_score: %f", final_score)
             if plan_success_count == 0:
                 return(0)
             else:
