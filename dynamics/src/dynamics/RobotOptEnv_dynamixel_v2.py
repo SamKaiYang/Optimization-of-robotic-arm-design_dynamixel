@@ -111,14 +111,14 @@ class RobotOptEnv(gym.Env):
 
         self.model_select = "train" # 選擇使用train or test model 
 
-        # self.op_dof = None
-        # self.op_payload = None
-        # self.op_payload_position = None
-        # self.op_vel = None
-        # self.op_acc = None
-        # self.op_radius = None
-        # self.op_weight = None
-        # self.op_cost = None
+        self.op_dof = None
+        self.op_payload = None
+        self.op_payload_position = None
+        self.op_vel = None
+        self.op_acc = None
+        self.op_radius = None
+        self.op_weight = None
+        self.op_cost = None
 
     def optimal_design_callback(self, data):
         # print(data.data)

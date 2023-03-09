@@ -477,6 +477,23 @@ class Tester(object):
         file_name = self.model_path + "/tested_reward_state" +".xlsx"
         excel_file.save(file_name)
 
+        # TODO: save op design condition save
+        # op_function_flag = config['op_function']
+        # ros_topic.arm_structure_dof = config['arm_structure_dof']
+        # ros_topic.DRL_algorithm = config['DRL_algorithm']
+        # ros_topic.test_model_name = config['test_model_name']
+        # drl.env.op_dof = config['op_dof']
+        # drl.env.op_payload = config['op_payload']
+        # drl.env.op_payload_position = config['op_payload_position']
+        # drl.env.mission_time = config['mission_time']
+        # drl.env.op_vel = config['op_vel']
+        # drl.env.op_acc = config['op_acc']
+        # drl.env.op_radius = config['op_radius']
+        # drl.env.op_weight = config['op_weight']
+        # drl.env.op_cost = config['op_cost']
+        # ros_topic.test_model_name = config['test_model_name']
+        # TODO: save robot model structure, DH, urdf, stl
+
 if __name__ == "__main__":
     rospy.init_node("optimization")
     a = 0
@@ -504,46 +521,7 @@ if __name__ == "__main__":
     ros_topic.test_model_name = config['test_model_name']
     rospy.loginfo("Input test_model_name: %s" % ros_topic.test_model_name)
 
-    drl.env.op_dof = config['op_dof']
-    rospy.loginfo("Input op_dof: %d" % drl.env.op_dof)
     
-    drl.env.op_payload = config['op_payload']
-    # rospy.loginfo("Input op_payload: %d" % drl.env.op_payload)
-    rospy.loginfo('Input op_payload_position: {}'.format(drl.env.op_payload))
-    
-    drl.env.op_payload_position = config['op_payload_position']
-    # rospy.loginfo("Input op_payload_position: %d" % drl.env.op_payload_position)
-    rospy.loginfo('Input op_payload_position: {}'.format(drl.env.op_payload_position))
-
-    drl.env.mission_time = config['mission_time']
-    # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
-    rospy.loginfo('Input mission_time: {}'.format(drl.env.mission_time))
-    
-    drl.env.op_vel = config['op_vel']
-    # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
-    rospy.loginfo('Input op_vel: {}'.format(drl.env.op_vel))
-    
-    drl.env.op_acc = config['op_acc']
-    # rospy.loginfo("Input op_acc: %d" % drl.env.op_acc)
-    rospy.loginfo('Input op_acc: {}'.format(drl.env.op_acc))
-    
-    drl.env.op_radius = config['op_radius']
-    rospy.loginfo("Input op_radius: %d" % drl.env.op_radius)
-    
-    drl.env.op_weight = config['op_weight']
-    rospy.loginfo("Input op_weight: %d" % drl.env.op_weight)
-    
-    drl.env.op_cost = config['op_cost']
-    rospy.loginfo("Input op_cost: %d" % drl.env.op_cost)
-    
-    ros_topic.test_model_name = config['test_model_name']
-    rospy.loginfo("Input test_model_model: {}".format(ros_topic.test_model_name))
-
-    # 要開始時, 按下隨意鍵
-    input_text = input("Enter some next: ")
-    rospy.loginfo("Input text: %s" % input_text)
-    
-    tb = tensorboardX.SummaryWriter()
     # train = Trainer()
     while not rospy.is_shutdown():
         # test all
@@ -569,17 +547,58 @@ if __name__ == "__main__":
             arm_structure_dof = ros_topic.arm_structure_dof
             ros_topic.arm_structure_dof = 0
 
+
+        drl.env.op_dof = config['op_dof']
+        rospy.loginfo("Input op_dof: %d" % drl.env.op_dof)
+        
+        drl.env.op_payload = config['op_payload']
+        # rospy.loginfo("Input op_payload: %d" % drl.env.op_payload)
+        rospy.loginfo('Input op_payload_position: {}'.format(drl.env.op_payload))
+        
+        drl.env.op_payload_position = config['op_payload_position']
+        # rospy.loginfo("Input op_payload_position: %d" % drl.env.op_payload_position)
+        rospy.loginfo('Input op_payload_position: {}'.format(drl.env.op_payload_position))
+
+        drl.env.mission_time = config['mission_time']
+        # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
+        rospy.loginfo('Input mission_time: {}'.format(drl.env.mission_time))
+        
+        drl.env.op_vel = config['op_vel']
+        # rospy.loginfo("Input op_vel: %d" % drl.env.op_vel)
+        rospy.loginfo('Input op_vel: {}'.format(drl.env.op_vel))
+        
+        drl.env.op_acc = config['op_acc']
+        # rospy.loginfo("Input op_acc: %d" % drl.env.op_acc)
+        rospy.loginfo('Input op_acc: {}'.format(drl.env.op_acc))
+        
+        drl.env.op_radius = config['op_radius']
+        rospy.loginfo("Input op_radius: %d" % drl.env.op_radius)
+        
+        drl.env.op_weight = config['op_weight']
+        rospy.loginfo("Input op_weight: %d" % drl.env.op_weight)
+        
+        drl.env.op_cost = config['op_cost']
+        rospy.loginfo("Input op_cost: %d" % drl.env.op_cost)
+
+        # 要開始時, 按下隨意鍵
+        input_text = input("Enter some next: ")
+        rospy.loginfo("Input text: %s" % input_text)
+        
+        tb = tensorboardX.SummaryWriter()
+
+
         if ros_topic.cmd_run == 1:
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
-                model_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag +str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
-                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
-                model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
+            
             # 訓練
             drl.env.model_select = "train"
             drl.env.point_Workspace_cal_Monte_Carlo()
@@ -593,7 +612,7 @@ if __name__ == "__main__":
                 '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 300)
+            test = Tester(test_env, model_path, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
             break
 
@@ -601,6 +620,12 @@ if __name__ == "__main__":
         if ros_topic.cmd_run == 2:
             ros_topic.cmd_run = 0
             # 測試
+            # if op_function_flag == "case1":
+            #     from RobotOptEnv_dynamixel import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+            # elif op_function_flag == "case2":
+            #     from RobotOptEnv_dynamixel_v2 import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+            # elif op_function_flag == "case3":
+            #     from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
@@ -610,13 +635,26 @@ if __name__ == "__main__":
             elif ros_topic.DRL_algorithm == 'C51':
                 select_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            # TODO: fixed
+            '''
+            if ros_topic.DRL_algorithm == 'DQN':
+                select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            elif ros_topic.DRL_algorithm == 'DDQN':
+                select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            elif ros_topic.DRL_algorithm == 'C51':
+                select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            '''
             drl.env.model_select = "test"
             # model_path = curr_path + '/test_results' + '/C51_outputs/' + str(arm_structure_dof) + \
             #     '/' + curr_time   # 保存結果的路径
             # model_path = select_path + str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
-            model_path = select_path + str(ros_topic.test_model_name) +'/models/'
+            # model_path = select_path + str(ros_topic.test_model_name) +'/models/model_last.pkl'
+            model_path = select_path
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 300)
+            test = Tester(test_env, model_path, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
             break
         else:

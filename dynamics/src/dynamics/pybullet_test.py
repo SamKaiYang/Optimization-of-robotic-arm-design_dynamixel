@@ -358,7 +358,9 @@ if __name__ == "__main__":
     #     # sys.stdout = sys.__stdout__
     #     cprint("success:{}".format(plan), 'cyan')
     #     motion_bullet.motion_planning_disconnect()
-    
+    # 是否要碰撞可視化
+    # 到collision.py 將  diagnosis=False->True
+
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
     motion_bullet.motion_planning_init(True)
