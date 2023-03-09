@@ -12,3 +12,4 @@ op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
 op_radius: 8
 op_weight: 1.5
 op_cost: 2
+test_model_name: '20230213-180022'

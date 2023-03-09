@@ -448,18 +448,21 @@ class Tester(object):
             episode += 1
             episode_reward = step_reward
             
-            sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
-            sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
-            sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
-            sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
-            sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
-            sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
-            sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
+            
+            # sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
+            # sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
+            # sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
+            # sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
+            # sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
+            # sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
+            # sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
             # sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
             # sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
             # sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
+            for j in range(len(state.numpy()[0])):
+                sheet.cell(row=i+1, column=j+1).value = state.numpy()[0][j]
             
-            sheet.cell(row=i + 1, column=11).value = episode_reward
+            sheet.cell(row=i + 1, column=len(state.numpy()[0])+2).value = episode_reward
             i = i + 1
 
             tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
@@ -467,7 +470,11 @@ class Tester(object):
         avg_reward /= self.num_episodes
         # print("avg reward: %5f" % (avg_reward))
         rospy.loginfo('avg reward: {}'.format(avg_reward))
-        file_name = self.xlsx_outpath + "/tested_reward_state" +".xlsx"
+
+        # model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+        #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+        
+        file_name = self.model_path + "/tested_reward_state" +".xlsx"
         excel_file.save(file_name)
 
 if __name__ == "__main__":
@@ -529,6 +536,9 @@ if __name__ == "__main__":
     drl.env.op_cost = config['op_cost']
     rospy.loginfo("Input op_cost: %d" % drl.env.op_cost)
     
+    ros_topic.test_model_name = config['test_model_name']
+    rospy.loginfo("Input test_model_model: {}".format(ros_topic.test_model_name))
+
     # 要開始時, 按下隨意鍵
     input_text = input("Enter some next: ")
     rospy.loginfo("Input text: %s" % input_text)
@@ -579,6 +589,8 @@ if __name__ == "__main__":
             train.train(train_eps = ddqn_train_eps)
             # # 測試
             drl.env.model_select = "test"
+            save_result_path = curr_path + '/test_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
             test = Tester(test_env, model_path, num_episodes = 300)
@@ -590,16 +602,19 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             # 測試
             if ros_topic.DRL_algorithm == 'DQN':
-                model_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+                select_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
-                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+                select_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
-                model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
+                select_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             drl.env.model_select = "test"
-            # model_path = '/home/iclab/Documents/drl_robotics_arm_ws/src/Optimization-of-robotic-arm-design/dynamics/src/dynamics/outputs/DDQN_RobotOptEnv/'+ str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
+            # model_path = curr_path + '/test_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+            #     '/' + curr_time   # 保存結果的路径
+            # model_path = select_path + str(ros_topic.test_model_name) +'/models/model_last.pkl'# test 20230102
+            model_path = select_path + str(ros_topic.test_model_name) +'/models/'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
             test = Tester(test_env, model_path, num_episodes = 300)
             test.test()

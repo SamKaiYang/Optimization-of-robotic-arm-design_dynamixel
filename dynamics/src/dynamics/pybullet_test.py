@@ -246,7 +246,7 @@ class motion_model(object):
                 wait_for_duration(time_step)
         return plan_success, path
     
-    def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
+    def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = False, time_step = 0.03, wait_duration = True):
         q_test = [np.array([  0.9235,    1.325,    0.599,    -2.26,    1.509,   -1.272]), \
         np.array([ -0.2475,   -1.497,    1.077,    2.115,   0.8647,   0.5595]), \
         np.array([   2.906,  -0.2699,    0.555,   0.5306,   0.8783,  -0.3165]),\
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
     motion_bullet.motion_planning_init(True)
+    # wait_for_duration(5)
     motion_bullet.random_obstacle()
     motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
     
