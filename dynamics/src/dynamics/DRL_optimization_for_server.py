@@ -474,24 +474,11 @@ class Tester(object):
         # model_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
         #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
         
-        file_name = self.model_path + "/tested_reward_state" +".xlsx"
+        # add curr_time
+        file_name = self.model_path + "/tested_reward_state_" + curr_time +".xlsx"
         excel_file.save(file_name)
 
-        # TODO: save op design condition save
-        # op_function_flag = config['op_function']
-        # ros_topic.arm_structure_dof = config['arm_structure_dof']
-        # ros_topic.DRL_algorithm = config['DRL_algorithm']
-        # ros_topic.test_model_name = config['test_model_name']
-        # drl.env.op_dof = config['op_dof']
-        # drl.env.op_payload = config['op_payload']
-        # drl.env.op_payload_position = config['op_payload_position']
-        # drl.env.mission_time = config['mission_time']
-        # drl.env.op_vel = config['op_vel']
-        # drl.env.op_acc = config['op_acc']
-        # drl.env.op_radius = config['op_radius']
-        # drl.env.op_weight = config['op_weight']
-        # drl.env.op_cost = config['op_cost']
-        # ros_topic.test_model_name = config['test_model_name']
+        
         # TODO: save robot model structure, DH, urdf, stl
 
 if __name__ == "__main__":
