@@ -4,9 +4,9 @@ DRL_algorithm: 'C51'
 cmd_run: 2
 test_model_name: '20230213-180022'
 op_dof: 6
-op_payload: 1.5
+op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
-mission_time: 50
+mission_time: 30
 op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
 op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
 op_radius: 8
