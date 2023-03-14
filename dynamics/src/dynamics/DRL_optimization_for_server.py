@@ -418,6 +418,7 @@ class Tester(object):
         # self.agent = agent
         self.model_path = model_path
         self.env = env
+        self._best_episode_reward = 50
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
         # self.policy = lambda x: agent.act(x)
@@ -435,6 +436,8 @@ class Tester(object):
         step = 0
         episode = 0
         avg_reward = 0
+        state_traj = []
+
         for _ in range(self.num_episodes):
             time_step = self.env.reset()
             while not time_step.is_last():
@@ -443,22 +446,12 @@ class Tester(object):
                 time_step = self.env.step(action_step.action)
                 step_reward = time_step.reward.numpy()[0]
                 state = time_step.observation
+                state_traj.append(state)
                 step += 1
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
             episode += 1
             episode_reward = step_reward
             
-            
-            # sheet.cell(row=i + 1, column=1).value = state.numpy()[0][0]
-            # sheet.cell(row=i + 1, column=2).value = state.numpy()[0][1]
-            # sheet.cell(row=i + 1, column=3).value = state.numpy()[0][2]
-            # sheet.cell(row=i + 1, column=4).value = state.numpy()[0][3]
-            # sheet.cell(row=i + 1, column=5).value = state.numpy()[0][4]
-            # sheet.cell(row=i + 1, column=6).value = state.numpy()[0][5]
-            # sheet.cell(row=i + 1, column=7).value = state.numpy()[0][6]
-            # sheet.cell(row=i + 1, column=8).value = state.numpy()[0][7]
-            # sheet.cell(row=i + 1, column=9).value = state.numpy()[0][8]
-            # sheet.cell(row=i + 1, column=10).value = state.numpy()[0][9]
             for j in range(len(state.numpy()[0])):
                 sheet.cell(row=i+1, column=j+1).value = state.numpy()[0][j]
             
@@ -467,6 +460,24 @@ class Tester(object):
 
             tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
             avg_reward += episode_reward
+            # TODO: 若獎勵大於50, 則儲存當前回合獎勵軌跡 
+            if episode_reward >= self._best_episode_reward: 
+                # TODO: state_traj
+                # num = 1  # 要更改的数字
+                # new_str = "/tested-model/test_{}_reward/".format(num)
+                # print(new_str)  # 输出：/tested-model/test_1_reward/
+                # tb.add_scalar("/tested-model/test_0_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_1_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_2_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_3_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
+                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
+                pass
+            # TODO: 清空
+            else:
+                state_traj = []
+
         avg_reward /= self.num_episodes
         # print("avg reward: %5f" % (avg_reward))
         rospy.loginfo('avg reward: {}'.format(avg_reward))
