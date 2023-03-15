@@ -188,6 +188,18 @@ if __name__ == '__main__':    # pragma nocover
     
     
     robot.teach()
+    # manipulability teach view
+    # robot.teach(limits= [-0.5, 0.5, -0.5, 0.5, -0, 1],vellipse=True)
+    
+    '''
+    # manipulability test point
+    q0 =  np.r_[0,90,0,23,90,0]*deg
+    q0 =  np.r_[0,76,-60,66,90,0]*deg
+    vellipse = robot.vellipse(q=q0)
+    robot.plot_ellipse(ellipse = vellipse)
+    print(robot.manipulability(q=q0))
+    '''
+
     # print(robot.fkine_path(q) * sm.SE3(0, 0, 0.04))
 
     # T = robot.fkine(q)
@@ -211,12 +223,16 @@ if __name__ == '__main__':    # pragma nocover
     # print(robot.manipulability(J=robot.fkine(q) * sm.SE3(0, 0, 0.04)))
     
 '''
+
+'''
     T_tmp = []
     T_tmp.append(SE3(0.25, 0.113, 0.199) * SE3.RPY([np.deg2rad(-173), np.deg2rad(-59), np.deg2rad(-147)]))
     T_tmp.append(SE3(-0.06, -0.09, 0.20) * SE3.RPY([np.deg2rad(-79), np.deg2rad(27), np.deg2rad(-99)]))
 
     print(robot.ikine_LM(T=T_tmp[0]))
     print(robot.ikine_LMS(T=T_tmp[1]))
+'''
+
 '''
     # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 

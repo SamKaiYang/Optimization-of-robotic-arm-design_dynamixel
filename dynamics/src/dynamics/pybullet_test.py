@@ -335,7 +335,17 @@ class motion_model(object):
                     wait_for_duration(time_step)
             wait_for_duration(1)
 
+    def test_point(self):
+        # TODO: 第三軸, 第五軸, 第六軸 與robotic toolbox方向相反
+        q0 = np.deg2rad([0,90,0,23,-90,0]) # test point 1
+        q0 = np.deg2rad([0,0,-3,0,0,0]) # test point 2
+        # q0 = np.deg2rad([0,76,60,66,-90,0]) # test point 3
+        set_joint_positions(self.Robot, self.arm_joints, q0)
+        wait_for_duration(100)
 
+    def plane_call(self):
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        planeId = p.loadURDF("plane.urdf")
         
 if __name__ == "__main__":
 
@@ -360,14 +370,17 @@ if __name__ == "__main__":
     #     motion_bullet.motion_planning_disconnect()
     # 是否要碰撞可視化
     # 到collision.py 將  diagnosis=False->True
-
+    motion_bullet.motion_planning_init(True)
+    motion_bullet.plane_call()
+    motion_bullet.test_point()
+    '''
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
     motion_bullet.motion_planning_init(True)
     # wait_for_duration(5)
     motion_bullet.random_obstacle()
     motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-    
+    '''
     '''
     motion_bullet.motion_planning_init(True)
     motion_bullet.angle_test()
