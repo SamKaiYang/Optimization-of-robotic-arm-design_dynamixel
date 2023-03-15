@@ -437,7 +437,7 @@ class Tester(object):
         episode = 0
         avg_reward = 0
         state_traj = []
-
+        num = 0
         for _ in range(self.num_episodes):
             time_step = self.env.reset()
             while not time_step.is_last():
@@ -446,7 +446,7 @@ class Tester(object):
                 time_step = self.env.step(action_step.action)
                 step_reward = time_step.reward.numpy()[0]
                 state = time_step.observation
-                state_traj.append(state)
+                state_traj.append(state.numpy()[0])
                 step += 1
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
             episode += 1
@@ -463,17 +463,16 @@ class Tester(object):
             # TODO: 若獎勵大於50, 則儲存當前回合獎勵軌跡 
             if episode_reward >= self._best_episode_reward: 
                 # TODO: state_traj
-                # num = 1  # 要更改的数字
-                # new_str = "/tested-model/test_{}_reward/".format(num)
-                # print(new_str)  # 输出：/tested-model/test_1_reward/
-                # tb.add_scalar("/tested-model/test_0_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_1_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_2_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_3_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
-                # tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
-                pass
+                excel_file_traj = Workbook()
+                sheet_traj = excel_file_traj.active
+                # 迭代矩陣的每一個元素，並填入工作表中
+                for k in range(len(state_traj)):
+                    for l in range(len(state_traj[k])):
+                        sheet_traj.cell(row=k+1, column=l+1).value = state_traj[k][l]
+                num = num + 1  # 要更改的数字
+                new_str = "_{}_".format(num)
+                file_name_traj = self.model_path + "/tested_state_traj" + new_str + curr_time +".xlsx"
+                excel_file_traj.save(file_name_traj)
             # TODO: 清空
             else:
                 state_traj = []
