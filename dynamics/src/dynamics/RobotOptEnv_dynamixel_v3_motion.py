@@ -538,6 +538,7 @@ class RobotOptEnv(gym.Env):
         rows = sheet1.rows
         cols = sheet1.columns
         T_tmp = []
+        T_point = []
         ratio_over = 0
         torque_over = 0
         num_torque = np.array([np.zeros(shape=6)])
@@ -551,7 +552,11 @@ class RobotOptEnv(gym.Env):
         plan_success_count = 0
         self.motion_plan.stl_trimesh_scaling(std_L2, std_L3)
         self.motion_plan.motion_planning_init(False)
-        self.motion_plan.random_obstacle()
+        for row in rows:
+            point_obstacle_val = [col.value for col in row]
+            T_point.append([point_obstacle_val[0], point_obstacle_val[1], point_obstacle_val[2]])
+        self.motion_plan.random_obstacle(T_point, 0.05) # distance5cm
+        rows = sheet1.rows # init
         for row in rows:
             row_val = [col.value for col in row]
             T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
@@ -564,10 +569,7 @@ class RobotOptEnv(gym.Env):
                 ik_q.q[4] = -ik_q.q[4]
                 ik_q.q[5] = -ik_q.q[5]
                 Joint_tmp.append(ik_q.q)
-                # print(Joint_tmp)
                 if count >= 1:
-                    # self.motion_plan.motion_planning_init(True)
-                    # self.motion_plan.random_obstacle()
                     plan_success, path = self.motion_plan.motion_planning(Joint_tmp[count-1], Joint_tmp[count], collision = False, wait_duration = False)
                     
                     if plan_success == True:
@@ -578,11 +580,12 @@ class RobotOptEnv(gym.Env):
             i = i + 1
         self.motion_plan.motion_planning_disconnect()
         if count == 0:
+            print("ik fail")
             return(0)
+            
         else:
-            # final_score = count / i
-            # rospy.loginfo("final_score: %f", final_score)
             if plan_success_count == 0:
+                print("motion fail")
                 return(0)
             else:
                 plan_success_score = plan_success_count / i

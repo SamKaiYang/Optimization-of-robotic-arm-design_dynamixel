@@ -55,43 +55,39 @@ class motion_model(object):
             random_num = random.uniform(start, end)
             if not exclude_start <= random_num <= exclude_end:
                 return random_num
-    def random_obstacle(self):
-        # create a box to be picked up
-        # see: https://pybullet-planning.readthedocs.io/en/latest/reference/generated/pybullet_planning.interfaces.env_manager.create_box.html#pybullet_planning.interfaces.env_manager.create_box
-        '''0.06	-0.17	-0.45
-        -0.36	-0.06	0.40
-        0.09	-0.32	-0.36
-        0.06	-0.15	0.22
-        -0.04	-0.15	1.02
-        0.08	0.05	0.21
-        0.02	-0.12	-0.25
-        0.29	-0.19	0.72
-        -0.06	-0.45	0.52
-        0.00	-0.04	0.38'''
-        
-        # self.block = [create_sphere(0.01) for _ in range(10)]
-        # # self.block = [create_box(0.03, 0.03, 0.03) for _ in range(10)]
-        # block_positions = [ \
-        # (0.06, -0.17, -0.45), (-0.36, -0.06, 0.40), (0.09, -0.32, -0.36), (0.06, -0.15, 0.22), \
-        # (-0.04, -0.15, 1.02), (0.08, 0.05, 0.21), (0.02, -0.12, -0.25), (0.29, -0.19, 0.72), \
-        # (-0.06, -0.45, 0.52), (0.00, -0.04, 0.38)]
-
-        # for i, pos in enumerate(block_positions):
-        #     set_pose(self.block[i], Pose(Point(x=pos[0], y=pos[1], z=pos[2]), Euler(yaw=np.pi/2)))
-        #     p.addUserDebugText(str(block_positions[i]), block_positions[i], textColorRGB=[1, 0, 0], textSize=1)
-
+    # TODO: input 任務點位, 與指定距離
+    def random_obstacle(self, target_points, distance_length):
+        # test 1 ---------------
+        # self.block_obstacles = [create_box(0.04, 0.04, 0.04) for _ in range(10)]
+        # # # Generate random spheres
+        # for i in range(10):
+        #     radius = self.random_exclude_range(-0.5, 0.5, -0.2, 0.2)
+        #     position = [self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), radius]
+        #     set_pose(self.block_obstacles[i], Pose(Point(x=position[0], y=position[1], z=position[2]), Euler(yaw=np.pi/2)))
+        #     p.addUserDebugText(str(position), position, textColorRGB=[1, 0, 0], textSize=1)
+        #  test 2----------------------------------------------------------------
         self.block_obstacles = [create_box(0.04, 0.04, 0.04) for _ in range(10)]
-        # # Generate random spheres
-        for i in range(10):
-            radius = self.random_exclude_range(-0.5, 0.5, -0.2, 0.2)
-            position = [self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), self.random_exclude_range(-0.5, 0.5, -0.2, 0.2), radius]
-            set_pose(self.block_obstacles[i], Pose(Point(x=position[0], y=position[1], z=position[2]), Euler(yaw=np.pi/2)))
-            p.addUserDebugText(str(position), position, textColorRGB=[1, 0, 0], textSize=1)
-
-    def motion_planning(self):
-        pass
-    def pybullet_init(self):
-        pass
+        # self.block_obstacles = create_box(0.04, 0.04, 0.04)
+        # 定义障碍物数量
+        num_obstacles = 10
+        # 生成随机点位
+        obstacle_positions = []
+        i = 0
+        while len(obstacle_positions) < num_obstacles:
+            # 定义坐标范围
+            x_obstacle = self.random_exclude_range(-0.5, 0.5, -0.1, 0.1)
+            y_obstacle = self.random_exclude_range(-0.5, 0.5, -0.1, 0.1)
+            z_obstacle = self.random_exclude_range(-0.5, 0.5, -0.1, 0.1)
+            # 计算点位到每个指定点位的距离
+            distances = [np.sqrt((x_obstacle - p[0])**2 + (y_obstacle - p[1])**2 + (z_obstacle - p[2])**2) for p in target_points]
+            # 确认生成的点位到每个指定点位的距离都足够远
+            if all(distance > distance_length for distance in distances):
+                obstacle_positions.append((x_obstacle, y_obstacle, z_obstacle))
+                position = [x_obstacle, y_obstacle, z_obstacle]
+                # TODO :將distances數組替換為單個變量distance，該變量用於計算每個新點到指定點位的距離。
+                set_pose(self.block_obstacles[i], Pose(Point(x=position[0], y=position[1], z=position[2]), Euler(yaw=np.pi/2)))
+                p.addUserDebugText(str(position), position, textColorRGB=[1, 0, 0], textSize=1)
+                i = i + 1
 
     def reset_robot_urdf(self, std_L2, std_L3):
         robot_urdf = stl_conv_urdf("single_arm_v12","test")
@@ -357,17 +353,20 @@ if __name__ == "__main__":
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(12,12)
     motion_bullet.stl_trimesh_scaling(12, 12)
-    # for _ in range(20):
-    #     motion_bullet.motion_planning_init(True)
-    #     motion_bullet.random_obstacle()
-    #     # motion_bullet.motion_plan()
+    # TODO: add target_points
+    target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
+    distance_points = 0.05
+    for _ in range(20):
+        motion_bullet.motion_planning_init(True)
+        motion_bullet.random_obstacle(target_points, distance_points)
+        # motion_bullet.motion_plan()
         
-    #     q1 = [0,0,0,0,0,0]
-    #     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
-    #     plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-    #     # sys.stdout = sys.__stdout__
-    #     cprint("success:{}".format(plan), 'cyan')
-    #     motion_bullet.motion_planning_disconnect()
+        q1 = [0,0,0,0,0,0]
+        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        # plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+        motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+        # cprint("success:{}".format(plan), 'cyan')
+        motion_bullet.motion_planning_disconnect()
     # 是否要碰撞可視化
     # 到collision.py 將  diagnosis=False->True
     motion_bullet.motion_planning_init(True)
