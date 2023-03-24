@@ -253,6 +253,8 @@ class motion_model(object):
         np.array([ -0.8522,    3.062,    1.905,   -2.086,  -0.1727,   0.9519]), \
         np.array([ -0.8376,    1.661,   -1.618,    3.005,  0.08707,   -1.117]), \
         np.array([ -0.5099,   -1.943,    2.853,    1.774,   0.5494,   -1.742])]
+
+        
         for i in range(10):
             if i>1:
                 set_joint_positions(self.Robot, self.arm_joints, q_test[i-1])
@@ -339,6 +341,35 @@ class motion_model(object):
         set_joint_positions(self.Robot, self.arm_joints, q0)
         wait_for_duration(100)
 
+    def show_point(self):
+        q_test = [np.array([ 0.7000,	0.5000,	0	,-180	,0	,-180]), \
+            np.array([ 0.6414	,0.6414	,0	,-180	,0	,-180]), \
+            np.array([ 0.5000	,0.7000	,0	,-180	,0	,-180]), \
+            np.array([ 0.3586	,0.6414	,0	,-180	,0	,-180]), \
+            np.array([ 0.3000	,0.5000	,0	,-180	,0	,-180]), \
+            np.array([ 0.3586	,0.3586	,0	,-180	,0	,-180]), \
+            np.array([ 0.5000	,0.3000	,0	,-180	,0	,-180]), \
+            np.array([ 0.6414	,0.3586	,0	,-180	,0	,-180])]
+
+        # q_test = [np.array([ 0.06	,-0.17	,-0.45	,-31	,56	,-138]), \
+        #     np.array([ -0.36	,-0.06	,0.40	,-104	,-50	,-159]), \
+        #     np.array([ 0.09	,-0.32	,-0.36	,1	,39	,-28]), \
+        #     np.array([ 0.06	,-0.15	,0.22	,130	,0	,46]), \
+        #     np.array([ -0.04	,-0.15	,1.02	,-70	,10	,122]), \
+        #     np.array([ 0.08	,0.05	,0.21	,-64	,80	,70]), \
+        #     np.array([ 0.02	,-0.12	,-0.25	,122	,33	,-34]), \
+        #     np.array([ -0.06	,-0.45	,0.52	,90	,25	,-74]), \
+        #     np.array([ 0.00	,-0.04	,0.38	,-94	,-42	,22]), \
+        #     np.array([ 0.29	,-0.19	,0.72	,69	,-2	,117])]
+
+        # self.block_obstacles = [create_box(0.04, 0.04, 0.04) for _ in range(10)]
+        self.block_points = [create_sphere(radius=0.01) for _ in range(len(q_test))]
+        i = 0
+        for _ in range(len(q_test)):
+            set_pose(self.block_points[i], Pose(Point(x=q_test[i][0], y=q_test[i][1], z=q_test[i][2]), Euler(yaw=np.pi/2)))
+            position = [q_test[i][0], q_test[i][1], q_test[i][2]]
+            p.addUserDebugText(str(position), position, textColorRGB=[1, 0, 0], textSize=1)
+            i = i + 1
     def plane_call(self):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         planeId = p.loadURDF("plane.urdf")
@@ -353,6 +384,7 @@ if __name__ == "__main__":
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(12,12)
     motion_bullet.stl_trimesh_scaling(12, 12)
+    '''
     # TODO: add target_points
     target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
     distance_points = 0.05
@@ -373,6 +405,7 @@ if __name__ == "__main__":
     motion_bullet.plane_call()
     motion_bullet.test_point()
     '''
+    '''
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
     motion_bullet.motion_planning_init(True)
@@ -380,6 +413,10 @@ if __name__ == "__main__":
     motion_bullet.random_obstacle()
     motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
     '''
+    motion_bullet.motion_planning_init(True)
+    motion_bullet.show_point()
+    wait_for_duration(100)
+
     '''
     motion_bullet.motion_planning_init(True)
     motion_bullet.angle_test()
