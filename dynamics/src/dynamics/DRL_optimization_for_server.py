@@ -587,13 +587,13 @@ if __name__ == "__main__":
         if ros_topic.cmd_run == 1:
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
-                model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag +str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' +str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
-                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
-                model_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + str(arm_structure_dof) + \
+                model_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + curr_time + '/models/'  # 保存模型的路径
             
             # 訓練
@@ -605,7 +605,7 @@ if __name__ == "__main__":
             train.train(train_eps = ddqn_train_eps)
             # # 測試
             drl.env.model_select = "test"
-            save_result_path = curr_path + '/test_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+            save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
