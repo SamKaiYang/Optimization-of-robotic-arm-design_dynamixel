@@ -290,11 +290,21 @@ class RobotOptEnv(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            # total_arm_length = random.randint(50, 80)  # 隨機生成總臂長
+            # diff_random_length = random.randint(5, 40)  # 隨機生成一個介於5到40之間的數字
+            # upper_arm_length = total_arm_length * diff_random_length / total_arm_length
+            # lower_arm_length = total_arm_length * (total_arm_length - diff_random_length) / total_arm_length
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             self.mission_time = np.random.uniform(low = 20, high = 50)
+            
+            rospy.loginfo("random_total_arm_length: %s", random_total_arm_length)
+            rospy.loginfo("std_L2: %s", self.std_L2)
+            rospy.loginfo("std_L3: %s", self.std_L3)
             rospy.loginfo("mission_time: %s", self.mission_time)
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
