@@ -572,6 +572,7 @@ if __name__ == "__main__":
         # rospy.loginfo("Input op_acc: %d" % drl.env.op_acc)
         rospy.loginfo('Input op_acc: {}'.format(drl.env.op_acc))
         
+        # 輸入可達半徑, 即最大總臂長設定
         drl.env.op_radius = config['op_radius']
         rospy.loginfo("Input op_radius: %d" % drl.env.op_radius)
         
