@@ -1,14 +1,14 @@
-op_function: case3
-arm_structure_dof: 5
+op_function: case2
+arm_structure_dof: 6
 DRL_algorithm: 'C51'
 cmd_run: 1
 test_model_name: '20230213-180022'
-op_dof: 5
+op_dof: 6
 op_payload: 1.5
 op_payload_position: [0 ,0 , 0.04]
 mission_time: 30
 op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
 op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
-op_radius: 8
+op_radius: 80
 op_weight: 1.5
 op_cost: 2

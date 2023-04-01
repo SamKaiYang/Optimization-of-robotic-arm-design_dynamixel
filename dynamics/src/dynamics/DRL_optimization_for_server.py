@@ -411,7 +411,7 @@ class Trainer:
 
 class Tester(object):
 
-    def __init__(self, env, model_path, num_episodes=50, max_ep_steps=400, test_ep_steps=100):
+    def __init__(self, env, model_path, drl_env_class, num_episodes=50, max_ep_steps=400, test_ep_steps=100):
         self.num_episodes = num_episodes
         self.max_ep_steps = max_ep_steps
         self.test_ep_steps = test_ep_steps
@@ -419,6 +419,7 @@ class Tester(object):
         self.model_path = model_path
         self.env = env
         self._best_episode_reward = 50
+        self.drl_env_class = drl_env_class
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
         # self.policy = lambda x: agent.act(x)
@@ -453,8 +454,11 @@ class Tester(object):
             episode_reward = step_reward
             
             for j in range(len(state.numpy()[0])):
-                sheet.cell(row=i+1, column=j+1).value = state.numpy()[0][j]
-            
+                sheet.cell(row=i+1, column=j+1).value = state.numpy()[0][j] # state record 
+            # self.motor_rated[1], self.motor_rated[2]] record
+            sheet.cell(row=i+1, column=len(state.numpy()[0])+4).value = self.drl_env_class.motor_type_axis_2
+            sheet.cell(row=i+1, column=len(state.numpy()[0])+5).value = self.drl_env_class.motor_type_axis_3
+            # reward record
             sheet.cell(row=i + 1, column=len(state.numpy()[0])+2).value = episode_reward
             i = i + 1
 
@@ -568,6 +572,7 @@ if __name__ == "__main__":
         # rospy.loginfo("Input op_acc: %d" % drl.env.op_acc)
         rospy.loginfo('Input op_acc: {}'.format(drl.env.op_acc))
         
+        # 輸入可達半徑, 即最大總臂長設定
         drl.env.op_radius = config['op_radius']
         rospy.loginfo("Input op_radius: %d" % drl.env.op_radius)
         
@@ -609,7 +614,7 @@ if __name__ == "__main__":
                 '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 200) # 20230309  change 300-> 200
+            test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
             break
 
@@ -651,7 +656,7 @@ if __name__ == "__main__":
             # model_path = select_path + str(ros_topic.test_model_name) +'/models/model_last.pkl'
             model_path = select_path
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, num_episodes = 200) # 20230309  change 300-> 200
+            test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200 #20230326 mini-test 20
             test.test()
             break
         else:
