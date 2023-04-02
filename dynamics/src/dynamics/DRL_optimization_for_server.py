@@ -629,13 +629,13 @@ if __name__ == "__main__":
             # elif op_function_flag == "case3":
             #     from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv
             if ros_topic.DRL_algorithm == 'DQN':
-                select_path = curr_path + '/train_results' + '/DQN_outputs/' + str(arm_structure_dof) + \
+                select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
-                select_path = curr_path + '/train_results' + '/DDQN_outputs/' + str(arm_structure_dof) + \
+                select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
-                select_path = curr_path + '/train_results' + '/C51_outputs/' + str(arm_structure_dof) + \
+                select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             # TODO: fixed
             '''

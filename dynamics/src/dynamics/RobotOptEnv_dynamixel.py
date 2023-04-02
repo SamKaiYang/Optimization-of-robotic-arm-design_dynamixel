@@ -146,64 +146,65 @@ class RobotOptEnv(gym.Env):
         # TODO: 向量編碼動作
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             # 配置軸2 motor 型號1
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            #[5.1, 25.3, 44.7]
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 1: # 軸2  # 長 # 型號1
             self.std_L2 += 1.0
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 2: # 軸2  # 短 # 型號2
             self.std_L2 -= 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
+
         elif action == 3: # 軸2  # 長 # 型號2
             self.std_L2 += 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
             
         elif action == 4: # 軸2  # 短 # 型號3
             self.std_L2 -= 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
+
         elif action == 5: # 軸2  # 長 # 型號3
             self.std_L2 += 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
             
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
             
         elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
+
         elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
+
         elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
 
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
@@ -214,12 +215,12 @@ class RobotOptEnv(gym.Env):
         # # 可達性
         # self.state[6] = self.reach_evaluate()
         # 計算成本與重量    
-        self.motor_cost[axis-1] = self.res.cost[motor_type]
-        self.motor_weight[axis-1] = self.res.weight[motor_type]
+        # self.motor_cost[axis-1] = self.res.cost[motor_type]
+        # self.motor_weight[axis-1] = self.res.weight[motor_type]
         # print(self.motor_cost)
         # print(self.motor_weight)
-        cost = sum(self.motor_cost) 
-        weight = sum(self.motor_weight)
+        # cost = sum(self.motor_cost) 
+        # weight = sum(self.motor_weight)
         # self.state[7] = cost
         # self.state[8] = weight
         
@@ -230,7 +231,7 @@ class RobotOptEnv(gym.Env):
         # rospy.loginfo("manipulability_score: %s", self.state[9])
         self.state[8] = self.std_L2
         self.state[9] = self.std_L3
-        self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
+        # self.motor_rated[axis-1] = self.res.rated_torque[motor_type]
         # rospy.loginfo("configuration cost & weight: %s, %s", cost, weight)
         self.counts += 1
         # rospy.loginfo("self.state: %s", self.state)
@@ -260,46 +261,6 @@ class RobotOptEnv(gym.Env):
 
         terminated = False
         
-        # # 避免軸長小於0
-        # if self.state[8] <= 0 or self.state[9] <=  0:
-        #     # terminated = True
-        #     reward += -200
-        # if self.torque_over == True and self.state[6] < 0.6: 
-        #     reward += -20
-        # elif self.torque_over == True and 0.6 <= self.state[6] < 0.8: 
-        #     reward += -10
-        # elif self.torque_over == True and 0.8 <= self.state[6] <= 1.0:   
-        #     reward += -5
-        # elif self.torque_over == False and self.state[6] < 0.6: 
-        #     reward += +5
-        # elif self.torque_over == False and 0.6 <= self.state[6] < 0.8:
-        #     reward += +10
-        # elif self.torque_over == False and 0.8 <= self.state[6] < 0.9:
-        #     reward += +20
-        # elif self.torque_over == False and 0.9 <= self.state[6] < 1.0:
-        #     terminated = True
-        #     reward += +50
-        # elif self.torque_over == False and self.state[6] == 1.0:
-        #     terminated = True
-        #     reward += +100
-        
-        # if self.counts == 30:
-        #     # 避免軸長小於0
-        #     if self.state[8] <= 0 or self.state[9] <=  0:
-        #         # terminated = True
-        #         reward += -1500
-        #     else:
-        #         reward += -10
-        #     if self.state[6] < 0.6: # TODO: fixed
-        #         reward += -50
-        #     else:
-        #         reward += -10
-        #     if self.torque_over == True: # TODO: fixed 0112 00:22 改為超過最大的馬達型號torque
-        #         reward += -100
-        #     else:
-        #         reward += -10
-        #     terminated = True
-        #     self.counts = 0
         # 避免軸長小於0
         if self.state[8] <= 0 or self.state[9] <=  0:
             # terminated = True
@@ -755,64 +716,65 @@ class RobotOptEnv_3dof(gym.Env):
         # TODO: 向量編碼動作
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             # 配置軸2 motor 型號1
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            #[5.1, 25.3, 44.7]
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 1: # 軸2  # 長 # 型號1
             self.std_L2 += 1.0
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 2: # 軸2  # 短 # 型號2
             self.std_L2 -= 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
+
         elif action == 3: # 軸2  # 長 # 型號2
             self.std_L2 += 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
             
         elif action == 4: # 軸2  # 短 # 型號3
             self.std_L2 -= 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
+
         elif action == 5: # 軸2  # 長 # 型號3
             self.std_L2 += 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
             
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
             
         elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
+
         elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
+
         elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
         
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
@@ -1323,64 +1285,65 @@ class RobotOptEnv_5dof(gym.Env):
         # TODO: 向量編碼動作
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             # 配置軸2 motor 型號1
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            #[5.1, 25.3, 44.7]
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 1: # 軸2  # 長 # 型號1
             self.std_L2 += 1.0
-            motor_type = 0 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 2: # 軸2  # 短 # 型號2
             self.std_L2 -= 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
+
         elif action == 3: # 軸2  # 長 # 型號2
             self.std_L2 += 1.0
-            motor_type = 1 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 25.3 # 型號
             
         elif action == 4: # 軸2  # 短 # 型號3
             self.std_L2 -= 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
+
         elif action == 5: # 軸2  # 長 # 型號3
             self.std_L2 += 1.0
-            motor_type = 2 # 型號
-            axis = 2 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_2 = 44.7 # 型號
             
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
-            motor_type = 0 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
             
         elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
-            motor_type = 1 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 25.3 # 型號
+
         elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
-            
+            self.std_L3 += 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
+
         elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
-            motor_type = 2 # 型號
-            axis = 3 # 軸數
+            self.std_L3 -= 1.0
+            self.motor_type_axis_3 = 44.7 # 型號
 
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
