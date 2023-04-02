@@ -317,7 +317,9 @@ class RobotOptEnv(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             torque = self.dynamics_torque_limit()
             # rospy.loginfo("torque: %s", torque)
@@ -343,7 +345,10 @@ class RobotOptEnv(gym.Env):
         elif self.model_select == "test":
             # random state (手臂長度隨機)
             rospy.loginfo("model_select:%s", self.model_select)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            total_arm_length = self.op_radius
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
@@ -882,7 +887,10 @@ class RobotOptEnv_3dof(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             torque = self.dynamics_torque_limit()
             self.state[0:3] = torque# TODO: fixed 3dof
@@ -907,7 +915,10 @@ class RobotOptEnv_3dof(gym.Env):
         elif self.model_select == "test":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            total_arm_length = self.op_radius
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
@@ -1456,7 +1467,10 @@ class RobotOptEnv_5dof(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             torque = self.dynamics_torque_limit()
             # rospy.loginfo("torque: %s", torque)
@@ -1482,7 +1496,10 @@ class RobotOptEnv_5dof(gym.Env):
         elif self.model_select == "test":
             # random state (手臂長度隨機)
             rospy.loginfo("model_select:%s", self.model_select)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            total_arm_length = self.op_radius
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
