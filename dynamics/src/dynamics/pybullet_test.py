@@ -44,7 +44,7 @@ from modular_robot_6dof import modular_robot_6dof
 
 HERE = os.path.dirname(__file__)
 SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12_motion.urdf')
-
+SINGLE_ARM_3DOF = os.path.join(HERE,'urdf', 'single_arm_v12_motion_3dof.urdf')
 class motion_model(object):
     def __init__(self):
         self.length_1 = 0.1
@@ -178,7 +178,25 @@ class motion_model(object):
                             'Joint6']
         self.arm_joints = joints_from_names(self.Robot, arm_joint_names)
         self.sample_fn = get_sample_fn(self.Robot, self.arm_joints)
-    
+
+    def motion_planning_init_3dof(self, viewer=True):
+        # viewer = True
+        connect(use_gui=viewer)
+        # p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # planeId = p.loadURDF("plane.urdf")
+        
+        robot_path = SINGLE_ARM_3DOF
+
+        self.Robot = load_pybullet(robot_path, fixed_base=True)
+        arm='right'
+        set_camera(yaw=0, pitch=-70, distance=2, target_position=(0, 0, 0))
+        arm_tag = arm[0]
+        arm_joint_names = ['Joint1',
+                            'Joint2',
+                            'Joint3']
+        self.arm_joints = joints_from_names(self.Robot, arm_joint_names)
+        self.sample_fn = get_sample_fn(self.Robot, self.arm_joints)
+        print("ffffuuucccckkk")
     def motion_planning_disconnect(self):
         disconnect()
         
@@ -379,12 +397,17 @@ if __name__ == "__main__":
     rospy.init_node("pybullet_test")
     # origin design compare
     print("start")
-    original_design_test = RobotOptEnv()
-    original_design_test.original_design(41.565,38.435,44.7,25.3,1.5,50)
+    # original_design_test = RobotOptEnv()
+    # original_design_test.original_design(41.565,38.435,44.7,25.3,1.5,50)
     
-    # motion_bullet= motion_model()
+
+    
+
+    motion_bullet= motion_model()
     # motion_bullet.reset_robot_urdf(12,12)
     # motion_bullet.stl_trimesh_scaling(12, 12)
+    motion_bullet.motion_planning_init_3dof(True)
+    wait_for_duration(100)
     '''
     # TODO: add target_points
     target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]

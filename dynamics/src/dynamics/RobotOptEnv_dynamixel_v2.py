@@ -908,52 +908,64 @@ class RobotOptEnv_3dof(gym.Env):
         # TODO: 向量編碼動作
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             # 配置軸2 motor 型號1
             #[5.1, 25.3, 44.7]
             self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 1: # 軸2  # 長 # 型號1
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 2: # 軸2  # 短 # 型號2
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_2 = 25.3 # 型號
 
         elif action == 3: # 軸2  # 長 # 型號2
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 25.3 # 型號
             
         elif action == 4: # 軸2  # 短 # 型號3
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_2 = 44.7 # 型號
 
         elif action == 5: # 軸2  # 長 # 型號3
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 44.7 # 型號
             
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 25.3 # 型號
             
         elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 25.3 # 型號
 
         elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 44.7 # 型號
 
         elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 44.7 # 型號
         
         # 輸入action後 二,三軸軸長
@@ -1040,11 +1052,17 @@ class RobotOptEnv_3dof(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             self.mission_time = np.random.uniform(low = 20, high = 50)
+            rospy.loginfo("random_total_arm_length: %s", random_total_arm_length)
+            rospy.loginfo("std_L2: %s", self.std_L2)
+            rospy.loginfo("std_L3: %s", self.std_L3)
             rospy.loginfo("mission_time: %s", self.mission_time)
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
@@ -1073,7 +1091,10 @@ class RobotOptEnv_3dof(gym.Env):
         elif self.model_select == "test":
             # random state (手臂長度隨機)
             rospy.loginfo("model_select:%s", self.model_select)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            total_arm_length = self.op_radius
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
@@ -1620,52 +1641,64 @@ class RobotOptEnv_5dof(gym.Env):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         if action == 0: # 軸2  # 短 # 型號1
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             # 配置軸2 motor 型號1
             #[5.1, 25.3, 44.7]
             self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 1: # 軸2  # 長 # 型號1
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 5.1 # 型號
             
         elif action == 2: # 軸2  # 短 # 型號2
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_2 = 25.3 # 型號
 
         elif action == 3: # 軸2  # 長 # 型號2
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 25.3 # 型號
             
         elif action == 4: # 軸2  # 短 # 型號3
             self.std_L2 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_2 = 44.7 # 型號
 
         elif action == 5: # 軸2  # 長 # 型號3
             self.std_L2 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_2 = 44.7 # 型號
             
         elif action == 6: # 軸3  # 短 # 型號1
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 7: # 軸3  # 長 # 型號1
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 5.1 # 型號
             
         elif action == 8: # 軸3  # 短 # 型號2
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 25.3 # 型號
             
         elif action == 9: # 軸3  # 長 # 型號2
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 25.3 # 型號
 
         elif action == 10: # 軸3  # 短 # 型號3
             self.std_L3 -= 1.0
+            self.std_L3 += 1.0
             self.motor_type_axis_3 = 44.7 # 型號
 
         elif action == 11: # 軸3  # 長 # 型號3
             self.std_L3 += 1.0
+            self.std_L3 -= 1.0
             self.motor_type_axis_3 = 44.7 # 型號
         
         # 輸入action後 二,三軸軸長
@@ -1807,11 +1840,17 @@ class RobotOptEnv_5dof(gym.Env):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
             # random state (手臂長度隨機)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            random_total_arm_length = np.random.uniform(low=20, high=80)
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             self.mission_time = np.random.uniform(low = 20, high = 50)
+            rospy.loginfo("random_total_arm_length: %s", random_total_arm_length)
+            rospy.loginfo("std_L2: %s", self.std_L2)
+            rospy.loginfo("std_L3: %s", self.std_L3)
             rospy.loginfo("mission_time: %s", self.mission_time)
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
@@ -1840,7 +1879,9 @@ class RobotOptEnv_5dof(gym.Env):
         elif self.model_select == "test":
             # random state (手臂長度隨機)
             rospy.loginfo("model_select:%s", self.model_select)
-            self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            total_arm_length = self.op_radius
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)

@@ -130,7 +130,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_2_12.0.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_2.STL" />
       </geometry>
       <material
         name="">
@@ -144,7 +144,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link2.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -188,7 +188,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://dynamics/src/dynamics/meshes/single_arm_v12_3_12.0.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_3.STL" />
       </geometry>
       <material
         name="">
@@ -202,7 +202,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://single_arm_v12/meshes/Link3.STL" />
+          filename="package://dynamics/src/dynamics/meshes/merged_single_arm_axis_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -218,180 +218,6 @@
       link="Link3" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      lower="-3.14"
-      upper="3.14"
-      effort="50"
-      velocity="0" />
-  </joint>
-  <link
-    name="Link4">
-    <inertial>
-      <origin
-        xyz="-1.11022302462516E-16 0.0124471610012716 0.0305494763505743"
-        rpy="0 0 0" />
-      <mass
-        value="0.313854171959486" />
-      <inertia
-        ixx="0.00030905374217572"
-        ixy="2.20104937481116E-19"
-        ixz="1.99389141092033E-20"
-        iyy="0.000138417182248756"
-        iyz="-3.51429818496687E-06"
-        izz="0.000324741574348905" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link4.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link4.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="Joint4"
-    type="revolute">
-    <origin
-      xyz="0.214 0 0.0325"
-      rpy="0 0 3.1416" />
-    <parent
-      link="Link3" />
-    <child
-      link="Link4" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      lower="-3.14"
-      upper="3.14"
-      effort="50"
-      velocity="0" />
-  </joint>
-  <link
-    name="Link5">
-    <inertial>
-      <origin
-        xyz="0.0305494763505902 0.0124160882702156 -0.000878959076247798"
-        rpy="0 0 0" />
-      <mass
-        value="0.313854171959487" />
-      <inertia
-        ixx="0.000324741574348905"
-        ixy="-3.50552519309465E-06"
-        ixz="2.48162957481373E-07"
-        iyy="0.000139268063164469"
-        iyz="1.20194589741801E-05"
-        izz="0.000308202861260008" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link5.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link5.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="Joint5"
-    type="revolute">
-    <origin
-      xyz="0 0.0685 0.0346"
-      rpy="1.5708 0 1.5708" />
-    <parent
-      link="Link4" />
-    <child
-      link="Link5" />
-    <axis
-      xyz="-1 0 0" />
-    <limit
-      lower="-3.14"
-      upper="3.14"
-      effort="50"
-      velocity="0" />
-  </joint>
-  <link
-    name="Link6">
-    <inertial>
-      <origin
-        xyz="-1.11022302462516E-16 1.73472347597681E-18 0.0055"
-        rpy="0 0 0" />
-      <mass
-        value="0.0173494454294496" />
-      <inertia
-        ixx="2.53988652151547E-06"
-        ixy="-2.00729161979554E-22"
-        ixz="-3.90838944351189E-22"
-        iyy="2.53988652151547E-06"
-        iyz="-1.17534537510526E-22"
-        izz="4.79061561920678E-06" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link6.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://single_arm_v12/meshes/Link6.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="Joint6"
-    type="revolute">
-    <origin
-      xyz="0.0346 0.068329 -0.0048371"
-      rpy="1.5708 -1.5708 0" />
-    <parent
-      link="Link5" />
-    <child
-      link="Link6" />
-    <axis
-      xyz="0 0 1" />
     <limit
       lower="-3.14"
       upper="3.14"
