@@ -397,17 +397,18 @@ if __name__ == "__main__":
     rospy.init_node("pybullet_test")
     # origin design compare
     print("start")
-    # original_design_test = RobotOptEnv()
-    # original_design_test.original_design(41.565,38.435,44.7,25.3,1.5,50)
+    original_design_test = RobotOptEnv()
+    original_design_test.original_design(41.565,38.435,25.3,25.3,10,2)
     
 
     
-
+    '''
     motion_bullet= motion_model()
     # motion_bullet.reset_robot_urdf(12,12)
     # motion_bullet.stl_trimesh_scaling(12, 12)
     motion_bullet.motion_planning_init_3dof(True)
     wait_for_duration(100)
+    '''
     '''
     # TODO: add target_points
     target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]

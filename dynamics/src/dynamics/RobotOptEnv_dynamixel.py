@@ -79,6 +79,8 @@ class RobotOptEnv(gym.Env):
         self.torque_done = np.array([false, false, false, false, false, false])
         self.torque_over = False
         self.prev_shaping = None
+        self.motor_type_axis_2 = 5.1
+        self.motor_type_axis_3 = 5.1
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
@@ -663,6 +665,8 @@ class RobotOptEnv_3dof(gym.Env):
         self.torque_done = np.array([false, false, false])# TODO: fixed 3dof
         self.torque_over = False
         self.prev_shaping = None
+        self.motor_type_axis_2 = 5.1
+        self.motor_type_axis_3 = 5.1
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
@@ -1229,6 +1233,8 @@ class RobotOptEnv_5dof(gym.Env):
         self.torque_done = np.array([false, false, false, false, false]) # TODO: fixed 5dof
         self.torque_over = False
         self.prev_shaping = None
+        self.motor_type_axis_2 = 5.1
+        self.motor_type_axis_3 = 5.1
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
