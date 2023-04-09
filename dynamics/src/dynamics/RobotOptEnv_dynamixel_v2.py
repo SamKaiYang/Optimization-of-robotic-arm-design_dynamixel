@@ -734,6 +734,7 @@ class RobotOptEnv(gym.Env):
                     return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
         elif model_select == "test":
             # import xlsx
+            # df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
             df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
             sheets = df.worksheets
             sheet1 = sheets[0]
