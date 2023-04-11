@@ -272,6 +272,7 @@ class RobotOptEnv(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # rospy.loginfo("reach_score: %s", reach_score)
@@ -354,10 +355,6 @@ class RobotOptEnv(gym.Env):
             # random state (手臂長度隨機)
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             random_total_arm_length = np.random.uniform(low=20, high=80)
-            # total_arm_length = random.randint(50, 80)  # 隨機生成總臂長
-            # diff_random_length = random.randint(5, 40)  # 隨機生成一個介於5到40之間的數字
-            # upper_arm_length = total_arm_length * diff_random_length / total_arm_length
-            # lower_arm_length = total_arm_length * (total_arm_length - diff_random_length) / total_arm_length
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 5.1
@@ -368,25 +365,21 @@ class RobotOptEnv(gym.Env):
             rospy.loginfo("std_L2: %s", self.std_L2)
             rospy.loginfo("std_L3: %s", self.std_L3)
             rospy.loginfo("mission_time: %s", self.mission_time)
+            
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.payload = rand_payload
+            self.payload_position =  [0, 0, 0.04]
+            self.robot.payload(self.payload, self.payload_position)  # set payload
+            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+            self.random_select_point() # 先隨機抽樣30個點位
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # torque = self.dynamics_torque_limit()
+            self.prev_shaping = None
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = consumption
-            # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
-            self.payload = rand_payload
-            # rospy.loginfo("payload: %s", self.payload)
-            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-            self.random_select_point() # 先隨機抽樣30個點位
-            self.prev_shaping = None
-            # reach_score = self.reach_evaluate()
-            # manipulability_score = self.manipulability_evaluate()
-            # reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
             self.state[3] = reach_score
-            # self.state[7] = sum(self.motor_cost_init)
-            # self.state[8] = sum(self.motor_weight_init)
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
@@ -399,31 +392,22 @@ class RobotOptEnv(gym.Env):
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
+            # FIXME: 修改未成功匯入payload給予機器人的問題
             self.payload = self.op_payload
-            self.payload_position = np.array(self.op_payload_position)
-            # self.mission_time = self.op_vel[0] # 改為yaml輸入
+            self.payload_position = self.op_payload_position
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             rospy.loginfo("mission_time: %s", self.mission_time)
-            # self.acc = np.array(self.op_acc[0:6])
             self.total_weight = self.op_weight # Kg
             self.total_cost = self.op_cost # 元
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # torque = self.dynamics_torque_limit()
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = consumption
-            # torque = self.dynamics_torque_limit()
-            # self.state[0:6] = torque
             self.prev_shaping = None
-            # reach_score = self.reach_evaluate()
-            # manipulability_score = self.manipulability_evaluate()
-            # reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
             self.state[3] = reach_score
-            # self.state[7] = sum(self.motor_cost_init)
-            # self.state[8] = sum(self.motor_weight_init)
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
@@ -438,7 +422,8 @@ class RobotOptEnv(gym.Env):
         motor_type_axis_3 = motor_2
         self.payload = payload
         op_payload_position = [0, 0, 0.04]
-        self.payload_position = [np.array(op_payload_position)]
+        # self.payload_position = [np.array(op_payload_position)]
+        self.robot.payload(self.payload, op_payload_position)  # set payload
         # mission_time = 30
         model_select = "test"
         # rospy.loginfo("mission_time: %s", mission_time)
@@ -734,8 +719,8 @@ class RobotOptEnv(gym.Env):
                     return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
         elif model_select == "test":
             # import xlsx
-            # df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
             df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
+            # df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
             sheets = df.worksheets
             sheet1 = sheets[0]
             rows = sheet1.rows
@@ -972,22 +957,18 @@ class RobotOptEnv_3dof(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # FIXME: add set payload
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # rospy.loginfo("reach_score: %s", reach_score)
         self.state[0] = ratio_over
         self.state[1] = torque_over
         self.state[2] = np.abs(consumption)
-        # 可達性 # 可操作性
-        # self.state[3], self.state[4] = self.reach_manipulability_evaluate(self.model_select)
         self.state[3] = reach_score
         self.state[4] = manipulability_score
         self.state[5] = self.std_L2
         self.state[6] = self.std_L3
         self.counts += 1
         reward = 0
-
-        
         # TODO: fixed
         shaping = (
             # - self.state[0] # 超過轉速量
@@ -1055,7 +1036,6 @@ class RobotOptEnv_3dof(gym.Env):
             # random state (手臂長度隨機)
             random_total_arm_length = np.random.uniform(low=20, high=80)
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
-            
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 5.1
@@ -1065,25 +1045,20 @@ class RobotOptEnv_3dof(gym.Env):
             rospy.loginfo("std_L2: %s", self.std_L2)
             rospy.loginfo("std_L3: %s", self.std_L3)
             rospy.loginfo("mission_time: %s", self.mission_time)
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.payload = rand_payload
+            self.payload_position =  [0, 0, 0.04]
+            self.robot.payload(self.payload, self.payload_position)  # set payload
+            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+            self.random_select_point() # 先隨機抽樣30個點位
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # torque = self.dynamics_torque_limit()
+            self.prev_shaping = None
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = consumption
-            # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
-            self.payload = rand_payload
-            # rospy.loginfo("payload: %s", self.payload)
-            self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-            self.random_select_point() # 先隨機抽樣30個點位
-            self.prev_shaping = None
-            # reach_score = self.reach_evaluate()
-            # manipulability_score = self.manipulability_evaluate()
-            # reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
             self.state[3] = reach_score
-            # self.state[7] = sum(self.motor_cost_init)
-            # self.state[8] = sum(self.motor_weight_init)
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
@@ -1094,34 +1069,24 @@ class RobotOptEnv_3dof(gym.Env):
             rospy.loginfo("model_select:%s", self.model_select)
             total_arm_length = self.op_radius
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
-            
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
+            # FIXME: 修改未成功匯入payload給予機器人的問題
             self.payload = self.op_payload
-            self.payload_position = np.array(self.op_payload_position)
-            # self.mission_time = self.op_vel[0] # 改為yaml輸入
+            self.payload_position = self.op_payload_position
+            self.robot.payload(self.payload, self.payload_position)
             rospy.loginfo("mission_time: %s", self.mission_time)
-            # self.acc = np.array(self.op_acc[0:6])
             self.total_weight = self.op_weight # Kg
             self.total_cost = self.op_cost # 元
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-            # torque = self.dynamics_torque_limit()
+            self.prev_shaping = None
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = consumption
-            # torque = self.dynamics_torque_limit()
-            # self.state[0:6] = torque
-            self.prev_shaping = None
-            # reach_score = self.reach_evaluate()
-            # manipulability_score = self.manipulability_evaluate()
-            # reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
             self.state[3] = reach_score
-            # self.state[7] = sum(self.motor_cost_init)
-            # self.state[8] = sum(self.motor_weight_init)
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
@@ -1705,14 +1670,12 @@ class RobotOptEnv_5dof(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # FIXME: 修改未成功匯入payload給予機器人的問題
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # rospy.loginfo("reach_score: %s", reach_score)
         self.state[0] = ratio_over
         self.state[1] = torque_over
         self.state[2] = np.abs(consumption)
-        # 可達性 # 可操作性
-        # self.state[3], self.state[4] = self.reach_manipulability_evaluate(self.model_select)
         self.state[3] = reach_score
         self.state[4] = manipulability_score
         self.state[5] = self.std_L2
@@ -1781,6 +1744,8 @@ class RobotOptEnv_5dof(gym.Env):
         current_design = [self.std_L2, self.std_L3, self.motor_rated[1], self.motor_rated[2]]
         return self.state, reward, terminated, current_design
     # reset环境状态 
+    # TODO: 修改為目前最新的計算方式 reset
+    # FIXME: 修改未成功匯入payload給予機器人的問題
     def reset(self):
         if self.model_select == "train":
             rospy.loginfo("model_select:%s", self.model_select)
@@ -1797,12 +1762,8 @@ class RobotOptEnv_5dof(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            # reach_score = self.reach_evaluate()
-            # manipulability_score = self.manipulability_evaluate()
             reach_score, manipulability_score = self.reach_manipulability_evaluate(self.model_select)
             self.state[6] = reach_score
-            # self.state[7] = sum(self.motor_cost_init)
-            # self.state[8] = sum(self.motor_weight_init)
             self.state[7] = manipulability_score
             self.state[8] = self.std_L2
             self.state[9] = self.std_L3

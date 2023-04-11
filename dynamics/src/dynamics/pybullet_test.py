@@ -398,7 +398,7 @@ if __name__ == "__main__":
     # origin design compare
     print("start")
     original_design_test = RobotOptEnv()
-    original_design_test.original_design(41.565,38.435,25.3,25.3,10,2)
+    original_design_test.original_design(41.565,38.435,25.3,25.3,3,30)
     
 
     

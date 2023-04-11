@@ -262,6 +262,8 @@ class RobotOptEnv(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # FIXME: 修改未成功匯入payload給予機器人的問題
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         # TODO: 撰寫motion planning 
         torque = self.dynamics_torque_limit()
         self.state[0:6] = torque# TODO: fixed 6dof
@@ -341,6 +343,12 @@ class RobotOptEnv(gym.Env):
 
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             self.robot.__init__() # 重製機器人
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.payload = rand_payload
+            self.payload_position =  [0, 0, 0.04]
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             # self.mission_time = np.random.uniform(low = 20, high = 50)
@@ -350,15 +358,9 @@ class RobotOptEnv(gym.Env):
             self.random_select_point() # 先隨機抽樣30個點位
             torque = self.dynamics_torque_limit()
             self.state[0:6] = torque# TODO: fixed 6dof
-            motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-
-            self.state[6] = motion_score
-            # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
-            self.payload = rand_payload
-            # rospy.loginfo("payload: %s", self.payload)
-            
             self.prev_shaping = None
+            motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            self.state[6] = motion_score
             self.state[7] = self.std_L2
             self.state[8] = self.std_L3
             
@@ -375,6 +377,8 @@ class RobotOptEnv(gym.Env):
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             # self.mission_time = self.op_vel[0]
             # rospy.loginfo("mission_time: %s", self.mission_time)
             # self.acc = np.array(self.op_acc[0:6])
@@ -791,6 +795,8 @@ class RobotOptEnv_3dof(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # FIXME: 修改未成功匯入payload給予機器人的問題
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         torque = self.dynamics_torque_limit()
         self.state[0:3] = torque# TODO: fixed 3dof
         motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
@@ -866,6 +872,12 @@ class RobotOptEnv_3dof(gym.Env):
             random_total_arm_length = np.random.uniform(low=20, high=80)
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.payload = rand_payload
+            self.payload_position =  [0, 0, 0.04]
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             # self.mission_time = np.random.uniform(low = 20, high = 50)
@@ -876,14 +888,8 @@ class RobotOptEnv_3dof(gym.Env):
             torque = self.dynamics_torque_limit()
             self.state[0:3] = torque# TODO: fixed 3dof
             motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-
-            self.state[3] = motion_score
-            # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
-            self.payload = rand_payload
-            # rospy.loginfo("payload: %s", self.payload)
-            
             self.prev_shaping = None
+            self.state[3] = motion_score
             self.state[4] = self.std_L2
             self.state[5] = self.std_L3
             self.counts = 0
@@ -897,6 +903,8 @@ class RobotOptEnv_3dof(gym.Env):
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             # self.mission_time = self.op_vel[0]
             # rospy.loginfo("mission_time: %s", self.mission_time)
             # self.acc = np.array(self.op_acc[0:6])
@@ -1337,6 +1345,8 @@ class RobotOptEnv_5dof(gym.Env):
         # 輸入action後 二,三軸軸長
         self.robot_urdf.specified_generate_write_urdf(self.std_L2, self.std_L3)
         self.robot.__init__() # 重製機器人
+        # FIXME: 修改未成功匯入payload給予機器人的問題
+        self.robot.payload(self.payload, self.payload_position)  # set payload
         torque = self.dynamics_torque_limit()
         self.state[0:5] = torque# TODO: fixed 3dof
         motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
@@ -1415,6 +1425,12 @@ class RobotOptEnv_5dof(gym.Env):
             random_total_arm_length = np.random.uniform(low=20, high=80)
             self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
+            # 生成隨機 payload (kg)
+            rand_payload = np.random.uniform(low=1, high=4)
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.payload = rand_payload
+            self.payload_position =  [0, 0, 0.04]
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             # self.mission_time = np.random.uniform(low = 20, high = 50)
@@ -1425,14 +1441,8 @@ class RobotOptEnv_5dof(gym.Env):
             torque = self.dynamics_torque_limit()
             self.state[0:5] = torque# TODO: fixed 5dof
             motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-
-            self.state[5] = motion_score
-            # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
-            self.payload = rand_payload
-            # rospy.loginfo("payload: %s", self.payload)
-            
             self.prev_shaping = None
+            self.state[5] = motion_score
             self.state[6] = self.std_L2
             self.state[7] = self.std_L3
             self.counts = 0
@@ -1446,12 +1456,8 @@ class RobotOptEnv_5dof(gym.Env):
             self.robot.__init__() # 重製機器人
             self.payload = self.op_payload
             self.payload_position = np.array(self.op_payload_position)
-            # self.mission_time = self.op_vel[0]
-            # rospy.loginfo("mission_time: %s", self.mission_time)
-            # self.acc = np.array(self.op_acc[0:6])
-            # self.total_weight = self.op_weight # Kg
-            # self.total_cost = self.op_cost # 元
-            # self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
+            # FIXME: 修改未成功匯入payload給予機器人的問題
+            self.robot.payload(self.payload, self.payload_position)  # set payload
             self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             # TODO: 撰寫motion planning 
