@@ -755,9 +755,9 @@ class RobotOptEnv(gym.Env):
                         ratio_over = ratio_over + 1
                     torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
 
-                    row = torque[:,1] # 取出第2行
+                    row = abs(torque[:,1]) # 取出第2行
                     result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
-                    row = torque[:,2] # 取出第3行
+                    row = abs(torque[:,2]) # 取出第3行
                     result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
                     if len(result_2)>0 or len(result_3) >0:
                         torque_over = torque_over + 1
@@ -767,7 +767,7 @@ class RobotOptEnv(gym.Env):
             num_samples = int(total_time / sample_interval)
             total_energy = 0
             for j in range(num_samples):
-                energy = num_torque[j] * sample_interval
+                energy = abs(num_torque[j]) * sample_interval
                 total_energy += energy
                 
             if count == 0:
