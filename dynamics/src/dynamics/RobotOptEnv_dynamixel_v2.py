@@ -661,123 +661,67 @@ class RobotOptEnv(gym.Env):
         if model_select == "train":
             # import xlsx
             df = load_workbook("./xlsx/task_point.xlsx")
-            sheets = df.worksheets
-            sheet1 = sheets[0]
-            rows = sheet1.rows
-            cols = sheet1.columns
-            T_tmp = []
-            score = []
-            ratio_over = 0
-            torque_over = 0
-            num_torque = np.array([np.zeros(shape=6)])
-            total_time = self.mission_time
-            # 采样间隔
-            sample_interval = 0.2
-            manipulability_index = []
-            i = 0
-            false_done = False
-            count = 0
-            for row in rows:
-                row_val = [col.value for col in row]
-                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
-                if ik_q.success == True:
-                    count += 1
-                    manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-                if i >= 1:
-                    # 生成时间向量
-                    traj_time = total_time/9 # 除以點位數量
-                    time_vector = np.linspace(0, traj_time, int(traj_time/sample_interval) + 1)
-                    traj = self.robot.jtraj(T_tmp[i-1],T_tmp[i],time_vector)
-                
-                    if np.amax(traj.sd) > 3.04:
-                        ratio_over = ratio_over + 1
-                    torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
-
-                    row = torque[:,1] # 取出第2行
-                    result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
-                    row = torque[:,2] # 取出第3行
-                    result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
-                    if len(result_2)>0 or len(result_3) >0:
-                        torque_over = torque_over + 1
-                    num_torque = np.append(num_torque, torque)
-                i = i + 1
-
-            num_samples = int(total_time / sample_interval)
-            total_energy = 0
-            for j in range(num_samples):
-                energy = num_torque[j] * sample_interval
-                total_energy += energy
-                
-            if count == 0:
-                return(ratio_over, torque_over, total_energy,0,0)
-            else:
-                final_score = count / i
-                if count == 1:
-                    return(ratio_over, torque_over, total_energy, final_score, manipulability_index[0]) # 回傳 manipulability[0]
-                else:
-                    return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
         elif model_select == "test":
             # import xlsx
-            df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
-            # df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
-            sheets = df.worksheets
-            sheet1 = sheets[0]
-            rows = sheet1.rows
-            cols = sheet1.columns
-            T_tmp = []
-            score = []
-            ratio_over = 0
-            torque_over = 0
-            num_torque = np.array([np.zeros(shape=6)])
-            total_time = self.mission_time
-            # 采样间隔
-            sample_interval = 0.2
-            manipulability_index = []
-            i = 0
-            false_done = False
-            count = 0
-            for row in rows:
-                row_val = [col.value for col in row]
-                T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-                ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+            # df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
+            df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
+        sheets = df.worksheets
+        sheet1 = sheets[0]
+        rows = sheet1.rows
+        cols = sheet1.columns
+        T_tmp = []
+        score = []
+        ratio_over = 0
+        torque_over = 0
+        num_torque = np.array([np.zeros(shape=6)])
+        total_time = self.mission_time
+        # 采样间隔
+        sample_interval = 0.2
+        manipulability_index = []
+        i = 0
+        false_done = False
+        count = 0
+        for row in rows:
+            row_val = [col.value for col in row]
+            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+            ik_q = self.robot.ikine_LMS(T=T_tmp[i])
 
-                if ik_q.success == True:
-                    count += 1
-                    manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-                if i >= 1:
-                    # 生成时间向量
-                    traj_time = total_time/9 # 除以點位數量
-                    time_vector = np.linspace(0, traj_time, int(traj_time/sample_interval) + 1)
-                    traj = self.robot.jtraj(T_tmp[i-1],T_tmp[i],time_vector)
+            if ik_q.success == True:
+                count += 1
+                manipulability_index.append(self.robot.manipulability(q=ik_q.q))
+            if i >= 1:
+                # 生成时间向量
+                traj_time = total_time/9 # 除以點位數量
+                time_vector = np.linspace(0, traj_time, int(traj_time/sample_interval) + 1)
+                traj = self.robot.jtraj(T_tmp[i-1],T_tmp[i],time_vector)
 
-                    if np.amax(traj.sd) > 3.04:
-                        ratio_over = ratio_over + 1
-                    torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
+                if np.amax(traj.sd) > 3.04:
+                    ratio_over = ratio_over + 1
+                torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
 
-                    row = abs(torque[:,1]) # 取出第2行
-                    result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
-                    row = abs(torque[:,2]) # 取出第3行
-                    result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
-                    if len(result_2)>0 or len(result_3) >0:
-                        torque_over = torque_over + 1
-                    num_torque = np.append(num_torque, torque)
-                i = i + 1
+                row = abs(torque[:,1]) # 取出第2行
+                result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
+                row = abs(torque[:,2]) # 取出第3行
+                result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
+                if len(result_2)>0 or len(result_3) >0:
+                    torque_over = torque_over + 1
+                num_torque = np.append(num_torque, torque)
+            i = i + 1
 
-            num_samples = int(total_time / sample_interval)
-            total_energy = 0
-            for j in range(num_samples):
-                energy = abs(num_torque[j]) * sample_interval
-                total_energy += energy
-                
-            if count == 0:
-                return(ratio_over, torque_over, total_energy,0,0)
+        num_samples = int(total_time / sample_interval)
+        total_energy = 0
+        for j in range(num_samples):
+            energy = abs(num_torque[j]) * sample_interval
+            total_energy += energy
+            
+        if count == 0:
+            return(ratio_over, torque_over, total_energy,0,0)
+        else:
+            final_score = count / i
+            if count == 1:
+                return(ratio_over, torque_over, total_energy, final_score, manipulability_index[0]) # 回傳 manipulability[0]
             else:
-                final_score = count / i
-                if count == 1:
-                    return(ratio_over, torque_over, total_energy, final_score, manipulability_index[0]) # 回傳 manipulability[0]
-                else:
-                    return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+                return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
 
 
 

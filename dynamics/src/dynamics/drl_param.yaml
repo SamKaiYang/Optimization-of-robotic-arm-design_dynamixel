@@ -1,10 +1,10 @@
 op_function: case2
 arm_structure_dof: 6
-DRL_algorithm: 'C51'
-cmd_run: 2
-test_model_name: '20230329-142925'
+DRL_algorithm: 'DQN'
+cmd_run: 1
+test_model_name: '20230411-081908'
 op_dof: 6
-op_payload: 1
+op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
 mission_time: 30
 op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
