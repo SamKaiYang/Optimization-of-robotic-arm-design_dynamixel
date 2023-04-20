@@ -582,6 +582,15 @@ if __name__ == "__main__":
         drl.env.op_cost = config['op_cost']
         rospy.loginfo("Input op_cost: %d" % drl.env.op_cost)
 
+        drl.env.action_select = config['action_select']
+        rospy.loginfo("Input action_select: %s" % drl.env.action_select)
+
+        drl.env.point_test_excel = config['point_test_excel']
+        rospy.loginfo("Input point_test_excel: %s" % drl.env.point_test_excel)
+
+        test_episodes = config['test_episodes']
+        rospy.loginfo("Input test_episodes: %d" % test_episodes)
+        
         # 要開始時, 按下隨意鍵
         input_text = input("Enter some next: ")
         rospy.loginfo("Input text: %s" % input_text)
@@ -656,7 +665,7 @@ if __name__ == "__main__":
             # model_path = select_path + str(ros_topic.test_model_name) +'/models/model_last.pkl'
             model_path = select_path
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200 #20230326 mini-test 20
+            test = Tester(test_env, model_path, drl.env, num_episodes = test_episodes) # 20230309  change 300-> 200 #20230326 mini-test 20
             test.test()
             break
         else:
