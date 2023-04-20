@@ -385,14 +385,31 @@ class stl_conv_urdf():
     # TODO: fixed -------   
     def opt_specify_random_generate_write_urdf(self, total_arm_length):
 
-        # 隨機生成大臂長和小臂長
-        # diff_random_length = random.randint(5, 40)
-        # upper_arm_length = total_arm_length * diff_random_length / total_arm_length
-        # lower_arm_length = total_arm_length * (total_arm_length-diff_random_length) / total_arm_length
+        # diff_random_length = random.uniform(5, total_arm_length-10)
+        # upper_arm_length = random.uniform(5, total_arm_length-diff_random_length)
+        # lower_arm_length = total_arm_length - upper_arm_length
 
-        diff_random_length = random.uniform(5, total_arm_length-10)
-        upper_arm_length = random.uniform(5, total_arm_length-diff_random_length)
+        MAX_LENGTH = 40
+        MIN_LENGTH = 5
+        # total_arm_length = 30 # 固定值
+
+        diff_random_length = random.uniform(MIN_LENGTH, total_arm_length-MIN_LENGTH)
+        upper_arm_length = random.uniform(MIN_LENGTH, total_arm_length-diff_random_length)
         lower_arm_length = total_arm_length - upper_arm_length
+
+        # 对 upper_arm_length 和 lower_arm_length 进行限制
+        if upper_arm_length > MAX_LENGTH:
+            upper_arm_length = MAX_LENGTH
+            lower_arm_length = total_arm_length - upper_arm_length
+        elif lower_arm_length > MAX_LENGTH:
+            lower_arm_length = MAX_LENGTH
+            upper_arm_length = total_arm_length - lower_arm_length
+        elif upper_arm_length < MIN_LENGTH:
+            upper_arm_length = MIN_LENGTH
+            lower_arm_length = total_arm_length - upper_arm_length
+        elif lower_arm_length < MIN_LENGTH:
+            lower_arm_length = MIN_LENGTH
+            upper_arm_length = total_arm_length - lower_arm_length
 
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
