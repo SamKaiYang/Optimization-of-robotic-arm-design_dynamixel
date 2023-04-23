@@ -398,10 +398,10 @@ if __name__ == "__main__":
     # origin design compare
     print("start")
     original_design_test = RobotOptEnv()
-    original_design_test.original_design(41.565,38.435,44.7,44.7,1,30)
+    # original_design_test.original_design(41.565,38.435,44.7,44.7,1,30)
     # original_design_test.original_design(67.69459,12.30541,44.7,5.1,3,30)
-    
-
+    original_design_test.original_design(30.4267000820369,29.5732999179631,44.7,25.3,3,30)
+ 
     
     '''
     motion_bullet= motion_model()

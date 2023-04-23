@@ -89,6 +89,8 @@ class RobotOptEnv(gym.Env):
         self.motor_type_axis_2 = 5.1
         self.motor_type_axis_3 = 5.1
         self.mission_time = 0
+        self.low_torque_cost = -200
+        self.high_torque_cost = 200
         # FIXME:
         self.action_select = 'fixed' 
         self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
@@ -98,12 +100,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
-        self.observation_space = spaces.Box(np.array([self.low_ratio_over,self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_ratio_over,self.high_torque_over,self.high_power_consumption, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_ratio_over,self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3, self.low_torque_cost ]), 
+                                            np.array([self.high_ratio_over,self.high_torque_over,self.high_power_consumption, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0,0,0], dtype=np.float64)
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -289,6 +291,7 @@ class RobotOptEnv(gym.Env):
         self.state[4] = manipulability_score
         self.state[5] = self.std_L2
         self.state[6] = self.std_L3
+        self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
 
@@ -296,6 +299,7 @@ class RobotOptEnv(gym.Env):
         # TODO: fixed
         shaping = (
             # - self.state[0] # 超過轉速量
+            - self.state[7] # 馬達扭矩成本
             - self.state[2] # 功耗
             # + 100 * self.state[3] # 可達性
             + 1000 * self.state[4] # 可操作性
@@ -367,8 +371,8 @@ class RobotOptEnv(gym.Env):
             
             # self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
-            self.motor_type_axis_2 = 5.1
-            self.motor_type_axis_3 = 5.1
+            self.motor_type_axis_2 = 44.7
+            self.motor_type_axis_3 = 44.7
             self.mission_time = np.random.uniform(low = 20, high = 50)
             
             # rospy.loginfo("random_total_arm_length: %s", random_total_arm_length)
@@ -393,6 +397,7 @@ class RobotOptEnv(gym.Env):
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
+            self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -416,8 +421,8 @@ class RobotOptEnv(gym.Env):
             self.total_weight = self.op_weight # Kg
             self.total_cost = self.op_cost # 元
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
-            self.motor_type_axis_2 = 5.1
-            self.motor_type_axis_3 = 5.1
+            self.motor_type_axis_2 = 44.7
+            self.motor_type_axis_3 = 44.7
             ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[0] = ratio_over
             self.state[1] = torque_over
@@ -427,6 +432,7 @@ class RobotOptEnv(gym.Env):
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
             self.state[6] = self.std_L3
+            self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
     def original_design(self,std_L2,std_L3, motor_1, motor_2, payload, mission_time):
@@ -457,6 +463,7 @@ class RobotOptEnv(gym.Env):
         rospy.loginfo("manipulability_score: %s", manipulability_score)
         rospy.loginfo("std_L2: %s", std_L2)
         rospy.loginfo("std_L3: %s", std_L3)
+        rospy.loginfo("motor_torque_cost: %s", motor_type_axis_2 + motor_type_axis_3)
         
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
