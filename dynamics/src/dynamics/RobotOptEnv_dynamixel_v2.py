@@ -91,7 +91,7 @@ class RobotOptEnv(gym.Env):
         self.mission_time = 0
         # FIXME:
         self.action_select = 'fixed' 
-        self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random'
+        self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
         self.MAX_LENGTH = 40
         self.MIN_LENGTH = 5
         # TODO: 增加馬達模組選型action

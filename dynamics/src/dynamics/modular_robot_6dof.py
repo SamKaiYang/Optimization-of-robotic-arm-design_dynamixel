@@ -185,7 +185,8 @@ if __name__ == '__main__':    # pragma nocover
     # Set the desired end-effector pose
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
-    
+    q_test =  np.r_[0, 90, -0, 0, 0, 0]*deg
+    # robot.plot(q=q_test, backend='pyplot', dt = 10)
     
     robot.teach()
     # manipulability teach view
@@ -234,7 +235,7 @@ if __name__ == '__main__':    # pragma nocover
 '''
 
 '''
-    # robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
+    robot.teach(limits= [-1, 1, -1, 1, -1, 1],vellipse=True)
 
     
     # import xlsx
