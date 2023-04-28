@@ -405,12 +405,14 @@ if __name__ == "__main__":
     
     '''
     motion_bullet= motion_model()
-    # motion_bullet.reset_robot_urdf(12,12)
-    # motion_bullet.stl_trimesh_scaling(12, 12)
+    # motion_bullet.reset_robot_urdf(30.4267000820369,12)
+    # motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
     motion_bullet.motion_planning_init_3dof(True)
     wait_for_duration(100)
     '''
-    '''
+    motion_bullet= motion_model()
+    motion_bullet.reset_robot_urdf(30.4267000820369,29.5732999179631)
+    motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
     # TODO: add target_points
     target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
     distance_points = 0.05
@@ -430,7 +432,7 @@ if __name__ == "__main__":
     motion_bullet.motion_planning_init(True)
     motion_bullet.plane_call()
     motion_bullet.test_point()
-    '''
+    
     '''
     q1 = [0,0,0,0,0,0]
     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
