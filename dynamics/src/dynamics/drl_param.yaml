@@ -2,7 +2,7 @@ op_function: case2
 arm_structure_dof: 6
 DRL_algorithm: 'DQN'
 cmd_run: 1
-test_model_name: '20230411-081908'
+test_model_name: '20230426-090522'
 op_dof: 6
 op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
@@ -13,5 +13,5 @@ op_radius: 60
 op_weight: 1.5
 op_cost: 2
 action_select: 'fixed'
-point_test_excel: './xlsx/task_point_6dof_tested_ori_random.xlsx'
+point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
 test_episodes: 200

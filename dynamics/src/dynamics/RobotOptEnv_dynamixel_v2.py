@@ -246,32 +246,32 @@ class RobotOptEnv(gym.Env):
                 self.motor_type_axis_2 = 44.7 # 型號
                 
             elif action == 6: # 軸3  # 短 # 型號1
-                self.std_L3 -= 1.0
+                self.std_L2 -= 1.0
                 self.std_L3 += 1.0
                 self.motor_type_axis_3 = 5.1 # 型號
                 
             elif action == 7: # 軸3  # 長 # 型號1
-                self.std_L3 += 1.0
+                self.std_L2 += 1.0
                 self.std_L3 -= 1.0
                 self.motor_type_axis_3 = 5.1 # 型號
                 
             elif action == 8: # 軸3  # 短 # 型號2
-                self.std_L3 -= 1.0
+                self.std_L2 -= 1.0
                 self.std_L3 += 1.0
                 self.motor_type_axis_3 = 25.3 # 型號
                 
             elif action == 9: # 軸3  # 長 # 型號2
-                self.std_L3 += 1.0
+                self.std_L2 += 1.0
                 self.std_L3 -= 1.0
                 self.motor_type_axis_3 = 25.3 # 型號
 
             elif action == 10: # 軸3  # 短 # 型號3
-                self.std_L3 -= 1.0
+                self.std_L2 -= 1.0
                 self.std_L3 += 1.0
                 self.motor_type_axis_3 = 44.7 # 型號
 
             elif action == 11: # 軸3  # 長 # 型號3
-                self.std_L3 += 1.0
+                self.std_L2 += 1.0
                 self.std_L3 -= 1.0
                 self.motor_type_axis_3 = 44.7 # 型號
 
