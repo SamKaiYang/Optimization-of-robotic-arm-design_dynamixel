@@ -496,7 +496,8 @@ class stl_conv_urdf():
         random_fixed_arm_length = random.uniform(-5,5)
         upper_arm_length = upper_arm_length - random_fixed_arm_length
         lower_arm_length = lower_arm_length + random_fixed_arm_length
-
+        rospy.loginfo("random_fixed_arm_length: %s", random_fixed_arm_length)
+        
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
