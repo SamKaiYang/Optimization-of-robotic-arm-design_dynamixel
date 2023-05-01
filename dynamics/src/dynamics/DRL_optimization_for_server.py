@@ -602,13 +602,13 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' +str(arm_structure_dof) + \
-                '/' + curr_time + '/models/'  # 保存模型的路径
+                '/' + curr_time + '/models/' + str(drl.env.action_select) + '/' # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
                 model_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + curr_time + '/models/'  # 保存模型的路径
+                '/' + curr_time + '/models/' + str(drl.env.action_select) + '/'  # 保存模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
                 model_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + curr_time + '/models/'  # 保存模型的路径
+                '/' + curr_time + '/models/' + str(drl.env.action_select) + '/'  # 保存模型的路径
             
             # 訓練
             drl.env.model_select = "train"
@@ -619,8 +619,8 @@ if __name__ == "__main__":
             train.train(train_eps = ddqn_train_eps)
             # # 測試
             drl.env.model_select = "test"
-            save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + curr_time   # 保存結果的路径
+            # save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+            #     '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
             test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
@@ -639,13 +639,13 @@ if __name__ == "__main__":
             #     from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/' + str(drl.env.action_select) + '/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
                 select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/' + str(drl.env.action_select) + '/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
                 select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/' + str(drl.env.action_select) + '/'  # 選擇模型的路径
             # TODO: fixed
             '''
             if ros_topic.DRL_algorithm == 'DQN':

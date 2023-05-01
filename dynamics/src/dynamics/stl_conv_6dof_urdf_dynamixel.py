@@ -7,6 +7,8 @@ from os import path
 from urdf_parser_py.urdf import URDF, Robot
 from interface_control.msg import specified_parameter_design, cal_cmd, optimal_random
 import random
+# 計算方程組
+from sympy import symbols, solve
 # TODO: fix stl conv 6dof urdf & 修改為可調整dof的方式
 class stl_conv_urdf():
     def __init__(self, robot_name, robot_parameter):
@@ -410,6 +412,90 @@ class stl_conv_urdf():
         elif lower_arm_length < MIN_LENGTH:
             lower_arm_length = MIN_LENGTH
             upper_arm_length = total_arm_length - lower_arm_length
+
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
+        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
+        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
+        vol = volume_2 - volume_1
+        cog = cog_2 - cog_1
+        inertia = inertia_2 - inertia_1
+
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_5.0.STL')
+        volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
+        your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_12.0.STL')
+        volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
+        vol2 = volume_2 - volume_1
+        cog2 = cog_2 - cog_1
+        inertia2 = inertia_2 - inertia_1
+
+        # ===================================
+        self.axis_2_length = 12.0
+        self.axis_3_length = 12.0
+        self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL")
+        self.robot_stl_axis_3 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL")
+        self.mesh_2_name = self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL"
+        self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
+
+        self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        # random axis 2 length
+        # TODO: fixed -------
+        # random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
+        random_axis_2_length = lower_arm_length
+        rospy.loginfo("dynamixel_axis_2_length: %s", random_axis_2_length)
+        # print("dynamixel_axis_2_length                    = {0}".format(random_axis_2_length))
+        diff_axis_2_length = random_axis_2_length - self.axis_2_length
+        self.axis_2_length = random_axis_2_length
+        self.op_axis_2_length = random_axis_2_length
+        self.L2_volume = self.L2_volume + vol*(diff_axis_2_length/7)
+        self.L2_cog = self.L2_cog + cog*(diff_axis_2_length/7)
+        self.L2_inertia = self.L2_inertia + inertia*(diff_axis_2_length/7)
+
+        self.L2_volume = self.L2_volume*1000
+        self.L2_inertia = self.L2_inertia*1000
+        
+        self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        # random axis 3 length
+        # TODO: fixed -------
+        # random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
+        random_axis_3_length = upper_arm_length
+        rospy.loginfo("dynamixel_axis_3_length: %s", random_axis_3_length)
+        # print("dynamixel_axis_3_length                    = {0}".format(random_axis_3_length))
+        diff_axis_3_length = random_axis_3_length - self.axis_3_length
+        self.axis_3_length = random_axis_3_length
+        self.op_axis_3_length = random_axis_3_length
+        self.L3_volume = self.L3_volume + vol2*(diff_axis_3_length/7)
+        self.L3_cog = self.L3_cog + cog2*(diff_axis_3_length/7)
+        self.L3_inertia = self.L3_inertia + inertia2*(diff_axis_3_length/7)
+
+        self.L3_volume = self.L3_volume*1000
+        self.L3_inertia = self.L3_inertia*1000
+        # ===================================
+        self.opt_read_check_urdf()
+        self.opt_data_write_urdf(random_axis_2_length,random_axis_3_length)
+        
+        return random_axis_2_length, random_axis_3_length
+    # for 6 dof generated information on the interface specified length 2 , 3 axis
+
+    # TODO: fixed -------   
+    def opt_specify_test_generate_write_urdf(self, total_arm_length):
+        MAX_LENGTH = 40
+        MIN_LENGTH = 5
+        # total_arm_length = 30 # 固定值
+        # 定義常數和變數，此常數為UR5機械手臂臂長比例
+        c = 0.92235
+        s = total_arm_length
+        # 計算方程組
+        x, y = symbols('x y')
+        eq1 = x/y - c
+        eq2 = x + y - s
+        sol = solve((eq1, eq2), (x, y))
+        # 輸出結果
+        upper_arm_length = sol[x]
+        lower_arm_length = sol[y]
+        random_fixed_arm_length = random.uniform(-5,5)
+        upper_arm_length = upper_arm_length - random_fixed_arm_length
+        lower_arm_length = lower_arm_length + random_fixed_arm_length
 
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_5.0.STL')
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
