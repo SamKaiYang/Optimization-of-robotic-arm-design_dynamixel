@@ -304,11 +304,11 @@ class RobotOptEnv(gym.Env):
             # + 100 * self.state[3] # 可達性
             + 1000 * self.state[4] # 可操作性
         ) 
-        rospy.loginfo("shaping: %s", shaping)
+        
         if self.prev_shaping is not None:
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
-        
+        rospy.loginfo("shaping reward: %s", reward)
 
         if self.state[0] > 0:
             self.ratio_over = True
@@ -352,10 +352,10 @@ class RobotOptEnv(gym.Env):
         
         self.ratio_over = False
         self.torque_over = False #reset
-        rospy.loginfo("counts: %s", self.counts)
-        rospy.loginfo("step_reward: %s", reward)
-        rospy.loginfo("step_reward: %s", self.state)
-        rospy.loginfo("================================")
+        # rospy.loginfo("counts: %s", self.counts)
+        # rospy.loginfo("step_reward: %s", reward)
+        # rospy.loginfo("step_state: %s", self.state)
+        # rospy.loginfo("================================")
         # print("================================")
         current_design = [self.std_L2, self.std_L3, self.motor_rated[1], self.motor_rated[2]]
         return self.state, reward, terminated, current_design

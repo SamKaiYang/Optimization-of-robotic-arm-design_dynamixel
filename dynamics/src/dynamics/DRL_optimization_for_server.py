@@ -313,7 +313,7 @@ class Trainer:
             replay_buffer=self.replay_buffer,
             global_step=self.agent.train_step_counter
         )
-
+        self.train_checkpointer.initialize_or_restore()
         self.policy_dir = os.path.join(self.model_path, 'policy')
         self.tf_policy_saver = policy_saver.PolicySaver(agent.policy)
         # add -----
@@ -322,7 +322,7 @@ class Trainer:
         self.num_eval_episodes = 10  # @param {type:"integer"}
         self.log_interval = 200  # @param {type:"integer"}
         self.eval_interval = 1000  # @param {type:"integer"}
-
+        self.checkpoint_interval = 10000
     def compute_avg_return(self, environment, policy, num_episodes=10):
 
         total_return = 0.0
@@ -353,6 +353,7 @@ class Trainer:
 
     def train(self, pre_fr=0, train_eps = 300):
         rospy.loginfo("-------------數據採集------------")
+        # self.initial_collect_steps = 2
         for _ in range(self.initial_collect_steps):
             time_step_collect = self.collect_step(self.env, self.random_policy)
             rospy.loginfo("initial_collect_steps: %s", _)
@@ -373,35 +374,54 @@ class Trainer:
         self.agent.train_step_counter.assign(0)
         rospy.loginfo("Evaluate the agent's policy once before training.")
         # Evaluate the agent's policy once before training.
-        avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
-        returns = [avg_return]
+        # avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
+        # returns = [avg_return]
 
         rospy.loginfo("-------------Train Start------------")
+        episode_return = 0.0
         for _ in range(self.num_iterations):
 
         # Collect a few steps using collect_policy and save to the replay buffer.
             for _ in range(self.collect_steps_per_iteration):
                 time_step = self.collect_step(self.env, self.agent.collect_policy)
-
+            
             # Sample a batch of data from the buffer and update the agent's network.
             experience, unused_info = next(iterator)
             train_loss = self.agent.train(experience)
-            tb.add_scalar("/trained-model/Loss_per_frame/", float(train_loss.loss), _)
             step = self.agent.train_step_counter.numpy()
-
+            tb.add_scalar("/trained-model/Loss_per_frame/", float(train_loss.loss), step)
             # 開始tensorboard紀錄
             step_reward = time_step.reward.numpy()[0]
+            step_state = time_step.observation.numpy()[0]
+            
             tb.add_scalar("/trained-model/train_step_reward/", step_reward, step)
             # tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
+            episode_return += step_reward
+            rospy.loginfo("step_reward: %s", step_reward)
+            rospy.loginfo("step_state: %s", step_state)
+            rospy.loginfo("step: %s", step)
+            rospy.loginfo("train_loss: %s", float(train_loss.loss))
+            rospy.loginfo("================================")
+            if time_step.is_last():
+                rospy.loginfo("episode_return: %s", episode_return)
+                rospy.loginfo("------episode end.-----------")
+                tb.add_scalar("/trained-model/Episode_Return/", episode_return, step)
+                episode_return = 0.0
 
             if step % self.log_interval == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss.loss))
                 tb.add_scalar("/trained-model/loss_log/",  float(train_loss.loss), step)
-            if step % self.eval_interval == 0:
-                avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
-                print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
-                tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
-                returns.append(avg_return)
+            # if step % self.eval_interval == 0:
+            #     avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
+            #     print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
+            #     tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
+            #     # returns.append(avg_return)
+            # 每一萬步儲存一次 model 
+            if step % self.checkpoint_interval == 0:
+                self.train_checkpointer.save(self.agent.train_step_counter)
+                self.tf_policy_saver.save(self.policy_dir)
+
+        # end save final train model 
         self.train_checkpointer.save(self.agent.train_step_counter)
         self.train_checkpointer.initialize_or_restore()
         self.agent.global_step = tf.compat.v1.train.get_global_step()
