@@ -1,7 +1,7 @@
 op_function: case2
 arm_structure_dof: 6
 DRL_algorithm: 'DQN'
-cmd_run: 2
+cmd_run: 3
 test_model_name: '20230426-090522'
 op_dof: 6
 op_payload: 3

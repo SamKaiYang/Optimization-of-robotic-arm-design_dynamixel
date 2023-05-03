@@ -517,29 +517,6 @@ class ReTrainer:
             data_spec=self.agent.collect_data_spec,
             batch_size=self.env.batch_size,
             max_length=self.replay_buffer_capacity)
-        # FIXME: retrain init -----
-        if self.retrain_path is not None:
-            # 加载之前训练的模型
-            self.train_checkpointer = common.Checkpointer(
-                ckpt_dir=os.path.join(self.retrain_path, 'checkpoint'),
-                agent=self.agent,
-                policy=self.agent.policy,
-                replay_buffer=self.replay_buffer,
-                global_step=self.agent.train_step_counter
-            )
-            self.train_checkpointer.initialize_or_restore()
-
-            # 将之前的经验添加到回放缓冲区
-            replay_buffer_data_file = os.path.join(self.retrain_path, 'replay_buffer.pkl')
-            with open(replay_buffer_data_file, 'rb') as f:
-                prev_replay_buffer_data = pickle.load(f)
-            for data in prev_replay_buffer_data:
-                traj = trajectory.from_transition(*data)
-                self.replay_buffer.add_batch(traj)
-
-            # 将训练迭代次数增加到新的总次数
-            self.num_iterations += self.agent.train_step_counter.numpy()
-
 
         self.collect_driver = dynamic_step_driver.DynamicStepDriver(
             self.env,
@@ -560,13 +537,25 @@ class ReTrainer:
         )
         
         self.policy_dir = os.path.join(self.model_path, 'policy')
-        self.tf_policy_saver = policy_saver.PolicySaver(agent.policy)
+        self.tf_policy_saver = policy_saver.PolicySaver(self.agent.policy)
         # add -----
         self.batch_size = 64  # @param {type:"integer"}
         self.n_step_update = 2  # @param {type:"integer"}
         self.num_eval_episodes = 10  # @param {type:"integer"}
         self.log_interval = 200  # @param {type:"integer"}
         self.eval_interval = 1000  # @param {type:"integer"}
+
+        # FIXME: retrain init -----
+        # Load the saved policy
+        if retrain_path != None:
+            saved_policy_path = os.path.join(self.retrain_path, 'policy')
+            saved_policy = tf.saved_model.load(saved_policy_path)
+            self.tf_policy_saver = saved_policy
+            # TODO:
+        else:
+            print("The model to be retrained is not loaded.")
+        # FIXME: TFUniformReplayBuffer 為空，緩衝區中沒有要採樣的項目。 緩衝區需要先充滿經驗，然後才能用於訓練。
+        # TODO: use Checkpointer
 
     def compute_avg_return(self, environment, policy, num_episodes=10):
 
@@ -597,15 +586,16 @@ class ReTrainer:
         return next_time_step
 
     def train(self, pre_fr=0, train_eps = 300):
-        rospy.loginfo("-------------數據採集------------")
-        for _ in range(self.initial_collect_steps):
-            time_step_collect = self.collect_step(self.env, self.random_policy)
-            rospy.loginfo("initial_collect_steps: %s", _)
-            # This loop is so common in RL, that we provide standard implementations of
-            # these. For more details see the drivers module.
+        # rospy.loginfo("-------------數據採集------------")
+        # for _ in range(self.initial_collect_steps):
+        #     time_step_collect = self.collect_step(self.env, self.random_policy)
+        #     rospy.loginfo("initial_collect_steps: %s", _)
+        #     # This loop is so common in RL, that we provide standard implementations of
+        #     # these. For more details see the drivers module.
 
-            # Dataset generates trajectories with shape [BxTx...] where
-            # T = n_step_update + 1.
+        #     # Dataset generates trajectories with shape [BxTx...] where
+        #     # T = n_step_update + 1.
+        
         dataset = self.replay_buffer.as_dataset(
             num_parallel_calls=3, sample_batch_size=self.batch_size,
             num_steps=self.n_step_update + 1).prefetch(3)
@@ -620,7 +610,7 @@ class ReTrainer:
         # Evaluate the agent's policy once before training.
         avg_return = self.compute_avg_return(self.env, self.agent.policy, self.num_eval_episodes)
         returns = [avg_return]
-        rospy.loginfo("-------------Train Start------------")
+        rospy.loginfo("-------------Retrain Start------------")
         for _ in range(self.num_iterations):
 
         # Collect a few steps using collect_policy and save to the replay buffer.
@@ -646,6 +636,10 @@ class ReTrainer:
                 print('step = {0}: Average Return = {1:.2f}'.format(step, avg_return))
                 tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
                 returns.append(avg_return)
+            # TODO: 定期save model
+            # 定期儲存模型
+            # if (_ + 1) % 1000 == 0:
+            #     tf.saved_model.save(agent.policy, '/path/to/save/model')
         self.train_checkpointer.save(self.agent.train_step_counter)
         self.train_checkpointer.initialize_or_restore()
         self.agent.global_step = tf.compat.v1.train.get_global_step()
