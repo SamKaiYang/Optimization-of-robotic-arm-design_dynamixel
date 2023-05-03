@@ -379,6 +379,7 @@ class Trainer:
 
         rospy.loginfo("-------------Train Start------------")
         episode_return = 0.0
+        # self.num_iterations =10 
         for _ in range(self.num_iterations):
 
         # Collect a few steps using collect_policy and save to the replay buffer.
@@ -417,16 +418,19 @@ class Trainer:
             #     tb.add_scalar("/trained-model/Average_Return/", avg_return, step)
             #     # returns.append(avg_return)
             # 每一萬步儲存一次 model 
+            # self.checkpoint_interval = 2
             if step % self.checkpoint_interval == 0:
+                filename = 'policy_step{}'.format(self.agent.train_step_counter.numpy())
                 self.train_checkpointer.save(self.agent.train_step_counter)
-                self.tf_policy_saver.save(self.policy_dir)
+                self.tf_policy_saver.save(self.policy_dir+ '/' + filename)
 
         # end save final train model 
+        filename = 'policy_step{}'.format(self.agent.train_step_counter.numpy())
         self.train_checkpointer.save(self.agent.train_step_counter)
         self.train_checkpointer.initialize_or_restore()
         self.agent.global_step = tf.compat.v1.train.get_global_step()
 
-        self.tf_policy_saver.save(self.policy_dir)
+        self.tf_policy_saver.save(self.policy_dir+ '/' + filename)
 
 
 class Tester(object):
@@ -761,6 +765,9 @@ if __name__ == "__main__":
 
         test_episodes = config['test_episodes']
         rospy.loginfo("Input test_episodes: %d" % test_episodes)
+
+        policy_num = config['policy_num']
+        rospy.loginfo("Input policy_num: %d" % policy_num)
         # 要開始時, 按下隨意鍵
         input_text = input("Enter some next: ")
         rospy.loginfo("Input text: %s" % input_text)
@@ -792,6 +799,7 @@ if __name__ == "__main__":
             # save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
             #     '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
+            model_path = model_path + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
             test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
@@ -802,13 +810,13 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'   # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/'  + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
                 select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/'  + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
                 select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/' + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
             
             drl.env.model_select = "test"
             model_path = select_path
