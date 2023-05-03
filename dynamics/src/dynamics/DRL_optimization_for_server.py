@@ -425,12 +425,12 @@ class Trainer:
                 self.tf_policy_saver.save(self.policy_dir+ '/' + filename)
 
         # end save final train model 
-        filename = 'policy_step{}'.format(self.agent.train_step_counter.numpy())
+        # filename = 'policy_step{}'.format(self.agent.train_step_counter.numpy())
         self.train_checkpointer.save(self.agent.train_step_counter)
         self.train_checkpointer.initialize_or_restore()
         self.agent.global_step = tf.compat.v1.train.get_global_step()
 
-        self.tf_policy_saver.save(self.policy_dir+ '/' + filename)
+        self.tf_policy_saver.save(self.policy_dir)
 
 
 class Tester(object):
