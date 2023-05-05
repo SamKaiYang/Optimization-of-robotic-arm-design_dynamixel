@@ -304,11 +304,11 @@ class RobotOptEnv(gym.Env):
             # + 100 * self.state[3] # 可達性
             + 1000 * self.state[4] # 可操作性
         ) 
-        rospy.loginfo("shaping: %s", shaping)
+        
         if self.prev_shaping is not None:
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
-        
+        rospy.loginfo("shaping reward: %s", reward)
 
         if self.state[0] > 0:
             self.ratio_over = True
@@ -352,10 +352,10 @@ class RobotOptEnv(gym.Env):
         
         self.ratio_over = False
         self.torque_over = False #reset
-        rospy.loginfo("counts: %s", self.counts)
-        rospy.loginfo("step_reward: %s", reward)
-        rospy.loginfo("step_reward: %s", self.state)
-        rospy.loginfo("================================")
+        # rospy.loginfo("counts: %s", self.counts)
+        # rospy.loginfo("step_reward: %s", reward)
+        # rospy.loginfo("step_state: %s", self.state)
+        # rospy.loginfo("================================")
         # print("================================")
         current_design = [self.std_L2, self.std_L3, self.motor_rated[1], self.motor_rated[2]]
         return self.state, reward, terminated, current_design
@@ -404,14 +404,17 @@ class RobotOptEnv(gym.Env):
             # random state (手臂長度隨機)
             rospy.loginfo("model_select:%s", self.model_select)
             total_arm_length = self.op_radius
-            if self.action_select == 'variable':
-                self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
-            elif self.action_select == 'fixed':
-                total_arm_length = self.op_radius
-                self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
+            # if self.action_select == 'variable':
+            #     # 固定random 大小臂長 上下5cm 內
+            #     self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            # elif self.action_select == 'fixed':
+            #     total_arm_length = self.op_radius
+            #     # 固定random 大小臂長 上下5cm 內
+            #     self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             
-            # self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
-            # self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
+            
+            # TODO: add 固定random 大小臂長 上下5cm 內
+            self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_test_generate_write_urdf(total_arm_length)
             self.robot.__init__() # 重製機器人
             # FIXME: 修改未成功匯入payload給予機器人的問題
             self.payload = self.op_payload
