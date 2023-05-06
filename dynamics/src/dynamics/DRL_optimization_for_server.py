@@ -474,9 +474,14 @@ class Tester(object):
                 state_traj.append(state.numpy()[0])
                 step += 1
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
+                rospy.loginfo("step_reward: %s", step_reward)
+                rospy.loginfo("step_state: %s", state.numpy()[0])
+                rospy.loginfo("step: %s", step)
+            
             episode += 1
             episode_reward = step_reward
-            
+            rospy.loginfo("episode_reward: %s", episode_reward)
+            rospy.loginfo("================================")
             for j in range(len(state.numpy()[0])):
                 sheet.cell(row=i+1, column=j+1).value = state.numpy()[0][j] # state record 
             # self.motor_rated[1], self.motor_rated[2]] record
@@ -816,7 +821,7 @@ if __name__ == "__main__":
             # save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
             #     '/' + curr_time   # 保存結果的路径
             # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
-            model_path = model_path + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
+            # model_path = model_path + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
             test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
             test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
@@ -827,13 +832,13 @@ if __name__ == "__main__":
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/'   # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'DDQN':
                 select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/'  + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             elif ros_topic.DRL_algorithm == 'C51':
                 select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-                '/' + str(ros_topic.test_model_name) + '/models/' + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
             
             drl.env.model_select = "test"
             model_path = select_path

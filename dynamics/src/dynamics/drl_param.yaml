@@ -1,18 +1,18 @@
 op_function: case2
 arm_structure_dof: 6
-DRL_algorithm: 'DQN'
+DRL_algorithm: 'C51'
 cmd_run: 1
-test_model_name: '20230426-090522'
+test_model_name: 'DQN-6-variable-20230503-155859'
 op_dof: 6
 op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
 mission_time: 30
 op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
 op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
-op_radius: 60
+op_radius: 50
 op_weight: 1.5
 op_cost: 2
 action_select: 'variable'
 point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
-test_episodes: 200
+test_episodes: 50
 policy_num: 40000

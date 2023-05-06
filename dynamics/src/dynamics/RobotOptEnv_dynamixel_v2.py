@@ -317,14 +317,9 @@ class RobotOptEnv(gym.Env):
             self.torque_over = True
 
         terminated = False
-        # TODO: 設定限制的最大、最小臂長
-        # 避免軸長小於0
-        # if self.state[5] <= 0 or self.state[6] <=  0:
-        #     # terminated = True
+        # if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
+        #     terminated = True
         #     reward += -200
-        if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
-            terminated = True
-            reward += -200
         # if self.ratio_over == True or self.torque_over == True and self.state[3] < 0.6: 
         #     reward += -20
         # elif self.ratio_over == True or self.torque_over == True and 0.6 <= self.state[3] < 0.8: 
@@ -361,11 +356,7 @@ class RobotOptEnv(gym.Env):
         
         self.ratio_over = False
         self.torque_over = False #reset
-        # rospy.loginfo("counts: %s", self.counts)
-        # rospy.loginfo("step_reward: %s", reward)
-        # rospy.loginfo("step_state: %s", self.state)
-        # rospy.loginfo("================================")
-        # print("================================")
+       
         current_design = [self.std_L2, self.std_L3, self.motor_rated[1], self.motor_rated[2]]
         return self.state, reward, terminated, current_design
     # reset环境状态 
