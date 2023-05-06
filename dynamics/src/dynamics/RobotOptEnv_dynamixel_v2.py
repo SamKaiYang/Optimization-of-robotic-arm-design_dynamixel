@@ -325,27 +325,36 @@ class RobotOptEnv(gym.Env):
         if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
             terminated = True
             reward += -200
-        if self.ratio_over == True or self.torque_over == True and self.state[3] < 0.6: 
-            reward += -20
-        elif self.ratio_over == True or self.torque_over == True and 0.6 <= self.state[3] < 0.8: 
-            reward += -10
-        elif self.ratio_over == True or self.torque_over == True and 0.8 <= self.state[3] <= 1.0:   
-            reward += -5
-        elif self.ratio_over == False and self.torque_over == False and self.state[3] < 0.6: 
-            reward += +5
-        elif self.ratio_over == False and self.torque_over == False and 0.6 <= self.state[3] < 0.8:
-            reward += +10
-        elif self.ratio_over == False and self.torque_over == False and 0.8 <= self.state[3] < 0.9:
-            reward += +20
-        elif self.ratio_over == False and self.torque_over == False and 0.9 <= self.state[3] < 1.0:
-            # terminated = True
-            reward += +50
-        # success
-        elif self.ratio_over == False and self.torque_over == False and self.state[3] == 1.0:
-            terminated = True
-            reward += +100
-            self.counts = 0
-        
+        # if self.ratio_over == True or self.torque_over == True and self.state[3] < 0.6: 
+        #     reward += -20
+        # elif self.ratio_over == True or self.torque_over == True and 0.6 <= self.state[3] < 0.8: 
+        #     reward += -10
+        # elif self.ratio_over == True or self.torque_over == True and 0.8 <= self.state[3] <= 1.0:   
+        #     reward += -5
+        # elif self.ratio_over == False and self.torque_over == False and self.state[3] < 0.6: 
+        #     reward += +5
+        # elif self.ratio_over == False and self.torque_over == False and 0.6 <= self.state[3] < 0.8:
+        #     reward += +10
+        # elif self.ratio_over == False and self.torque_over == False and 0.8 <= self.state[3] < 0.9:
+        #     reward += +20
+        # elif self.ratio_over == False and self.torque_over == False and 0.9 <= self.state[3] < 1.0:
+        #     # terminated = True
+        #     reward += +50
+        # # success
+        # elif self.ratio_over == False and self.torque_over == False and self.state[3] == 1.0:
+        #     terminated = True
+        #     reward += +100
+        #     self.counts = 0
+        if self.ratio_over or self.torque_over:
+            percent = 100 - self.state[3] * 100    
+            reward += -percent
+        else:
+            percent = self.state[3] * 100
+            reward += percent
+            # success
+            if percent == 100:
+                terminated = True
+                self.counts = 0
         if self.counts == 50: # max_steps
             terminated = True
             self.counts = 0

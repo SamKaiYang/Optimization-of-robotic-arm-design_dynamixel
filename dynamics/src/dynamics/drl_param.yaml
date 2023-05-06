@@ -12,7 +12,7 @@ op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
 op_radius: 60
 op_weight: 1.5
 op_cost: 2
-action_select: 'fixed'
+action_select: 'variable'
 point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
 test_episodes: 200
 policy_num: 40000
