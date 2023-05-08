@@ -286,7 +286,7 @@ class RobotOptEnv(gym.Env):
         else:
             ratio_over = 10
             torque_over = 10
-            consumption = float('inf')
+            consumption = 2000
         # ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # rospy.loginfo("reach_score: %s", reach_score)
@@ -453,7 +453,7 @@ class RobotOptEnv(gym.Env):
             else:
                 ratio_over = 10
                 torque_over = 10
-                consumption = float('inf')
+                consumption = 2000
             self.prev_shaping = None
             self.reachable_tmp = 0
             self.state[0] = ratio_over
@@ -499,7 +499,7 @@ class RobotOptEnv(gym.Env):
             else:
                 ratio_over = 10
                 torque_over = 10
-                consumption = float('inf')
+                consumption = 2000
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = np.abs(consumption)
