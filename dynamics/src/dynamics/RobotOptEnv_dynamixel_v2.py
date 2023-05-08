@@ -371,16 +371,19 @@ class RobotOptEnv(gym.Env):
         #         terminated = True
         #         self.counts = 0
         # TODO: case 3
-        percent = self.state[3] * 100
-        reward += percent
-        # success
+        if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
+            terminated = True
+            reward += -200
+        percent = 100 - self.state[3] * 100
+        reward += -percent
+        # reachable == 1
         if percent == 100:
             ratio_score = -self.ratio_over
             torque_score = -self.torque_over
             reward += ratio_score * 3
             reward += torque_score * 3
             if self.ratio_over == 0 and self.torque_over == 0:
-                reward += 100
+                reward += 200
                 terminated = True
                 self.counts = 0
         if self.counts == 50: # max_steps
@@ -624,12 +627,12 @@ class RobotOptEnv(gym.Env):
         self.q6_s = -180
         self.q6_end = 180
         N = 10 # 改為直接random 10個點
-        theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
-        theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
-        theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
-        theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
-        theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
-        theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+        theta1 = self.q1_s + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
+        theta2 = self.q2_s + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
+        theta3 = self.q3_s + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
+        theta4 = self.q4_s + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
+        theta5 = self.q5_s + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
+        theta6 = self.q6_s + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
 
         for i in range(N):
             q1 = theta1[i, 0]
@@ -1258,12 +1261,12 @@ class RobotOptEnv_3dof(gym.Env):
         radian = 180 / pi
         # 弧度
 
-        self.q1_s = -160
-        self.q1_end = 160
-        self.q2_s = -160
-        self.q2_end = 160
-        self.q3_s = -160
-        self.q3_end = 160
+        self.q1_s = -180
+        self.q1_end = 180
+        self.q2_s = -50
+        self.q2_end = 230
+        self.q3_s = -150
+        self.q3_end = 150
         # TODO: fixed 3dof
         # self.q4_s = -160
         # self.q4_end = 160
@@ -1272,14 +1275,14 @@ class RobotOptEnv_3dof(gym.Env):
         # self.q6_s = -160
         # self.q6_end = 160
         N = 10
-        theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
-        theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
-        theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
+        theta1 = self.q1_s + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
+        theta2 = self.q2_s + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
+        theta3 = self.q3_s + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
         # TODO: fixed 3dof
         # theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
         # theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
         # theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
-
+        
         for i in range(N):
             q1 = theta1[i, 0]
             q2 = theta2[i, 0]
@@ -1830,27 +1833,23 @@ class RobotOptEnv_5dof(gym.Env):
         radian = 180 / pi
         # 弧度
 
-        self.q1_s = -160
-        self.q1_end = 160
-        self.q2_s = -160
-        self.q2_end = 160
-        self.q3_s = -160
-        self.q3_end = 160
-        self.q4_s = -160
-        self.q4_end = 160
-        self.q5_s = -160
-        self.q5_end = 160
-        # TODO: fixed 5dof
-        # self.q6_s = -160
-        # self.q6_end = 160
-        N = 10
-        theta1 = self.q1_end + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
-        theta2 = self.q2_end + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
-        theta3 = self.q3_end + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
-        theta4 = self.q4_end + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
-        theta5 = self.q5_end + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
-        # TODO: fixed 5dof
-        # theta6 = self.q6_end + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+        self.q1_s = -180
+        self.q1_end = 180
+        self.q2_s = -50
+        self.q2_end = 230
+        self.q3_s = -150
+        self.q3_end = 150
+        self.q4_s = -180
+        self.q4_end = 180
+        self.q5_s = -180
+        self.q5_end = 180
+        
+        N = 10 # 改為直接random 10個點
+        theta1 = self.q1_s + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
+        theta2 = self.q2_s + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
+        theta3 = self.q3_s + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
+        theta4 = self.q4_s + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
+        theta5 = self.q5_s + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
 
         for i in range(N):
             q1 = theta1[i, 0]
