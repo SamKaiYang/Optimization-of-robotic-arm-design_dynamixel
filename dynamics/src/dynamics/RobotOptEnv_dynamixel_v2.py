@@ -667,8 +667,8 @@ class RobotOptEnv(gym.Env):
             self.T = self.robot.fkine(
                 [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
             )
-            t = np.around(self.T.t, 2)
-            r = np.around(self.T.rpy('deg'), 0)
+            t = np.around(self.T.t, 3)
+            r = np.around(self.T.rpy('deg'), 3)
             self.T_x.append(t[0])
             self.T_y.append(t[1])
             self.T_z.append(t[2])
