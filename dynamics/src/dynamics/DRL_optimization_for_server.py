@@ -99,6 +99,9 @@ import os
 import shutil
 import tempfile
 import zipfile
+
+import itertools
+
 files = None
 # add
 
@@ -357,6 +360,10 @@ class Trainer:
         for _ in range(self.initial_collect_steps):
             time_step_collect = self.collect_step(self.env, self.random_policy)
             rospy.loginfo("initial_collect_steps: %s", _)
+            collect_step_reward = time_step_collect.reward.numpy()[0]
+            collect_step_state = time_step_collect.observation.numpy()[0]
+            rospy.loginfo("collect_step_reward: %s", collect_step_reward)
+            rospy.loginfo("collect_step_state: %s", collect_step_state)
             # This loop is so common in RL, that we provide standard implementations of
             # these. For more details see the drivers module.
 
@@ -794,10 +801,11 @@ if __name__ == "__main__":
         input_text = input("Enter some next: ")
         rospy.loginfo("Input text: %s" % input_text)
         
-        tb = tensorboardX.SummaryWriter()
+        
 
 
         if ros_topic.cmd_run == 1:
+            tb = tensorboardX.SummaryWriter()
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' +str(arm_structure_dof) + \
@@ -829,6 +837,7 @@ if __name__ == "__main__":
 
         # test tested_model
         if ros_topic.cmd_run == 2:
+            tb = tensorboardX.SummaryWriter()
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
@@ -848,6 +857,7 @@ if __name__ == "__main__":
             break
         # retrain 
         if ros_topic.cmd_run == 3:
+            tb = tensorboardX.SummaryWriter()
             ros_topic.cmd_run = 0
             if ros_topic.DRL_algorithm == 'DQN':
                 model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' +str(arm_structure_dof) + \
@@ -881,5 +891,70 @@ if __name__ == "__main__":
             test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
             test.test()
             break
+        # 多種任務測試
+        if ros_topic.cmd_run == 4:
+            ros_topic.cmd_run = 0
+            if ros_topic.DRL_algorithm == 'DQN':
+                select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'   # 選擇模型的路径
+            elif ros_topic.DRL_algorithm == 'DDQN':
+                select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            elif ros_topic.DRL_algorithm == 'C51':
+                select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.test_model_name) + '/models/'  # 選擇模型的路径
+            
+            drl.env.model_select = "test"
+            model_path = select_path
+            test_episodes = 50
+
+            with open(curr_path+'/muti_mission_input.yaml', 'r') as f:
+                config = yaml.load(f, Loader=yaml.Loader)
+            payload = config['payload']
+            rospy.loginfo('Input payload: {}'.format(payload))
+            work_space = config['work_space']
+            rospy.loginfo('Input work_space: {}'.format(work_space))
+            mission_time = config['mission_time']
+            rospy.loginfo('Input mission_time: {}'.format(mission_time))
+            combinations = list(itertools.product(payload, work_space, mission_time))
+            rospy.loginfo('Input combinations: {}'.format(combinations))
+            for p, w, t in itertools.product(payload, work_space, mission_time):
+                curr_time = f'{p}-{w}-{t}'
+                drl.env.op_payload = p
+                if w == 'A':  # 圓形環門
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested.xlsx'
+                elif w == 'B': # 複雜點位
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                drl.env.mission_time = t
+                # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
+                log_dir = f"logs/{curr_time}"
+                tb = tensorboardX.SummaryWriter(log_dir = log_dir) # reset tb
+                # curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 改為任務編號
+                test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
+                test = Tester(test_env, model_path, drl.env, num_episodes = test_episodes) # 20230309  change 300-> 200 #20230326 mini-test 20
+                test.test()
+            break
+        # original test
+        if ros_topic.cmd_run == 5:
+            with open(curr_path+'/muti_mission_input.yaml', 'r') as f:
+                config = yaml.load(f, Loader=yaml.Loader)
+            payload = config['payload']
+            rospy.loginfo('Input payload: {}'.format(payload))
+            work_space = config['work_space']
+            rospy.loginfo('Input work_space: {}'.format(work_space))
+            mission_time = config['mission_time']
+            rospy.loginfo('Input mission_time: {}'.format(mission_time))
+            combinations = list(itertools.product(payload, work_space, mission_time))
+            rospy.loginfo('Input combinations: {}'.format(combinations))
+            for p, w, t in itertools.product(payload, work_space, mission_time):
+                curr_time = f'{p}-{w}-{t}'
+                drl.env.op_payload = p
+                if w == 'A':  # 圓形環門
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested.xlsx'
+                elif w == 'B': # 複雜點位
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                drl.env.mission_time = t
+            print(curr_time)
+            drl.env.original_design(30.4267000820369,29.5732999179631,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
         else:
             pass

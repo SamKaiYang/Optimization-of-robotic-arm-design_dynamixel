@@ -186,9 +186,82 @@ if __name__ == '__main__':    # pragma nocover
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     q_test =  np.r_[0, 90, -0, 0, 0, 0]*deg
+
+    df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
+    sheets = df.worksheets
+    sheet1 = sheets[0]
+    rows = sheet1.rows
+    cols = sheet1.columns
+    T_tmp = []
+    T_traj = []
+    ik_q_traj = []
+    score = []
+    ratio_over = 0
+    torque_over = 0
+    num_torque = np.array([np.zeros(shape=6)])
+    total_time = 20
+    # 采样间隔
+    sample_interval = 0.2
+    manipulability_index = []
+    i = 0
+    false_done = False
+    count = 0
+    max_diff = []
+    max_diff_tol = 0
+    traj_time = []
+    diff = np.array([np.zeros(shape=6)])
+    for row in rows:
+        row_val = [col.value for col in row]
+        T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+        ik_q = robot.ikine_LMS(T=T_tmp[i])
+
+        if ik_q.success == True:
+            count += 1
+            T_traj.append(T_tmp[i])
+            ik_q_traj.append(ik_q.q)
+            manipulability_index.append(robot.manipulability(q=ik_q.q))
+            print("ik_q.q",ik_q.q)
+            if count >= 2: # 兩個點位以上開始計算
+                diff = diff + np.abs(np.subtract(ik_q_traj[-2], ik_q_traj[-1]))
+                max_diff_tol = max_diff_tol + np.max(diff)
+                max_diff.append(np.max(diff))
+                print(max_diff)
+        i = i + 1
+    for k in range(len(max_diff)):
+        traj_time.append(max_diff[k] / max_diff_tol * total_time)
+        print("traj_time",traj_time)
+    for m in range(len(max_diff)):
+        time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
+        traj = robot.jtraj(T_traj[m],T_traj[m+1],time_vector)
+        print(traj.s)
+        if np.amax(traj.sd) > 3.04:
+            ratio_over = ratio_over + 1
+        torque = robot.rne(traj.s,traj.sd,traj.sdd)
+        row = abs(torque[:,1]) # 取出第2行
+        result_2 = row[row > 44.7] # 取出大于阈值的数字
+        row = abs(torque[:,2]) # 取出第3行
+        result_3 = row[row > 44.7] # 取出大于阈值的数字
+        if len(result_2)>0 or len(result_3) >0:
+            torque_over = torque_over + 1
+        num_torque = np.append(num_torque, torque)
+    total_energy = 0
+    for j in range(len(num_torque)):
+        energy = abs(num_torque[j]) * sample_interval
+        total_energy += energy
+            
+        # if count == 0:
+        #     return(0, 0, 0,0,0)
+        # else:
+        #     final_score = count / i
+            # if count == 1:
+            #     return(0, 0, 0, final_score, manipulability_index[0]) # 回傳 manipulability[0]
+            # else:
+            #     return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+
+
     # robot.plot(q=q_test, backend='pyplot', dt = 10)
     
-    robot.teach()
+    # robot.teach()
     # manipulability teach view
     # robot.teach(limits= [-0.5, 0.5, -0.5, 0.5, -0, 1],vellipse=True)
     
