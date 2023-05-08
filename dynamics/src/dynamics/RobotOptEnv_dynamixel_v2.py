@@ -377,8 +377,8 @@ class RobotOptEnv(gym.Env):
         if percent == 100:
             ratio_score = -self.ratio_over
             torque_score = -self.torque_over
-            reward += ratio_score
-            reward += torque_score
+            reward += ratio_score * 3
+            reward += torque_score * 3
             if self.ratio_over == 0 and self.torque_over == 0:
                 reward += 100
                 terminated = True
