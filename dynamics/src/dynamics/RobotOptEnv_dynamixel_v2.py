@@ -53,6 +53,7 @@ class RobotOptEnv(gym.Env):
         self.acc = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194, 2.356194])
         self.total_weight = 20 # Kg
         self.total_cost = 1800 # 元
+        self.reachable_tmp = 0
         # 預設二,三軸軸長
         self.std_L2 = 35.0 # 預設標準值 第二軸 35 cm
         self.std_L3 = 35.0 # 預設標準值 第三軸 35 cm
@@ -301,7 +302,7 @@ class RobotOptEnv(gym.Env):
         self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
-
+        
         
         # TODO: fixed
         # shaping = (
@@ -311,22 +312,17 @@ class RobotOptEnv(gym.Env):
         #     # + 100 * self.state[3] # 可達性
         #     + 1000 * self.state[4] # 可操作性
         # ) 
-        if self.state[3] == 1:
+        if self.state[3] == 1 and self.reachable_tmp == self.state[3]:
             shaping = (
-                        # - self.state[0] # 超過轉速量
                         - self.state[7] # 馬達扭矩成本
                         - self.state[2] # 功耗
-                        # + 100 * self.state[3] # 可達性
                         + 1000 * self.state[4] # 可操作性
                     ) 
         else:
             shaping = (
-                        # - self.state[0] # 超過轉速量
-                        # - self.state[7] # 馬達扭矩成本
-                        # - self.state[2] # 功耗
-                        # + 100 * self.state[3] # 可達性
                         + 1000 * self.state[4] # 可操作性
                     ) 
+        self.reachable_tmp = self.state[3]
         if self.prev_shaping is not None:
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
@@ -433,6 +429,7 @@ class RobotOptEnv(gym.Env):
                 torque_over = 10
                 consumption = float('inf')
             self.prev_shaping = None
+            self.reachable_tmp = 0
             self.state[0] = ratio_over
             self.state[1] = torque_over
             self.state[2] = np.abs(consumption)
@@ -481,6 +478,7 @@ class RobotOptEnv(gym.Env):
             self.state[1] = torque_over
             self.state[2] = np.abs(consumption)
             self.prev_shaping = None
+            self.reachable_tmp = 0
             self.state[3] = reach_score
             self.state[4] = manipulability_score
             self.state[5] = self.std_L2
@@ -643,7 +641,7 @@ class RobotOptEnv(gym.Env):
             self.T = self.robot.fkine(
                 [q1 * du, q2 * du, q3 * du, q4 * du, q5 * du, q6 * du]
             )
-            t = np.around(self.T.t, 3)
+            t = np.around(self.T.t, 2)
             r = np.around(self.T.rpy('deg'), 0)
             self.T_x.append(t[0])
             self.T_y.append(t[1])
