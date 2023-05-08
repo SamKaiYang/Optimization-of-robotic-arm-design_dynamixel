@@ -312,20 +312,43 @@ class RobotOptEnv(gym.Env):
         #     # + 100 * self.state[3] # 可達性
         #     + 1000 * self.state[4] # 可操作性
         # ) 
-        if self.state[3] == 1 and self.reachable_tmp == self.state[3]:
+        if self.state[3] == 1 and self.reachable_tmp == 1:
             shaping = (
                         - self.state[7] # 馬達扭矩成本
                         - self.state[2] # 功耗
                         + 1000 * self.state[4] # 可操作性
                     ) 
+            if self.prev_shaping != None:
+                reward = shaping - self.prev_shaping
+            self.prev_shaping = shaping
+        elif self.state[3] == 1 and self.reachable_tmp != 1:
+            tmp_shaping = (
+                        - self.state[7] # 馬達扭矩成本
+                        - self.state[2] # 功耗
+                        + 1000 * self.state[4] # 可操作性
+                    ) 
+            self.prev_shaping = tmp_shaping
+            reward = 0
+            # self.prev_shaping = tmp_shaping
+        elif self.state[3] != 1 and self.reachable_tmp == 1:
+            tmp_shaping = (
+                        + 1000 * self.state[4] # 可操作性
+                    ) 
+            self.prev_shaping = tmp_shaping
+            reward = 0
+            # self.prev_shaping = tmp_shaping
         else:
             shaping = (
                         + 1000 * self.state[4] # 可操作性
                     ) 
+            if self.prev_shaping != None:
+                reward = shaping - self.prev_shaping
+            self.prev_shaping = shaping
         self.reachable_tmp = self.state[3]
-        if self.prev_shaping is not None:
-            reward = shaping - self.prev_shaping
-        self.prev_shaping = shaping
+        # if self.prev_shaping is not None:
+        #     reward = shaping - self.prev_shaping
+        # self.prev_shaping = shaping
+        rospy.loginfo("-------------------------")
         rospy.loginfo("shaping reward: %s", reward)
 
         if self.state[0] > 0:
@@ -377,11 +400,11 @@ class RobotOptEnv(gym.Env):
         percent = 100 - self.state[3] * 100
         reward += -percent
         # reachable == 1
-        if percent == 100:
-            ratio_score = -self.ratio_over
-            torque_score = -self.torque_over
-            reward += ratio_score * 3
-            reward += torque_score * 3
+        if percent == 0:
+            ratio_score = self.ratio_over
+            torque_score = self.torque_over
+            reward -= ratio_score * 3
+            reward -= torque_score * 3
             if self.ratio_over == 0 and self.torque_over == 0:
                 reward += 200
                 terminated = True
@@ -417,7 +440,7 @@ class RobotOptEnv(gym.Env):
             rospy.loginfo("mission_time: %s", self.mission_time)
             
             # 生成隨機 payload (kg)
-            rand_payload = np.random.uniform(low=1, high=4)
+            rand_payload = np.random.uniform(low=1, high=6)
             # FIXME: 修改未成功匯入payload給予機器人的問題
             self.payload = rand_payload
             self.payload_position =  [0, 0, 0.04]
@@ -627,12 +650,12 @@ class RobotOptEnv(gym.Env):
         self.q6_s = -180
         self.q6_end = 180
         N = 10 # 改為直接random 10個點
-        theta1 = self.q1_s + (self.q1_end - self.q1_s) * np.random.rand(N, 1)
-        theta2 = self.q2_s + (self.q2_end - self.q2_s) * np.random.rand(N, 1)
-        theta3 = self.q3_s + (self.q3_end - self.q3_s) * np.random.rand(N, 1)
-        theta4 = self.q4_s + (self.q4_end - self.q4_s) * np.random.rand(N, 1)
-        theta5 = self.q5_s + (self.q5_end - self.q5_s) * np.random.rand(N, 1)
-        theta6 = self.q6_s + (self.q6_end - self.q6_s) * np.random.rand(N, 1)
+        theta1 = np.around(self.q1_s + (self.q1_end - self.q1_s) * np.random.rand(N, 1), 0)
+        theta2 = np.around(self.q2_s + (self.q2_end - self.q2_s) * np.random.rand(N, 1), 0)
+        theta3 = np.around(self.q3_s + (self.q3_end - self.q3_s) * np.random.rand(N, 1), 0)
+        theta4 = np.around(self.q4_s + (self.q4_end - self.q4_s) * np.random.rand(N, 1), 0)
+        theta5 = np.around(self.q5_s + (self.q5_end - self.q5_s) * np.random.rand(N, 1), 0)
+        theta6 = np.around(self.q6_s + (self.q6_end - self.q6_s) * np.random.rand(N, 1), 0)
 
         for i in range(N):
             q1 = theta1[i, 0]
@@ -795,14 +818,14 @@ class RobotOptEnv(gym.Env):
                 manipulability_index.append(self.robot.manipulability(q=ik_q.q))
                 # print("ik_q.q",ik_q.q)
                 if count >= 2: # 兩個點位以上開始計算
-                    diff = diff + np.abs(np.subtract(ik_q_traj[-2], ik_q_traj[-1]))
+                    diff = np.abs(np.subtract(ik_q_traj[-2], ik_q_traj[-1]))
                     max_diff_tol = max_diff_tol + np.max(diff)
                     max_diff.append(np.max(diff))
                     # print(max_diff)
             i = i + 1
         for k in range(len(max_diff)):
             traj_time.append(max_diff[k] / max_diff_tol * total_time)
-            # print("traj_time",traj_time)
+        print("traj_time",traj_time)
         for m in range(len(max_diff)):
             time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
             traj = self.robot.jtraj(T_traj[m],T_traj[m+1],time_vector)

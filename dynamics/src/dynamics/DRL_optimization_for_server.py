@@ -357,13 +357,18 @@ class Trainer:
     def train(self, pre_fr=0, train_eps = 300):
         rospy.loginfo("-------------數據採集------------")
         # self.initial_collect_steps = 2
+        # time_step_collect = self.env.reset()
         for _ in range(self.initial_collect_steps):
+            
             time_step_collect = self.collect_step(self.env, self.random_policy)
             rospy.loginfo("initial_collect_steps: %s", _)
             collect_step_reward = time_step_collect.reward.numpy()[0]
             collect_step_state = time_step_collect.observation.numpy()[0]
             rospy.loginfo("collect_step_reward: %s", collect_step_reward)
             rospy.loginfo("collect_step_state: %s", collect_step_state)
+
+            if time_step_collect.is_last():
+                time_step_collect = self.env.reset()
             # This loop is so common in RL, that we provide standard implementations of
             # these. For more details see the drivers module.
 
@@ -411,6 +416,8 @@ class Trainer:
             rospy.loginfo("train_loss: %s", float(train_loss.loss))
             rospy.loginfo("================================")
             if time_step.is_last():
+                time_step = self.env.reset()
+                # episode_return = 0.0
                 rospy.loginfo("episode_return: %s", episode_return)
                 rospy.loginfo("------episode end.-----------")
                 tb.add_scalar("/trained-model/Episode_Return/", episode_return, step)
