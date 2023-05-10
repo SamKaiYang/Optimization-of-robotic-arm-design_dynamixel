@@ -409,7 +409,7 @@ class RobotOptEnv(gym.Env):
             torque_score = self.state[1]
             reward -= ratio_score * 3
             reward -= torque_score * 3
-            if self.ratio_over == 0 and self.torque_over == 0:
+            if ratio_score == 0 and torque_score == 0:
                 reward += 200
                 # terminated = True
                 # self.counts = 0
