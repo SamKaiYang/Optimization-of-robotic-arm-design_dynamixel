@@ -399,6 +399,10 @@ class RobotOptEnv(gym.Env):
             reward += -200
         percent = 100 - self.state[3] * 100
         reward += -percent
+        ratio_score = self.state[0]
+        torque_score = self.state[1]
+        reward -= ratio_score * 3
+        reward -= torque_score * 3
         # reachable == 1
         if percent == 0:
             ratio_score = self.state[0]
