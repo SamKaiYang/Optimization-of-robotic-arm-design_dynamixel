@@ -314,7 +314,7 @@ class RobotOptEnv(gym.Env):
         # ) 
         if self.state[3] == 1 and self.reachable_tmp == 1:
             shaping = (
-                        - self.state[7] # 馬達扭矩成本
+                        - self.state[7]/10 # 馬達扭矩成本
                         - self.state[2] # 功耗
                         + 1000 * self.state[4] # 可操作性
                     ) 
@@ -323,7 +323,7 @@ class RobotOptEnv(gym.Env):
             self.prev_shaping = shaping
         elif self.state[3] == 1 and self.reachable_tmp != 1:
             tmp_shaping = (
-                        - self.state[7] # 馬達扭矩成本
+                        - self.state[7]/10  # 馬達扭矩成本
                         - self.state[2] # 功耗
                         + 1000 * self.state[4] # 可操作性
                     ) 
@@ -407,7 +407,7 @@ class RobotOptEnv(gym.Env):
             reward -= torque_score * 3
             if self.ratio_over == 0 and self.torque_over == 0:
                 reward += 200
-                terminated = True
+                # terminated = True
                 self.counts = 0
         if self.counts == 50: # max_steps
             terminated = True
