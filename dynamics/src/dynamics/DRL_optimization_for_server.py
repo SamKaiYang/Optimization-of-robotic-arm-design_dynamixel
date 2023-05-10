@@ -929,7 +929,7 @@ if __name__ == "__main__":
                 curr_time = f'{p}-{w}-{t}'
                 drl.env.op_payload = p
                 if w == 'A':  # 圓形環門
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested.xlsx'
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
                 elif w == 'B': # 複雜點位
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 drl.env.mission_time = t
@@ -957,11 +957,11 @@ if __name__ == "__main__":
                 curr_time = f'{p}-{w}-{t}'
                 drl.env.op_payload = p
                 if w == 'A':  # 圓形環門
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested.xlsx'
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
                 elif w == 'B': # 複雜點位
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 drl.env.mission_time = t
             print(curr_time)
-            drl.env.original_design(30.4267000820369,29.5732999179631,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
+            drl.env.original_design(26.036,23.964,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
         else:
             pass

@@ -400,7 +400,9 @@ if __name__ == "__main__":
     original_design_test = RobotOptEnv()
     # original_design_test.original_design(41.565,38.435,44.7,44.7,1,30)
     # original_design_test.original_design(67.69459,12.30541,44.7,5.1,3,30)
-    original_design_test.original_design(30.4267000820369,29.5732999179631,44.7,25.3,3,30)
+    # original_design_test.original_design(30.4267000820369,29.5732999179631,44.7,25.3,3,30)
+
+    original_design_test.original_design(26.036,23.964,44.7,44.7,3,30)
  
     
     '''
@@ -410,28 +412,28 @@ if __name__ == "__main__":
     motion_bullet.motion_planning_init_3dof(True)
     wait_for_duration(100)
     '''
-    motion_bullet= motion_model()
-    motion_bullet.reset_robot_urdf(30.4267000820369,29.5732999179631)
-    motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
-    # TODO: add target_points
-    target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
-    distance_points = 0.05
-    for _ in range(20):
-        motion_bullet.motion_planning_init(True)
-        motion_bullet.random_obstacle(target_points, distance_points)
-        # motion_bullet.motion_plan()
+    # motion_bullet= motion_model()
+    # motion_bullet.reset_robot_urdf(30.4267000820369,29.5732999179631)
+    # motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
+    # # TODO: add target_points
+    # target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
+    # distance_points = 0.05
+    # for _ in range(20):
+    #     motion_bullet.motion_planning_init(True)
+    #     motion_bullet.random_obstacle(target_points, distance_points)
+    #     # motion_bullet.motion_plan()
         
-        q1 = [0,0,0,0,0,0]
-        q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
-        # plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-        motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-        # cprint("success:{}".format(plan), 'cyan')
-        motion_bullet.motion_planning_disconnect()
-    # 是否要碰撞可視化
-    # 到collision.py 將  diagnosis=False->True
-    motion_bullet.motion_planning_init(True)
-    motion_bullet.plane_call()
-    motion_bullet.test_point()
+    #     q1 = [0,0,0,0,0,0]
+    #     q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+    #     # plan,path = motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+    #     motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
+    #     # cprint("success:{}".format(plan), 'cyan')
+    #     motion_bullet.motion_planning_disconnect()
+    # # 是否要碰撞可視化
+    # # 到collision.py 將  diagnosis=False->True
+    # motion_bullet.motion_planning_init(True)
+    # motion_bullet.plane_call()
+    # motion_bullet.test_point()
     
     '''
     q1 = [0,0,0,0,0,0]
