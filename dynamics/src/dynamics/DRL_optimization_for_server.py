@@ -831,15 +831,15 @@ if __name__ == "__main__":
             # model_path = None
             train = Trainer(train_agent, train_env, model_path)
             train.train(train_eps = ddqn_train_eps)
-            # # 測試
-            drl.env.model_select = "test"
-            # save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
-            #     '/' + curr_time   # 保存結果的路径
-            # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
-            # model_path = model_path + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
-            test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
-            test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
-            test.test()
+            # # # 測試
+            # drl.env.model_select = "test"
+            # # save_result_path = curr_path + '/test_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+            # #     '/' + curr_time   # 保存結果的路径
+            # # plot_cfg.model_path = plot_cfg.model_path +'model_last.pkl'
+            # # model_path = model_path + 'policy_step' + str(policy_num) +  '/' # 選擇模型的路径
+            # test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
+            # test = Tester(test_env, model_path, drl.env, num_episodes = 200) # 20230309  change 300-> 200
+            # test.test()
             break
 
         # test tested_model
