@@ -412,7 +412,7 @@ class RobotOptEnv(gym.Env):
             if self.ratio_over == 0 and self.torque_over == 0:
                 reward += 200
                 # terminated = True
-                self.counts = 0
+                # self.counts = 0
         if self.counts == 50: # max_steps
             terminated = True
             self.counts = 0
