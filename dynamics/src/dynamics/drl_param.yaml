@@ -1,7 +1,7 @@
 op_function: case2
 arm_structure_dof: 6
 DRL_algorithm: 'C51'
-cmd_run: 4
+cmd_run: 1
 test_model_name: 'C51-6-variable-20230508-193940'
 op_dof: 6
 op_payload: 3
@@ -14,5 +14,5 @@ op_weight: 1.5
 op_cost: 2
 action_select: 'variable'
 point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
-test_episodes: 50
+test_episodes: 20
 policy_num: 40000

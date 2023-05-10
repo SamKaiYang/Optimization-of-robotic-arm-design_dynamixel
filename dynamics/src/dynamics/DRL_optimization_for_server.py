@@ -913,7 +913,7 @@ if __name__ == "__main__":
             
             drl.env.model_select = "test"
             model_path = select_path
-            test_episodes = 50
+            # test_episodes = 50
 
             with open(curr_path+'/muti_mission_input.yaml', 'r') as f:
                 config = yaml.load(f, Loader=yaml.Loader)

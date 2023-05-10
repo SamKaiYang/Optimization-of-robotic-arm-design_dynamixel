@@ -351,11 +351,11 @@ class RobotOptEnv(gym.Env):
         rospy.loginfo("-------------------------")
         rospy.loginfo("shaping reward: %s", reward)
 
-        if self.state[0] > 0:
-            self.ratio_over = True
+        # if self.state[0] > 0:
+        #     self.ratio_over = True
 
-        if self.state[1] > 0:
-            self.torque_over = True
+        # if self.state[1] > 0:
+        #     self.torque_over = True
 
         terminated = False
         # TODO: case 1
@@ -401,8 +401,8 @@ class RobotOptEnv(gym.Env):
         reward += -percent
         # reachable == 1
         if percent == 0:
-            ratio_score = self.ratio_over
-            torque_score = self.torque_over
+            ratio_score = self.state[0]
+            torque_score = self.state[1]
             reward -= ratio_score * 3
             reward -= torque_score * 3
             if self.ratio_over == 0 and self.torque_over == 0:
