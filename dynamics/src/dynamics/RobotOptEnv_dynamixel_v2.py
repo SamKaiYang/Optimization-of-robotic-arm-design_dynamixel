@@ -98,7 +98,7 @@ class RobotOptEnv(gym.Env):
         self.MAX_LENGTH = 40
         self.MIN_LENGTH = 5
         # TODO: 增加馬達模組選型action
-        self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
+        self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
         self.observation_space = spaces.Box(np.array([self.low_ratio_over,self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3, self.low_torque_cost ]), 
