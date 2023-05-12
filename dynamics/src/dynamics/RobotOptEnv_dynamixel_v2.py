@@ -98,7 +98,7 @@ class RobotOptEnv(gym.Env):
         self.MAX_LENGTH = 40
         self.MIN_LENGTH = 5
         # TODO: 增加馬達模組選型action
-        self.action_space = spaces.Discrete(12) # TODO: fixed 12種action
+        self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
         self.observation_space = spaces.Box(np.array([self.low_ratio_over,self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3, self.low_torque_cost ]), 
@@ -164,55 +164,77 @@ class RobotOptEnv(gym.Env):
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         if self.action_select == 'variable':
-            if action == 0: # 軸2  # 短 # 型號1
-                self.std_L2 -= 1.0
-                # 配置軸2 motor 型號1
-                #[5.1, 25.3, 44.7]
-                self.motor_type_axis_2 = 5.1 # 型號
+            # if action == 0: # 軸2  # 短 # 型號1
+            #     self.std_L2 -= 1.0
+            #     # 配置軸2 motor 型號1
+            #     #[5.1, 25.3, 44.7]
+            #     self.motor_type_axis_2 = 5.1 # 型號
             
-            elif action == 1: # 軸2  # 長 # 型號1
-                self.std_L2 += 1.0
-                self.motor_type_axis_2 = 5.1 # 型號
+            # elif action == 1: # 軸2  # 長 # 型號1
+            #     self.std_L2 += 1.0
+            #     self.motor_type_axis_2 = 5.1 # 型號
                 
-            elif action == 2: # 軸2  # 短 # 型號2
+            # elif action == 2: # 軸2  # 短 # 型號2
+            #     self.std_L2 -= 1.0
+            #     self.motor_type_axis_2 = 25.3 # 型號
+
+            # elif action == 3: # 軸2  # 長 # 型號2
+            #     self.std_L2 += 1.0
+            #     self.motor_type_axis_2 = 25.3 # 型號
+                
+            # elif action == 4: # 軸2  # 短 # 型號3
+            #     self.std_L2 -= 1.0
+            #     self.motor_type_axis_2 = 44.7 # 型號
+
+            # elif action == 5: # 軸2  # 長 # 型號3
+            #     self.std_L2 += 1.0
+            #     self.motor_type_axis_2 = 44.7 # 型號
+                
+            # elif action == 6: # 軸3  # 短 # 型號1
+            #     self.std_L3 -= 1.0
+            #     self.motor_type_axis_3 = 5.1 # 型號
+                
+            # elif action == 7: # 軸3  # 長 # 型號1
+            #     self.std_L3 += 1.0
+            #     self.motor_type_axis_3 = 5.1 # 型號
+                
+            # elif action == 8: # 軸3  # 短 # 型號2
+            #     self.std_L3 -= 1.0
+            #     self.motor_type_axis_3 = 25.3 # 型號
+                
+            # elif action == 9: # 軸3  # 長 # 型號2
+            #     self.std_L3 += 1.0
+            #     self.motor_type_axis_3 = 25.3 # 型號
+
+            # elif action == 10: # 軸3  # 短 # 型號3
+            #     self.std_L3 -= 1.0
+            #     self.motor_type_axis_3 = 44.7 # 型號
+
+            # elif action == 11: # 軸3  # 長 # 型號3
+            #     self.std_L3 += 1.0
+            #     self.motor_type_axis_3 = 44.7 # 型號
+            # method 2 action case :
+            if action == 0: 
                 self.std_L2 -= 1.0
-                self.motor_type_axis_2 = 25.3 # 型號
-
-            elif action == 3: # 軸2  # 長 # 型號2
+            elif action == 1:
                 self.std_L2 += 1.0
-                self.motor_type_axis_2 = 25.3 # 型號
-                
-            elif action == 4: # 軸2  # 短 # 型號3
-                self.std_L2 -= 1.0
-                self.motor_type_axis_2 = 44.7 # 型號
-
-            elif action == 5: # 軸2  # 長 # 型號3
-                self.std_L2 += 1.0
-                self.motor_type_axis_2 = 44.7 # 型號
-                
-            elif action == 6: # 軸3  # 短 # 型號1
+            elif action == 2:
                 self.std_L3 -= 1.0
-                self.motor_type_axis_3 = 5.1 # 型號
-                
-            elif action == 7: # 軸3  # 長 # 型號1
+            elif action == 3:
                 self.std_L3 += 1.0
-                self.motor_type_axis_3 = 5.1 # 型號
-                
-            elif action == 8: # 軸3  # 短 # 型號2
-                self.std_L3 -= 1.0
-                self.motor_type_axis_3 = 25.3 # 型號
-                
-            elif action == 9: # 軸3  # 長 # 型號2
-                self.std_L3 += 1.0
-                self.motor_type_axis_3 = 25.3 # 型號
-
-            elif action == 10: # 軸3  # 短 # 型號3
-                self.std_L3 -= 1.0
-                self.motor_type_axis_3 = 44.7 # 型號
-
-            elif action == 11: # 軸3  # 長 # 型號3
-                self.std_L3 += 1.0
-                self.motor_type_axis_3 = 44.7 # 型號
+            elif action == 4:
+                self.motor_type_axis_2 = 5.1
+            elif action == 5:
+                self.motor_type_axis_2 = 25.3
+            elif action == 6:
+                self.motor_type_axis_2 = 44.7
+            elif action == 7:
+                self.motor_type_axis_3 = 5.1 
+            elif action == 8:
+                self.motor_type_axis_3 = 25.3
+            elif action == 9:
+                self.motor_type_axis_3 = 44.7
+          
         elif self.action_select == 'fixed':
             if action == 0: # 軸2  # 短 # 型號1
                 self.std_L2 -= 1.0
