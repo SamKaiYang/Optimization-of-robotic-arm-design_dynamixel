@@ -551,7 +551,7 @@ class RobotOptEnv(gym.Env):
         self.robot.payload(self.payload, op_payload_position)  # set payload
         # mission_time = 30
         model_select = "test"
-        self.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+        # self.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
         # self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
         
         # rospy.loginfo("mission_time: %s", mission_time)
@@ -561,16 +561,17 @@ class RobotOptEnv(gym.Env):
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # torque = self.dynamics_torque_limit()
-        rospy.loginfo("ratio_over: %s", ratio_over)
-        rospy.loginfo("torque_over: %s", torque_over)
-        rospy.loginfo("consumption: %s", np.abs(consumption))
-        # 生成隨機 payload (kg)
-        rospy.loginfo("reach_score: %s", reach_score)
-        rospy.loginfo("manipulability_score: %s", manipulability_score)
-        rospy.loginfo("std_L2: %s", std_L2)
-        rospy.loginfo("std_L3: %s", std_L3)
-        rospy.loginfo("motor_torque_cost: %s", motor_type_axis_2 + motor_type_axis_3)
-        
+        # rospy.loginfo("ratio_over: %s", ratio_over)
+        # rospy.loginfo("torque_over: %s", torque_over)
+        # rospy.loginfo("consumption: %s", np.abs(consumption))
+        # # 生成隨機 payload (kg)
+        # rospy.loginfo("reach_score: %s", reach_score)
+        # rospy.loginfo("manipulability_score: %s", manipulability_score)
+        # rospy.loginfo("std_L2: %s", std_L2)
+        # rospy.loginfo("std_L3: %s", std_L3)
+        # rospy.loginfo("motor_torque_cost: %s", motor_type_axis_2 + motor_type_axis_3)
+        origin_return = [ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        return origin_return
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None
@@ -1217,15 +1218,16 @@ class RobotOptEnv_3dof(gym.Env):
         ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # torque = self.dynamics_torque_limit()
-        rospy.loginfo("ratio_over: %s", ratio_over)
-        rospy.loginfo("torque_over: %s", torque_over)
-        rospy.loginfo("consumption: %s", np.abs(consumption))
-        # 生成隨機 payload (kg)
-        rospy.loginfo("reach_score: %s", reach_score)
-        rospy.loginfo("manipulability_score: %s", manipulability_score)
-        rospy.loginfo("std_L2: %s", std_L2)
-        rospy.loginfo("std_L3: %s", std_L3)
-
+        # rospy.loginfo("ratio_over: %s", ratio_over)
+        # rospy.loginfo("torque_over: %s", torque_over)
+        # rospy.loginfo("consumption: %s", np.abs(consumption))
+        # # 生成隨機 payload (kg)
+        # rospy.loginfo("reach_score: %s", reach_score)
+        # rospy.loginfo("manipulability_score: %s", manipulability_score)
+        # rospy.loginfo("std_L2: %s", std_L2)
+        # rospy.loginfo("std_L3: %s", std_L3)
+        origin_return = [ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        return origin_return
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None

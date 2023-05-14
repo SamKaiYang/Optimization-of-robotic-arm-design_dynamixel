@@ -953,6 +953,10 @@ if __name__ == "__main__":
             rospy.loginfo('Input mission_time: {}'.format(mission_time))
             combinations = list(itertools.product(payload, work_space, mission_time))
             rospy.loginfo('Input combinations: {}'.format(combinations))
+
+            original_design = Workbook()
+            sheet_original_design = original_design.active
+            i = 0
             for p, w, t in itertools.product(payload, work_space, mission_time):
                 curr_time = f'{p}-{w}-{t}'
                 drl.env.op_payload = p
@@ -961,7 +965,15 @@ if __name__ == "__main__":
                 elif w == 'B': # 複雜點位
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 drl.env.mission_time = t
-            print(curr_time)
-            drl.env.original_design(26.036,23.964,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
+                print(curr_time)
+                origin_return = drl.env.original_design(26.036,23.964,44.7,25.1,drl.env.op_payload,drl.env.mission_time)
+                # 迭代矩陣的每一個元素，並填入工作表中
+                for l in range(len(origin_return)):
+                    sheet_original_design.cell(row=i+1, column=1).value = curr_time
+                    sheet_original_design.cell(row=i+1, column=l+2).value = origin_return[l]
+                i = i + 1
+            file_name_original_design = "./xlsx/tested_state_original_design.xlsx"
+            original_design.save(file_name_original_design)
+            break
         else:
             pass
