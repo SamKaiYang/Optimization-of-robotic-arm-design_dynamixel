@@ -551,7 +551,7 @@ class RobotOptEnv(gym.Env):
         self.robot.payload(self.payload, op_payload_position)  # set payload
         # mission_time = 30
         model_select = "test"
-        self.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+        # self.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
         # self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
         
         # rospy.loginfo("mission_time: %s", mission_time)
