@@ -934,7 +934,7 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 drl.env.mission_time = t
                 # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
-                log_dir = f"logs/{curr_time}"
+                log_dir = f"logs/"+str(ros_topic.test_model_name)+"/{curr_time}"
                 tb = tensorboardX.SummaryWriter(log_dir = log_dir) # reset tb
                 # curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 改為任務編號
                 test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
