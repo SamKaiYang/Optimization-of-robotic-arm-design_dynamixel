@@ -284,7 +284,7 @@ class Trainer:
         # TODO: fixed
         # self.num_iterations = 15000 # @param {type:"integer"}
         # test
-        self.num_iterations = 40000 # @param {type:"integer"}
+        self.num_iterations = 60000 # @param {type:"integer"}
         # self.initial_collect_steps = 1000  # @param {type:"integer"}
         # test
         self.initial_collect_steps = 1000  # @param {type:"integer"}
