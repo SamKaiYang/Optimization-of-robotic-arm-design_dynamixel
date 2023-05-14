@@ -1225,7 +1225,7 @@ class RobotOptEnv_3dof(gym.Env):
         rospy.loginfo("manipulability_score: %s", manipulability_score)
         rospy.loginfo("std_L2: %s", std_L2)
         rospy.loginfo("std_L3: %s", std_L3)
-
+        return ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None
