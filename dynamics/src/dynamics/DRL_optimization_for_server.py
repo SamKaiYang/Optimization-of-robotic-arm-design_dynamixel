@@ -456,7 +456,7 @@ class Tester(object):
         # self.agent = agent
         self.model_path = model_path
         self.env = env
-        self._best_episode_reward = 50
+        self._best_episode_reward = 200
         self.drl_env_class = drl_env_class
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
@@ -507,7 +507,7 @@ class Tester(object):
 
             tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
             avg_reward += episode_reward
-            # TODO: 若獎勵大於50, 則儲存當前回合獎勵軌跡 
+            # TODO: 若獎勵大於200, 則儲存當前回合獎勵軌跡 
             if episode_reward >= self._best_episode_reward: 
                 # TODO: state_traj
                 excel_file_traj = Workbook()
@@ -518,7 +518,9 @@ class Tester(object):
                         sheet_traj.cell(row=k+1, column=l+1).value = state_traj[k][l]
                 num = num + 1  # 要更改的数字
                 new_str = "_{}_".format(num)
-                file_name_traj = self.model_path + "/tested_state_traj" + new_str + curr_time +".xlsx"
+                if not os.path.exists(self.model_path + "tested_state_traj/"):
+                    os.makedirs(self.model_path + "tested_state_traj/")
+                file_name_traj = self.model_path + "tested_state_traj/tested_state_traj" + new_str + curr_time +".xlsx"
                 excel_file_traj.save(file_name_traj)
             # TODO: 清空
             else:
@@ -532,7 +534,9 @@ class Tester(object):
         #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
         
         # add curr_time
-        file_name = self.model_path + "/tested_reward_state_" + curr_time +".xlsx"
+        if not os.path.exists(self.model_path + "tested_reward_state/"):
+                    os.makedirs(self.model_path + "tested_reward_state/")
+        file_name = self.model_path + "tested_reward_state/tested_reward_state_" + curr_time +".xlsx"
         excel_file.save(file_name)
 
         
