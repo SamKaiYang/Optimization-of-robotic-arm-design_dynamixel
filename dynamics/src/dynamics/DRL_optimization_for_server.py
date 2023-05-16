@@ -284,7 +284,7 @@ class Trainer:
         # TODO: fixed
         # self.num_iterations = 15000 # @param {type:"integer"}
         # test
-        self.num_iterations = 40000 # @param {type:"integer"}
+        self.num_iterations = 60000 # @param {type:"integer"}
         # self.initial_collect_steps = 1000  # @param {type:"integer"}
         # test
         self.initial_collect_steps = 1000  # @param {type:"integer"}
@@ -456,7 +456,7 @@ class Tester(object):
         # self.agent = agent
         self.model_path = model_path
         self.env = env
-        self._best_episode_reward = 50
+        self._best_episode_reward = 200
         self.drl_env_class = drl_env_class
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
@@ -507,7 +507,7 @@ class Tester(object):
 
             tb.add_scalar("/tested-model/test_episode_reward/", episode_reward, episode)
             avg_reward += episode_reward
-            # TODO: 若獎勵大於50, 則儲存當前回合獎勵軌跡 
+            # TODO: 若獎勵大於200, 則儲存當前回合獎勵軌跡 
             if episode_reward >= self._best_episode_reward: 
                 # TODO: state_traj
                 excel_file_traj = Workbook()
@@ -518,7 +518,9 @@ class Tester(object):
                         sheet_traj.cell(row=k+1, column=l+1).value = state_traj[k][l]
                 num = num + 1  # 要更改的数字
                 new_str = "_{}_".format(num)
-                file_name_traj = self.model_path + "/tested_state_traj" + new_str + curr_time +".xlsx"
+                if not os.path.exists(self.model_path + "tested_state_traj/"):
+                    os.makedirs(self.model_path + "tested_state_traj/")
+                file_name_traj = self.model_path + "tested_state_traj/tested_state_traj" + new_str + curr_time +".xlsx"
                 excel_file_traj.save(file_name_traj)
             # TODO: 清空
             else:
@@ -532,7 +534,9 @@ class Tester(object):
         #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
         
         # add curr_time
-        file_name = self.model_path + "/tested_reward_state_" + curr_time +".xlsx"
+        if not os.path.exists(self.model_path + "tested_reward_state/"):
+                    os.makedirs(self.model_path + "tested_reward_state/")
+        file_name = self.model_path + "tested_reward_state/tested_reward_state_" + curr_time +".xlsx"
         excel_file.save(file_name)
 
         
@@ -934,7 +938,7 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 drl.env.mission_time = t
                 # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
-                log_dir = f"logs/"+str(ros_topic.test_model_name)+"/{curr_time}"
+                log_dir = f"logs/"+str(ros_topic.test_model_name)+"/"+str(curr_time)+"/"
                 tb = tensorboardX.SummaryWriter(log_dir = log_dir) # reset tb
                 # curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 改為任務編號
                 test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
