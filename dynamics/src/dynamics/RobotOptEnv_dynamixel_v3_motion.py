@@ -31,28 +31,10 @@ from urdf_parser_py.urdf import URDF
 import os
 from openpyxl import load_workbook
 from openpyxl import Workbook
-
-# pybullet motion planning import 
-# import pybullet as p
 import time
-# import pybullet_data
 import os
 from termcolor import cprint
 import numpy as np
-# from pybullet_planning import BASE_LINK, RED, BLUE, GREEN
-# from pybullet_planning import load_pybullet, connect, wait_for_user, LockRenderer, has_gui, WorldSaver, HideOutput, \
-#     reset_simulation, disconnect, set_camera_pose, has_gui, set_camera, wait_for_duration, wait_if_gui, apply_alpha
-# from pybullet_planning import Pose, Point, Euler
-# from pybullet_planning import multiply, invert, get_distance
-# from pybullet_planning import create_obj, create_attachment, Attachment
-# from pybullet_planning import link_from_name, get_link_pose, get_moving_links, get_link_name, get_disabled_collisions, \
-#     get_body_body_disabled_collisions, has_link, are_links_adjacent
-# from pybullet_planning import get_num_joints, get_joint_names, get_movable_joints, set_joint_positions, joint_from_name, \
-#     joints_from_names, get_sample_fn,get_extend_fn, plan_joint_motion, get_difference_fn,get_collision_fn
-# from pybullet_planning import dump_world, set_pose
-# from pybullet_planning import get_collision_fn, get_floating_body_collision_fn, expand_links, create_box
-# from pybullet_planning import pairwise_collision, pairwise_collision_info, draw_collision_diagnosis, body_collision_info
-# from pybullet_planning import rrt_connect
 from pybullet_test import motion_model
 HERE = os.path.dirname(__file__)
 SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v12.urdf')
@@ -129,6 +111,11 @@ class RobotOptEnv(gym.Env):
                                                 self.high_torque_over, self.high_torque_over, self.high_torque_over, \
                                                 self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
                                             dtype=np.float64)
+        
+        # # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
+        # self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 ]), 
+        #                                     np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
+        #                                     dtype=np.float64)
         # TODO: reward 歸一化
         self.state = np.array([0,0,0,0,0,0,0,0,0], dtype=np.float64)
         self.pre_state = np.array([0,0,0,0,0,0,0,0,0], dtype=np.float64)
