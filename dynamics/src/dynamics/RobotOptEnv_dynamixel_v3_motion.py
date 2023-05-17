@@ -1067,7 +1067,7 @@ class RobotOptEnv_3dof(gym.Env):
         count = 0
         plan_success_count = 0
         self.motion_plan.stl_trimesh_scaling(std_L2, std_L3)
-        self.motion_plan.motion_planning_init(False)
+        self.motion_plan.motion_planning_init_3dof(False)
         for row in rows:
             point_obstacle_val = [col.value for col in row]
             T_point.append([point_obstacle_val[0], point_obstacle_val[1], point_obstacle_val[2]])
@@ -1086,7 +1086,7 @@ class RobotOptEnv_3dof(gym.Env):
                 # ik_q.q[5] = -ik_q.q[5]
                 Joint_tmp.append(ik_q.q)
                 if count >= 1:
-                    plan_success, path = self.motion_plan.motion_planning(Joint_tmp[count-1], Joint_tmp[count], collision = False, wait_duration = False)
+                    plan_success, path = self.motion_plan.motion_planning_3dof(Joint_tmp[count-1], Joint_tmp[count], collision = False, wait_duration = False)
                     
                     if plan_success == True:
                         plan_success_count = plan_success_count + 1 

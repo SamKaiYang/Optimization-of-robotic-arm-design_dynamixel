@@ -259,7 +259,28 @@ class motion_model(object):
                 set_joint_positions(self.Robot, self.arm_joints, conf)
                 wait_for_duration(time_step)
         return plan_success, path
-    
+    def motion_planning_3dof(self, q1, q2, distance = None, obstacles_num = None, collision = True, time_step = 0.03, wait_duration = False):
+        # q1 = [0,0,0,0,0,0]
+        set_joint_positions(self.Robot, self.arm_joints, q1)
+        # wait_for_duration(0.5)
+        # q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+        # 預設使用rrt connect motion planning
+        path = plan_joint_motion(self.Robot, self.arm_joints, q2, obstacles=self.block_obstacles, self_collisions=collision,
+            custom_limits={})
+        if path is None:
+            # cprint('no plan found', 'red')
+            plan_success = False
+        # adjusting this number will adjust the simulation speed
+        else:
+            plan_success = True
+            
+        time_step = 0.03
+        if wait_duration == True and plan_success == True:
+            for conf in path:
+                cprint('path:{}'.format(conf), 'cyan')
+                set_joint_positions(self.Robot, self.arm_joints, conf)
+                wait_for_duration(time_step)
+        return plan_success, path
     def motion_planning_test(self, q1, q2, distance = None, obstacles_num = None, collision = False, time_step = 0.03, wait_duration = True):
         q_test = [np.array([  0.9235,    1.325,    0.599,    -2.26,    1.509,   -1.272]), \
         np.array([ -0.2475,   -1.497,    1.077,    2.115,   0.8647,   0.5595]), \
