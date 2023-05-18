@@ -101,12 +101,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
         
         # TODO: observation space for torque, reach, motor cost, weight, manipulability
-        self.observation_space = spaces.Box(np.array([self.low_ratio_over,self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3, self.low_torque_cost ]), 
-                                            np.array([self.high_ratio_over,self.high_torque_over,self.high_power_consumption, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque_over,self.low_power_consumption, self.low_reach_eva, self.low_manipulability, self.low_std_L2, self.low_std_L3, self.low_torque_cost ]), 
+                                            np.array([self.high_torque_over,self.high_power_consumption, self.high_reach_eva, self.high_manipulability, self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0,0], dtype=np.float64)
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -156,64 +156,11 @@ class RobotOptEnv(gym.Env):
         self.total_weight = self.op_weight # Kg
         self.total_cost = self.op_cost # 元
         self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
-    # def one_hot_encode(action, num_actions):
-    #     one_hot = np.zeros(num_actions)
-    #     one_hot[action] = 1
-    #     return one_hot
+
     # TODO: fixed
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         if self.action_select == 'variable':
-            # if action == 0: # 軸2  # 短 # 型號1
-            #     self.std_L2 -= 1.0
-            #     # 配置軸2 motor 型號1
-            #     #[5.1, 25.3, 44.7]
-            #     self.motor_type_axis_2 = 5.1 # 型號
-            
-            # elif action == 1: # 軸2  # 長 # 型號1
-            #     self.std_L2 += 1.0
-            #     self.motor_type_axis_2 = 5.1 # 型號
-                
-            # elif action == 2: # 軸2  # 短 # 型號2
-            #     self.std_L2 -= 1.0
-            #     self.motor_type_axis_2 = 25.3 # 型號
-
-            # elif action == 3: # 軸2  # 長 # 型號2
-            #     self.std_L2 += 1.0
-            #     self.motor_type_axis_2 = 25.3 # 型號
-                
-            # elif action == 4: # 軸2  # 短 # 型號3
-            #     self.std_L2 -= 1.0
-            #     self.motor_type_axis_2 = 44.7 # 型號
-
-            # elif action == 5: # 軸2  # 長 # 型號3
-            #     self.std_L2 += 1.0
-            #     self.motor_type_axis_2 = 44.7 # 型號
-                
-            # elif action == 6: # 軸3  # 短 # 型號1
-            #     self.std_L3 -= 1.0
-            #     self.motor_type_axis_3 = 5.1 # 型號
-                
-            # elif action == 7: # 軸3  # 長 # 型號1
-            #     self.std_L3 += 1.0
-            #     self.motor_type_axis_3 = 5.1 # 型號
-                
-            # elif action == 8: # 軸3  # 短 # 型號2
-            #     self.std_L3 -= 1.0
-            #     self.motor_type_axis_3 = 25.3 # 型號
-                
-            # elif action == 9: # 軸3  # 長 # 型號2
-            #     self.std_L3 += 1.0
-            #     self.motor_type_axis_3 = 25.3 # 型號
-
-            # elif action == 10: # 軸3  # 短 # 型號3
-            #     self.std_L3 -= 1.0
-            #     self.motor_type_axis_3 = 44.7 # 型號
-
-            # elif action == 11: # 軸3  # 長 # 型號3
-            #     self.std_L3 += 1.0
-            #     self.motor_type_axis_3 = 44.7 # 型號
-            # method 2 action case :
             if action == 0: 
                 self.std_L2 -= 1.0
             elif action == 1:
@@ -304,134 +251,84 @@ class RobotOptEnv(gym.Env):
         self.robot.payload(self.payload, self.payload_position)  # set payload
         reach_score, manipulability_score = self.only_reachable_manipulability(self.model_select)
         if reach_score == 1:
-            ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         else:
-            ratio_over = 10
+            # ratio_over = 10
             torque_over = 10
             consumption = 2000
-        # ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
-        # rospy.loginfo("reach_score: %s", reach_score)
-        self.state[0] = ratio_over
-        self.state[1] = torque_over
-        self.state[2] = np.abs(consumption)
-        # 可達性 # 可操作性
-        # self.state[3], self.state[4] = self.reach_manipulability_evaluate(self.model_select)
-        self.state[3] = reach_score
-        self.state[4] = manipulability_score
-        self.state[5] = self.std_L2
-        self.state[6] = self.std_L3
-        self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
+
+        # self.state[0] = ratio_over
+        self.state[0] = torque_over
+        self.state[1] = np.abs(consumption)
+        self.state[2] = reach_score
+        self.state[3] = manipulability_score
+        self.state[4] = self.std_L2
+        self.state[5] = self.std_L3
+        self.state[6] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
         
         
-        # TODO: fixed
-        # shaping = (
-        #     # - self.state[0] # 超過轉速量
-        #     - self.state[7] # 馬達扭矩成本
-        #     - self.state[2] # 功耗
-        #     # + 100 * self.state[3] # 可達性
-        #     + 1000 * self.state[4] # 可操作性
-        # ) 
-        if self.state[3] == 1 and self.reachable_tmp == 1:
+
+        if self.state[2] == 1 and self.reachable_tmp == 1:
             shaping = (
-                        - self.state[7]/10 # 馬達扭矩成本
-                        - self.state[2] # 功耗
-                        + 1000 * self.state[4] # 可操作性
+                        - self.state[6]/5 # 馬達扭矩成本
+                        - self.state[1]/5 # 功耗
+                        + 1000 * self.state[3] # 可操作性
                     ) 
             if self.prev_shaping != None:
                 reward = shaping - self.prev_shaping
             self.prev_shaping = shaping
-        elif self.state[3] == 1 and self.reachable_tmp != 1:
+        elif self.state[2] == 1 and self.reachable_tmp != 1:
             tmp_shaping = (
-                        - self.state[7]/10  # 馬達扭矩成本
-                        - self.state[2] # 功耗
-                        + 1000 * self.state[4] # 可操作性
+                        - self.state[6]/5  # 馬達扭矩成本
+                        - self.state[1]/5 # 功耗
+                        + 1000 * self.state[3] # 可操作性
                     ) 
             self.prev_shaping = tmp_shaping
             reward = 0
             # self.prev_shaping = tmp_shaping
-        elif self.state[3] != 1 and self.reachable_tmp == 1:
+        elif self.state[2] != 1 and self.reachable_tmp == 1:
             tmp_shaping = (
-                        + 1000 * self.state[4] # 可操作性
+                        + 1000 * self.state[3] # 可操作性
                     ) 
             self.prev_shaping = tmp_shaping
             reward = 0
             # self.prev_shaping = tmp_shaping
         else:
             shaping = (
-                        + 1000 * self.state[4] # 可操作性
+                        + 1000 * self.state[3] # 可操作性
                     ) 
             if self.prev_shaping != None:
                 reward = shaping - self.prev_shaping
             self.prev_shaping = shaping
-        self.reachable_tmp = self.state[3]
-        # if self.prev_shaping is not None:
-        #     reward = shaping - self.prev_shaping
-        # self.prev_shaping = shaping
+        # 防止功耗計算爆掉
+        if self.state[1] > 2000:
+            reward = 0
+        self.reachable_tmp = self.state[2]
+
         rospy.loginfo("-------------------------")
         rospy.loginfo("shaping reward: %s", reward)
 
-        # if self.state[0] > 0:
-        #     self.ratio_over = True
-
-        # if self.state[1] > 0:
-        #     self.torque_over = True
-
         terminated = False
-        # TODO: case 1
-        # if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
-        #     terminated = True
-        #     reward += -200
-        # if self.ratio_over == True or self.torque_over == True and self.state[3] < 0.6: 
-        #     reward += -20
-        # elif self.ratio_over == True or self.torque_over == True and 0.6 <= self.state[3] < 0.8: 
-        #     reward += -10
-        # elif self.ratio_over == True or self.torque_over == True and 0.8 <= self.state[3] <= 1.0:   
-        #     reward += -5
-        # elif self.ratio_over == False and self.torque_over == False and self.state[3] < 0.6: 
-        #     reward += +5
-        # elif self.ratio_over == False and self.torque_over == False and 0.6 <= self.state[3] < 0.8:
-        #     reward += +10
-        # elif self.ratio_over == False and self.torque_over == False and 0.8 <= self.state[3] < 0.9:
-        #     reward += +20
-        # elif self.ratio_over == False and self.torque_over == False and 0.9 <= self.state[3] < 1.0:
-        #     # terminated = True
-        #     reward += +50
-        # # success
-        # elif self.ratio_over == False and self.torque_over == False and self.state[3] == 1.0:
-        #     terminated = True
-        #     reward += +100
-        #     self.counts = 0
-        # TODO: case2
-        # if self.ratio_over or self.torque_over:
-        #     percent = 100 - self.state[3] * 100    
-        #     reward += -percent
-        # else:
-        #     percent = self.state[3] * 100
-        #     reward += percent
-        #     # success
-        #     if percent == 100:
-        #         terminated = True
-        #         self.counts = 0
+        
         # TODO: case 3
-        if self.state[5] <= self.MIN_LENGTH or self.state[6] <= self.MIN_LENGTH  or self.state[5] >= self.MAX_LENGTH or self.state[6] >= self.MAX_LENGTH:
+        if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
             terminated = True
             reward += -200
-        percent = 100 - self.state[3] * 100
+        percent = 100 - self.state[2] * 100
         reward += -percent
-        ratio_score = self.state[0]
-        torque_score = self.state[1]
-        reward -= ratio_score * 3
+        # ratio_score = self.state[0]
+        torque_score = self.state[0]
+        # reward -= ratio_score * 3
         reward -= torque_score * 3
         # reachable == 1
         if percent == 0:
-            ratio_score = self.state[0]
-            torque_score = self.state[1]
+            # ratio_score = self.state[0]
+            torque_score = self.state[0]
             # reward -= ratio_score * 3
             # reward -= torque_score * 3
-            if ratio_score == 0 and torque_score == 0:
+            if torque_score == 0:
                 reward += 200
                 # terminated = True
                 # self.counts = 0
@@ -475,21 +372,21 @@ class RobotOptEnv(gym.Env):
             self.random_select_point() # 先隨機抽樣30個點位
             reach_score, manipulability_score = self.only_reachable_manipulability(self.model_select)
             if reach_score == 1:
-                ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+                torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             else:
-                ratio_over = 10
+                # ratio_over = 10
                 torque_over = 10
                 consumption = 2000
             self.prev_shaping = None
             self.reachable_tmp = 0
-            self.state[0] = ratio_over
-            self.state[1] = torque_over
-            self.state[2] = np.abs(consumption)
-            self.state[3] = reach_score
-            self.state[4] = manipulability_score
-            self.state[5] = self.std_L2
-            self.state[6] = self.std_L3
-            self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
+            # self.state[0] = ratio_over
+            self.state[0] = torque_over
+            self.state[1] = np.abs(consumption)
+            self.state[2] = reach_score
+            self.state[3] = manipulability_score
+            self.state[4] = self.std_L2
+            self.state[5] = self.std_L3
+            self.state[6] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -521,21 +418,21 @@ class RobotOptEnv(gym.Env):
             # ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             reach_score, manipulability_score = self.only_reachable_manipulability(self.model_select)
             if reach_score == 1:
-                ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+                torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             else:
-                ratio_over = 10
+                # ratio_over = 10
                 torque_over = 10
                 consumption = 2000
-            self.state[0] = ratio_over
-            self.state[1] = torque_over
-            self.state[2] = np.abs(consumption)
+            # self.state[0] = ratio_over
+            self.state[0] = torque_over
+            self.state[1] = np.abs(consumption)
             self.prev_shaping = None
             self.reachable_tmp = 0
-            self.state[3] = reach_score
-            self.state[4] = manipulability_score
-            self.state[5] = self.std_L2
-            self.state[6] = self.std_L3
-            self.state[7] = self.motor_type_axis_2 + self.motor_type_axis_3
+            self.state[2] = reach_score
+            self.state[3] = manipulability_score
+            self.state[4] = self.std_L2
+            self.state[5] = self.std_L3
+            self.state[6] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
     def original_design(self,std_L2,std_L3, motor_1, motor_2, payload, mission_time):
@@ -558,7 +455,7 @@ class RobotOptEnv(gym.Env):
         self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
         self.random_select_point() # 先隨機抽樣30個點位
         self.mission_time = mission_time
-        ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
+        torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
         # ratio_over, torque_over, consumption = self.power_consumption(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         # torque = self.dynamics_torque_limit()
         # rospy.loginfo("ratio_over: %s", ratio_over)
@@ -570,7 +467,7 @@ class RobotOptEnv(gym.Env):
         # rospy.loginfo("std_L2: %s", std_L2)
         # rospy.loginfo("std_L3: %s", std_L3)
         # rospy.loginfo("motor_torque_cost: %s", motor_type_axis_2 + motor_type_axis_3)
-        origin_return = [ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        origin_return = [torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
         return origin_return
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
@@ -757,67 +654,8 @@ class RobotOptEnv(gym.Env):
             # import xlsx
             df = load_workbook("./xlsx/task_point.xlsx")
         elif model_select == "test":
-            # import xlsx
-            # df = load_workbook("./xlsx/task_point_6dof_tested.xlsx")
-            # df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
             df = load_workbook(self.point_test_excel)
         sheets = df.worksheets
-        # sheet1 = sheets[0]
-        # rows = sheet1.rows
-        # cols = sheet1.columns
-        # T_tmp = []
-        # score = []
-        # ratio_over = 0
-        # torque_over = 0
-        # num_torque = np.array([np.zeros(shape=6)])
-        # total_time = self.mission_time
-        # # 采样间隔
-        # sample_interval = 0.2
-        # manipulability_index = []
-        # i = 0
-        # false_done = False
-        # count = 0
-        # for row in rows:
-        #     row_val = [col.value for col in row]
-        #     T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
-        #     ik_q = self.robot.ikine_LMS(T=T_tmp[i])
-
-        #     if ik_q.success == True:
-        #         count += 1
-        #         manipulability_index.append(self.robot.manipulability(q=ik_q.q))
-        #     if i >= 1:
-        #         # 生成时间向量
-        #         traj_time = total_time/9 # 除以點位數量
-        #         time_vector = np.linspace(0, traj_time, int(traj_time/sample_interval) + 1)
-        #         traj = self.robot.jtraj(T_tmp[i-1],T_tmp[i],time_vector)
-
-        #         if np.amax(traj.sd) > 3.04:
-        #             ratio_over = ratio_over + 1
-        #         torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
-
-        #         row = abs(torque[:,1]) # 取出第2行
-        #         result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
-        #         row = abs(torque[:,2]) # 取出第3行
-        #         result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
-        #         if len(result_2)>0 or len(result_3) >0:
-        #             torque_over = torque_over + 1
-        #         num_torque = np.append(num_torque, torque)
-        #     i = i + 1
-
-        # num_samples = int(total_time / sample_interval)
-        # total_energy = 0
-        # for j in range(num_samples):
-        #     energy = abs(num_torque[j]) * sample_interval
-        #     total_energy += energy
-            
-        # if count == 0:
-        #     return(ratio_over, torque_over, total_energy,0,0)
-        # else:
-        #     final_score = count / i
-        #     if count == 1:
-        #         return(ratio_over, torque_over, total_energy, final_score, manipulability_index[0]) # 回傳 manipulability[0]
-        #     else:
-        #         return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
         sheet1 = sheets[0]
         rows = sheet1.rows
         T_tmp = []
@@ -860,8 +698,8 @@ class RobotOptEnv(gym.Env):
             time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
             traj = self.robot.jtraj(T_traj[m],T_traj[m+1],time_vector)
             # print(traj.s)
-            if np.amax(traj.sd) > 3.04:
-                ratio_over = ratio_over + 1
+            # if np.amax(traj.sd) > 3.04:
+            #     ratio_over = ratio_over + 1
             torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
             row = abs(torque[:,1]) # 取出第2行
             result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
@@ -876,13 +714,13 @@ class RobotOptEnv(gym.Env):
             total_energy += energy
                 
         if count == 0:
-            return(0, 0, 0,0,0)
+            return(0, 0, 0, 0)
         else:
             final_score = count / i
             if count == 1:
-                return(0, 0, 0, final_score, manipulability_index[0]) # 回傳 manipulability[0]
+                return(0, 0, final_score, manipulability_index[0]) # 回傳 manipulability[0]
             else:
-                return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
+                return(torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
 
 
 class RobotOptEnv_3dof(gym.Env):

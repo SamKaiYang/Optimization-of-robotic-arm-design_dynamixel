@@ -142,8 +142,8 @@ class drl_optimization:
         # log_interval = 200  # @param {type:"integer"}
 
         num_atoms = 51  # @param {type:"integer"}
-        min_q_value = -250  # @param {type:"integer"}
-        max_q_value = 250  # @param {type:"integer"}
+        min_q_value = -100  # @param {type:"integer"}
+        max_q_value = 50  # @param {type:"integer"}
         n_step_update = 2  # @param {type:"integer"}
 
         # num_eval_episodes = 10  # @param {type:"integer"}
@@ -456,7 +456,7 @@ class Tester(object):
         # self.agent = agent
         self.model_path = model_path
         self.env = env
-        self._best_episode_reward = 200
+        self._best_episode_reward = 0
         self.drl_env_class = drl_env_class
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
