@@ -97,6 +97,8 @@ class RobotOptEnv(gym.Env):
         self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
         self.MAX_LENGTH = 40
         self.MIN_LENGTH = 5
+        # self.torque_sum_list = [10.2, 30.4, 49.8, 50.6, 70, 89.4]
+        self.torque_sum_list = [89.4, 70, 50.6, 49.8, 30.4, 10.2]
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
         
@@ -272,32 +274,32 @@ class RobotOptEnv(gym.Env):
 
         if self.state[2] == 1 and self.reachable_tmp == 1:
             shaping = (
-                        - self.state[6]/5 # 馬達扭矩成本
+                        # - self.state[6]/5 # 馬達扭矩成本
                         - self.state[1]/5 # 功耗
-                        + 1000 * self.state[3] # 可操作性
+                        + 2000 * self.state[3] # 可操作性
                     ) 
             if self.prev_shaping != None:
                 reward = shaping - self.prev_shaping
             self.prev_shaping = shaping
         elif self.state[2] == 1 and self.reachable_tmp != 1:
             tmp_shaping = (
-                        - self.state[6]/5  # 馬達扭矩成本
+                        # - self.state[6]/5  # 馬達扭矩成本
                         - self.state[1]/5 # 功耗
-                        + 1000 * self.state[3] # 可操作性
+                        + 2000 * self.state[3] # 可操作性
                     ) 
             self.prev_shaping = tmp_shaping
             reward = 0
             # self.prev_shaping = tmp_shaping
         elif self.state[2] != 1 and self.reachable_tmp == 1:
             tmp_shaping = (
-                        + 1000 * self.state[3] # 可操作性
+                        + 2000 * self.state[3] # 可操作性
                     ) 
             self.prev_shaping = tmp_shaping
             reward = 0
             # self.prev_shaping = tmp_shaping
         else:
             shaping = (
-                        + 1000 * self.state[3] # 可操作性
+                        + 2000 * self.state[3] # 可操作性
                     ) 
             if self.prev_shaping != None:
                 reward = shaping - self.prev_shaping
@@ -329,7 +331,10 @@ class RobotOptEnv(gym.Env):
             # reward -= ratio_score * 3
             # reward -= torque_score * 3
             if torque_score == 0:
-                reward += 200
+                reward += 50
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[6]:
+                        reward += x * 10
                 # terminated = True
                 # self.counts = 0
         if self.counts == 50: # max_steps
