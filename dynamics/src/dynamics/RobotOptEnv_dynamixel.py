@@ -284,6 +284,9 @@ class RobotOptEnv(gym.Env):
             torque_score = self.state[0]
             if torque_score == 0:
                 reward += 200
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
         if self.counts == 50: # max_steps
             terminated = True
             self.counts = 0
@@ -783,6 +786,9 @@ class RobotOptEnv_3dof(gym.Env):
             torque_score = self.state[0]
             if torque_score == 0:
                 reward += 200
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
         if self.counts == 50: # max_steps
             terminated = True
             self.counts = 0
@@ -822,6 +828,7 @@ class RobotOptEnv_3dof(gym.Env):
             self.state[2] = manipulability_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -844,6 +851,7 @@ class RobotOptEnv_3dof(gym.Env):
             self.state[2] = manipulability_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state     
 
@@ -1294,6 +1302,7 @@ class RobotOptEnv_5dof(gym.Env):
             self.state[2] = manipulability_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -1316,6 +1325,7 @@ class RobotOptEnv_5dof(gym.Env):
             self.state[2] = manipulability_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state          
   
