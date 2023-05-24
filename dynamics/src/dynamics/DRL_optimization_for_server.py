@@ -456,7 +456,7 @@ class Tester(object):
         # self.agent = agent
         self.model_path = model_path
         self.env = env
-        self._best_episode_reward = 0
+        self._best_episode_reward = 50
         self.drl_env_class = drl_env_class
         # self.agent.is_training = False
         # self.agent.load_weights(model_path)
