@@ -476,6 +476,7 @@ class Tester(object):
         episode = 0
         avg_reward = 0
         state_traj = []
+        motor_config_state_traj = []
         num = 0
         for _ in range(self.num_episodes):
             time_step = self.env.reset()
@@ -486,6 +487,7 @@ class Tester(object):
                 step_reward = time_step.reward.numpy()[0]
                 state = time_step.observation
                 state_traj.append(state.numpy()[0])
+                motor_config_state_traj.append([self.drl_env_class.motor_type_axis_2, self.drl_env_class.motor_type_axis_3])
                 step += 1
                 tb.add_scalar("/tested-model/test_step_reward/", step_reward, step)
                 rospy.loginfo("step_reward: %s", step_reward)
@@ -501,6 +503,7 @@ class Tester(object):
             # self.motor_rated[1], self.motor_rated[2]] record
             sheet.cell(row=i+1, column=len(state.numpy()[0])+4).value = self.drl_env_class.motor_type_axis_2
             sheet.cell(row=i+1, column=len(state.numpy()[0])+5).value = self.drl_env_class.motor_type_axis_3
+            
             # reward record
             sheet.cell(row=i + 1, column=len(state.numpy()[0])+2).value = episode_reward
             i = i + 1
@@ -516,6 +519,9 @@ class Tester(object):
                 for k in range(len(state_traj)):
                     for l in range(len(state_traj[k])):
                         sheet_traj.cell(row=k+1, column=l+1).value = state_traj[k][l]
+                for m in range(len(motor_config_state_traj)):
+                    for n in range(len(motor_config_state_traj[m])):
+                        sheet_traj.cell(row=m+1, column=n+9).value = motor_config_state_traj[m][n]
                 num = num + 1  # 要更改的数字
                 new_str = "_{}_".format(num)
                 if not os.path.exists(self.model_path + "tested_state_traj/"):
@@ -936,6 +942,10 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
                 elif w == 'B': # 複雜點位
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                elif w == 'C': 
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                # elif w == 'D': 
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
                 drl.env.mission_time = t
                 # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
                 log_dir = f"logs/"+ op_function_flag +"/"+ str(ros_topic.test_model_name)+"/"+str(curr_time)+"/"
@@ -968,6 +978,10 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
                 elif w == 'B': # 複雜點位
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                elif w == 'C': 
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                # elif w == 'D': 
+                #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
                 drl.env.mission_time = t
                 print(curr_time)
                 origin_return = drl.env.original_design(26.036,23.964,44.7,25.1,drl.env.op_payload,drl.env.mission_time)

@@ -493,7 +493,7 @@ class stl_conv_urdf():
         # 輸出結果
         upper_arm_length = sol[x]
         lower_arm_length = sol[y]
-        random_fixed_arm_length = random.uniform(-5,5)
+        random_fixed_arm_length = random.uniform(-8,8)
         upper_arm_length = upper_arm_length - random_fixed_arm_length
         lower_arm_length = lower_arm_length + random_fixed_arm_length
         rospy.loginfo("random_fixed_arm_length: %s", random_fixed_arm_length)

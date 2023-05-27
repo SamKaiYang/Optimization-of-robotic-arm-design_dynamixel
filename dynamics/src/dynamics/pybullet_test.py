@@ -422,10 +422,11 @@ if __name__ == "__main__":
     # original_design_test.original_design(41.565,38.435,44.7,44.7,1,30)
     # original_design_test.original_design(67.69459,12.30541,44.7,5.1,3,30)
     # original_design_test.original_design(30.4267000820369,29.5732999179631,44.7,25.3,3,30)
-
-    original_design_test.original_design(26.036,23.964,44.7,44.7,3,30)
- 
-    
+    original_design_test.point_test_excel = "./xlsx/task_point_6dof_tested_c.xlsx"
+    origin_return = original_design_test.original_design(26.036,23.964,44.7,44.7,3,30)
+    print(origin_return)
+    origin_return = original_design_test.original_design(29,29,44.7,44.7,3,30)
+    print(origin_return)
     '''
     motion_bullet= motion_model()
     # motion_bullet.reset_robot_urdf(30.4267000820369,12)
