@@ -352,7 +352,12 @@ class RobotOptEnv(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
@@ -374,7 +379,12 @@ class RobotOptEnv(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
