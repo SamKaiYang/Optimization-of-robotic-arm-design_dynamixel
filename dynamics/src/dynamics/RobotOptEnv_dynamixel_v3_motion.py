@@ -338,12 +338,12 @@ class RobotOptEnv(gym.Env):
             if self.action_select == 'variable':
                 self.std_L2, self.std_L3 = self.robot_urdf.opt_random_generate_write_urdf() # 啟用隨機的L2,L3長度urdf
             elif self.action_select == 'fixed':
-                random_total_arm_length = np.random.uniform(low=10, high=60) # FIX: 臂長長度
+                random_total_arm_length = np.random.uniform(low=10, high=80) # FIX: 臂長長度
                 self.std_L2, self.std_L3 = self.robot_urdf.opt_specify_random_generate_write_urdf(random_total_arm_length) # 啟用隨機的L2,L3長度urdf, 並指定總臂長
             self.robot.__init__() # 重製機器人
             self.motor_type_axis_2 = 44.7
             self.motor_type_axis_3 = 44.7
-            rand_payload = np.random.uniform(low=1, high=4)
+            rand_payload = np.random.uniform(low=0, high=6)
             self.payload = rand_payload
             self.robot.payload(self.payload, self.payload_position)  # set payload
             torque = self.dynamics_torque_limit()
