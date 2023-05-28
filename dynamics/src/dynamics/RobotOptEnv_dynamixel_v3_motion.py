@@ -374,6 +374,8 @@ class RobotOptEnv(gym.Env):
             self.payload_position = np.array(self.op_payload_position)
             self.robot.payload(self.payload, self.payload_position)  # set payload
             torque = self.dynamics_torque_limit()
+            self.motor_type_axis_2 = 5.1
+            self.motor_type_axis_3 = 5.1
             torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
             self.state[0] = torque_over
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
