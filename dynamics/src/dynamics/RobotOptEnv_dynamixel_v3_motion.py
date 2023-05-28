@@ -102,6 +102,7 @@ class RobotOptEnv(gym.Env):
         self.mission_time = 0
         self.low_torque_cost = -200
         self.high_torque_cost = 200
+        self.torque_sum_list = [89.4, 70, 50.6, 49.8, 30.4, 10.2]
         # FIXME:
         self.action_select = 'fixed' 
         self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
@@ -111,12 +112,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
 
         # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
-        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 , self.low_torque_cost]), 
+                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0], dtype=np.float64)
         #隨機抽樣點位初始化
         self.T_x = []
         self.T_y = []
@@ -362,6 +363,7 @@ class RobotOptEnv(gym.Env):
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -391,6 +393,7 @@ class RobotOptEnv(gym.Env):
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
 
@@ -877,6 +880,7 @@ class RobotOptEnv_3dof(gym.Env):
         self.prev_shaping = None
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
 
@@ -899,10 +903,16 @@ class RobotOptEnv_3dof(gym.Env):
             torque_score = self.state[0]
             if torque_score == 0:
                 reward += 100
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
         if motion_percent == 0:
             torque_score = self.state[0]
             if torque_score == 0:
                 reward += 200
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
                 terminated = True
                 self.counts = 0
 
