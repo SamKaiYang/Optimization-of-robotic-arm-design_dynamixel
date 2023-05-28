@@ -276,7 +276,12 @@ class RobotOptEnv(gym.Env):
         rospy.loginfo("motor_type_axis_3: %s", self.motor_type_axis_3)
         torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
         self.state[0] = torque_over
-        reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+        reach_score = self.reachability_performance_evaluate(self.model_select)
+        if reach_score == 1:
+            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+        else:
+            motion_score = 0
+        # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
         self.state[1] = reach_score
         self.state[2] = motion_score
         self.prev_shaping = None
@@ -294,22 +299,24 @@ class RobotOptEnv(gym.Env):
         percent = 100 - self.state[1] * 100
         reward += -percent
         
-        motion_percent = 100 - self.state[2] * 100
-        reward += -motion_percent
+        # motion_percent = 100 - self.state[2] * 100
+        # reward += -motion_percent
 
         torque_score = self.state[0]
         reward -= torque_score * 10 # TODO: fixed reward
         
         if percent == 0:
+            motion_percent = self.state[2] * 100
+            reward += motion_percent
             torque_score = self.state[0]
             if torque_score == 0:
                 reward += 100
-        if motion_percent == 0:
-            torque_score = self.state[0]
-            if torque_score == 0:
-                reward += 200
-                terminated = True
-                self.counts = 0
+            if motion_percent == 100:
+                torque_score = self.state[0]
+                if torque_score == 0:
+                    reward += 100
+                    terminated = True
+                    self.counts = 0
 
         if self.counts == 50: # max_steps
             terminated = True
@@ -532,7 +539,32 @@ class RobotOptEnv(gym.Env):
 
         file_name = self.xlsx_outpath + "/task_point_motion" +".xlsx"
         excel_file.save(file_name)
+    def reachability_performance_evaluate(self,model_select):
+        if model_select == "train":
+            # import xlsx
+            df = load_workbook("./xlsx/task_point.xlsx")
+        elif model_select == "test":
+            df = load_workbook(self.point_test_excel)
+        sheets = df.worksheets
+        sheet1 = sheets[0]
+        rows = sheet1.rows
+        T_tmp = []
+        i = 0
+        count = 0
+        for row in rows:
+            row_val = [col.value for col in row]
+            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+            ik_q = self.robot.ikine_LMS(T=T_tmp[i])
 
+            if ik_q.success == True:
+                count += 1
+            i = i + 1
+        final_score = count / i
+        if count == 0:
+            return(0)
+        else:
+            return(final_score)
+        
     def motion_planning_performance_evaluate(self, std_L2, std_L3, model_select,axis2_motor_type, axis3_motor_type):
         if model_select == "train":
             # import xlsx
