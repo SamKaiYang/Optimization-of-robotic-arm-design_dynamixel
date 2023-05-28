@@ -547,6 +547,27 @@ class RobotOptEnv(gym.Env):
         file_name = self.xlsx_outpath + "/task_point" +".xlsx"
         excel_file.save(file_name)
 
+    def original_design(self,std_L2,std_L3, motor_1, motor_2, payload, mission_time):
+        #  指定手臂長度
+        print("aaaaa")
+        self.robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
+        self.robot.__init__() # 重製機器人
+        motor_type_axis_2 = motor_1
+        motor_type_axis_3 = motor_2
+        self.payload = payload
+        op_payload_position = [0, 0, 0.04]
+        self.robot.payload(self.payload, op_payload_position)  # set payload
+        model_select = "test"
+        torque = self.dynamics_torque_limit()
+        torque_over = self.torque_score_result(model_select, motor_type_axis_2, motor_type_axis_3, torque)
+
+        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+        self.random_select_point() # 先隨機抽樣30個點位
+        reach_score, manipulability_score = self.reach_manipulability_evaluate(model_select)
+        origin_return = [torque_over, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        return origin_return
+
+
 class RobotOptEnv_3dof(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
