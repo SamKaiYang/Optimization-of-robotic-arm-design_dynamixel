@@ -521,8 +521,7 @@ class RobotOptEnv(gym.Env):
 
         for i in range(N):
             q1 = theta1[i, 0]
-            # TODO: 真實情況下機構極限
-            q2 = theta2[i, 0]-90
+            q2 = theta2[i, 0]
             q3 = theta3[i, 0]
             q4 = theta4[i, 0]
             q5 = theta5[i, 0]
@@ -557,7 +556,7 @@ class RobotOptEnv(gym.Env):
     def reachability_performance_evaluate(self,model_select):
         if model_select == "train":
             # import xlsx
-            df = load_workbook("./xlsx/task_point.xlsx")
+            df = load_workbook("./xlsx/task_point_motion.xlsx")
         elif model_select == "test":
             df = load_workbook(self.point_test_excel)
         sheets = df.worksheets
