@@ -338,34 +338,11 @@ class RobotOptEnv(gym.Env):
                     # self.counts = 0
         # TODO: case 2 only manipulability
         if self.train_flag == 2: 
-            if self.state[2] == 1 and self.reachable_tmp == 1:
-                shaping = (
-                            + 2000 * self.state[3] # 可操作性
-                        ) 
-                if self.prev_shaping != None:
-                    reward = shaping - self.prev_shaping
-                self.prev_shaping = shaping
-            elif self.state[2] == 1 and self.reachable_tmp != 1:
-                tmp_shaping = (
-                            + 2000 * self.state[3] # 可操作性
-                        ) 
-                self.prev_shaping = tmp_shaping
-                reward = 0
-                # self.prev_shaping = tmp_shaping
-            elif self.state[2] != 1 and self.reachable_tmp == 1:
-                tmp_shaping = (
-                            + 2000 * self.state[3] # 可操作性
-                        ) 
-                self.prev_shaping = tmp_shaping
-                reward = 0
-                # self.prev_shaping = tmp_shaping
-            else:
-                shaping = (
-                            + 2000 * self.state[3] # 可操作性
-                        ) 
-                if self.prev_shaping != None:
-                    reward = shaping - self.prev_shaping
-                self.prev_shaping = shaping
+            shaping = (
+                        + 2000 * self.state[3] # 可操作性
+                    ) 
+            self.prev_shaping = shaping
+            reward = shaping - self.prev_shaping
             # 防止功耗計算爆掉
             if self.state[1] > 2000:
                 reward = 0
@@ -396,6 +373,18 @@ class RobotOptEnv(gym.Env):
                         ) 
                 self.prev_shaping = tmp_shaping
                 reward = 0
+                # self.prev_shaping = tmp_shaping
+            elif self.state[2] != 1 and self.reachable_tmp == 1:
+                tmp_shaping = (
+                            + 0
+                        ) 
+                self.prev_shaping = tmp_shaping
+                reward = 0
+                # self.prev_shaping = tmp_shaping
+            else:
+                shaping = (
+                            + 0
+                        ) 
                 if self.prev_shaping != None:
                     reward = shaping - self.prev_shaping
                 self.prev_shaping = shaping
