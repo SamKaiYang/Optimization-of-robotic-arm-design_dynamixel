@@ -814,6 +814,9 @@ if __name__ == "__main__":
 
         policy_num = config['policy_num']
         rospy.loginfo("Input policy_num: %d" % policy_num)
+
+        drl.env.train_flag = config['train_flag']
+        rospy.loginfo("Input train_flag: %d" % drl.env.train_flag)
         # 要開始時, 按下隨意鍵
         input_text = input("Enter some next: ")
         rospy.loginfo("Input text: %s" % input_text)
@@ -992,6 +995,30 @@ if __name__ == "__main__":
                 i = i + 1
             file_name_original_design = "./xlsx/tested_state_original_design_" + op_function_flag + ".xlsx"
             original_design.save(file_name_original_design)
+            break
+        # single performance index train only for case2
+        if ros_topic.cmd_run == 6:
+            # drl.env.train_flag = 2
+            tb = tensorboardX.SummaryWriter()
+            ros_topic.cmd_run = 0
+            if ros_topic.DRL_algorithm == 'DQN':
+                model_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' +str(arm_structure_dof) + \
+                '/' + str(ros_topic.DRL_algorithm) + '-' + str(arm_structure_dof) + '-' +str(drl.env.action_select) + '-' + curr_time + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'DDQN':
+                model_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.DRL_algorithm) + '-' + str(arm_structure_dof) + '-' +str(drl.env.action_select) + '-' + curr_time + '/models/'  # 保存模型的路径
+            elif ros_topic.DRL_algorithm == 'C51':
+                model_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                '/' + str(ros_topic.DRL_algorithm) + '-' + str(arm_structure_dof) + '-' +str(drl.env.action_select) + '-' + curr_time + '/models/'  # 保存模型的路径
+            
+            # 訓練
+            drl.env.model_select = "train"
+            drl.env.point_Workspace_cal_Monte_Carlo()
+            train_env, train_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=1)
+            # model_path = None
+            train = Trainer(train_agent, train_env, model_path)
+            train.train(train_eps = ddqn_train_eps)
+
             break
         else:
             pass

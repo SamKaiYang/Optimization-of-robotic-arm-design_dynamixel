@@ -1,7 +1,7 @@
-op_function: case1
+op_function: case2
 arm_structure_dof: 6
 DRL_algorithm: 'DDQN'
-cmd_run: 5
+cmd_run: 6
 test_model_name: 'DDQN-6-variable-20230521-064836'
 op_dof: 6
 op_payload: 3
@@ -16,3 +16,4 @@ action_select: 'variable'
 point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
 test_episodes: 20
 policy_num: 40000
+train_flag: 4

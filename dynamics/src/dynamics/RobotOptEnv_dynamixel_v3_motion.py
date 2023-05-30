@@ -102,6 +102,7 @@ class RobotOptEnv(gym.Env):
         self.mission_time = 0
         self.low_torque_cost = -200
         self.high_torque_cost = 200
+        self.torque_sum_list = [89.4, 70, 50.6, 49.8, 30.4, 10.2]
         # FIXME:
         self.action_select = 'fixed' 
         self.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
@@ -111,12 +112,12 @@ class RobotOptEnv(gym.Env):
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
 
         # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
-        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 , self.low_torque_cost]), 
+                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0], dtype=np.float64)
         #隨機抽樣點位初始化
         self.T_x = []
         self.T_y = []
@@ -287,6 +288,7 @@ class RobotOptEnv(gym.Env):
         self.prev_shaping = None
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
 
@@ -309,8 +311,12 @@ class RobotOptEnv(gym.Env):
             motion_percent = self.state[2] * 100
             reward += motion_percent
             torque_score = self.state[0]
+            
             if torque_score == 0:
                 reward += 100
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
             if motion_percent == 100:
                 torque_score = self.state[0]
                 if torque_score == 0:
@@ -362,6 +368,7 @@ class RobotOptEnv(gym.Env):
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -374,6 +381,8 @@ class RobotOptEnv(gym.Env):
             self.payload_position = np.array(self.op_payload_position)
             self.robot.payload(self.payload, self.payload_position)  # set payload
             torque = self.dynamics_torque_limit()
+            self.motor_type_axis_2 = 5.1
+            self.motor_type_axis_3 = 5.1
             torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
             self.state[0] = torque_over
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
@@ -389,6 +398,7 @@ class RobotOptEnv(gym.Env):
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
 
@@ -516,8 +526,7 @@ class RobotOptEnv(gym.Env):
 
         for i in range(N):
             q1 = theta1[i, 0]
-            # TODO: 真實情況下機構極限
-            q2 = theta2[i, 0]-90
+            q2 = theta2[i, 0]
             q3 = theta3[i, 0]
             q4 = theta4[i, 0]
             q5 = theta5[i, 0]
@@ -552,7 +561,7 @@ class RobotOptEnv(gym.Env):
     def reachability_performance_evaluate(self,model_select):
         if model_select == "train":
             # import xlsx
-            df = load_workbook("./xlsx/task_point.xlsx")
+            df = load_workbook("./xlsx/task_point_motion.xlsx")
         elif model_select == "test":
             df = load_workbook(self.point_test_excel)
         sheets = df.worksheets
@@ -706,13 +715,13 @@ class RobotOptEnv_3dof(gym.Env):
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
 
-        # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
-        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
+         # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
+        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 , self.low_torque_cost]), 
+                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0], dtype=np.float64)
         #隨機抽樣點位初始化
         self.T_x = []
         self.T_y = []
@@ -875,6 +884,7 @@ class RobotOptEnv_3dof(gym.Env):
         self.prev_shaping = None
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
 
@@ -887,22 +897,28 @@ class RobotOptEnv_3dof(gym.Env):
         percent = 100 - self.state[1] * 100
         reward += -percent
         
-        motion_percent = 100 - self.state[2] * 100
-        reward += -motion_percent
+        # motion_percent = 100 - self.state[2] * 100
+        # reward += -motion_percent
 
         torque_score = self.state[0]
         reward -= torque_score * 10 # TODO: fixed reward
         
         if percent == 0:
+            motion_percent = self.state[2] * 100
+            reward += motion_percent
             torque_score = self.state[0]
+            
             if torque_score == 0:
                 reward += 100
-        if motion_percent == 0:
-            torque_score = self.state[0]
-            if torque_score == 0:
-                reward += 200
-                terminated = True
-                self.counts = 0
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
+            if motion_percent == 100:
+                torque_score = self.state[0]
+                if torque_score == 0:
+                    reward += 100
+                    terminated = True
+                    self.counts = 0
 
         if self.counts == 50: # max_steps
             terminated = True
@@ -939,11 +955,17 @@ class RobotOptEnv_3dof(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -961,11 +983,17 @@ class RobotOptEnv_3dof(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
         
@@ -1222,12 +1250,12 @@ class RobotOptEnv_5dof(gym.Env):
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
 
         # TODO: observation space for torque over 6DoF, reach, motion, axis 2, axis 3
-        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 ]), 
-                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3]), 
+        self.observation_space = spaces.Box(np.array([self.low_torque_over, self.low_reach_eva, self.low_motion_eva, self.low_std_L2, self.low_std_L3 , self.low_torque_cost]), 
+                                            np.array([self.high_torque_over, self.high_reach_eva, self.high_motion_eva,self.high_std_L2, self.high_std_L3, self.high_torque_cost]), 
                                             dtype=np.float64)
         # TODO: reward 歸一化
-        self.state = np.array([0,0,0,0,0], dtype=np.float64)
-        self.pre_state = np.array([0,0,0,0,0], dtype=np.float64)
+        self.state = np.array([0,0,0,0,0,0], dtype=np.float64)
+        self.pre_state = np.array([0,0,0,0,0,0], dtype=np.float64)
 
         #隨機抽樣點位初始化
         self.T_x = []
@@ -1384,6 +1412,7 @@ class RobotOptEnv_5dof(gym.Env):
         self.prev_shaping = None
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
 
@@ -1396,22 +1425,28 @@ class RobotOptEnv_5dof(gym.Env):
         percent = 100 - self.state[1] * 100
         reward += -percent
         
-        motion_percent = 100 - self.state[2] * 100
-        reward += -motion_percent
+        # motion_percent = 100 - self.state[2] * 100
+        # reward += -motion_percent
 
         torque_score = self.state[0]
         reward -= torque_score * 10 # TODO: fixed reward
         
         if percent == 0:
+            motion_percent = self.state[2] * 100
+            reward += motion_percent
             torque_score = self.state[0]
+            
             if torque_score == 0:
                 reward += 100
-        if motion_percent == 0:
-            torque_score = self.state[0]
-            if torque_score == 0:
-                reward += 200
-                terminated = True
-                self.counts = 0
+                for x in range(6):
+                    if self.torque_sum_list[x] == self.state[5]:
+                        reward += x * 10
+            if motion_percent == 100:
+                torque_score = self.state[0]
+                if torque_score == 0:
+                    reward += 100
+                    terminated = True
+                    self.counts = 0
 
         if self.counts == 50: # max_steps
             terminated = True
@@ -1448,11 +1483,17 @@ class RobotOptEnv_5dof(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state
         elif self.model_select == "test":
@@ -1470,11 +1511,17 @@ class RobotOptEnv_5dof(gym.Env):
             self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
             self.random_select_point() # 先隨機抽樣30個點位
             self.prev_shaping = None
-            reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            reach_score = self.reachability_performance_evaluate(self.model_select)
+            if reach_score == 1:
+                reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
+            else:
+                motion_score = 0
+            # reach_score, motion_score = self.motion_planning_performance_evaluate(self.std_L2, self.std_L3, self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             self.state[1] = reach_score
             self.state[2] = motion_score
             self.state[3] = self.std_L2
             self.state[4] = self.std_L3
+            self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
     

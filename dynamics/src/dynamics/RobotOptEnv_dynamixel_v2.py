@@ -99,6 +99,7 @@ class RobotOptEnv(gym.Env):
         self.MIN_LENGTH = 5
         # self.torque_sum_list = [10.2, 30.4, 49.8, 50.6, 70, 89.4]
         self.torque_sum_list = [89.4, 70, 50.6, 49.8, 30.4, 10.2]
+        self.train_flag = 1
         # TODO: 增加馬達模組選型action
         self.action_space = spaces.Discrete(10) # TODO: fixed 12種action
         
@@ -270,73 +271,162 @@ class RobotOptEnv(gym.Env):
         self.counts += 1
         reward = 0
         
-        
+        # TODO: case all
+        if self.train_flag == 1:
+            if self.state[2] == 1 and self.reachable_tmp == 1:
+                shaping = (
+                            # - self.state[6]/5 # 馬達扭矩成本
+                            - self.state[1]/5 # 功耗
+                            + 2000 * self.state[3] # 可操作性
+                        ) 
+                if self.prev_shaping != None:
+                    reward = shaping - self.prev_shaping
+                self.prev_shaping = shaping
+            elif self.state[2] == 1 and self.reachable_tmp != 1:
+                tmp_shaping = (
+                            # - self.state[6]/5  # 馬達扭矩成本
+                            - self.state[1]/5 # 功耗
+                            + 2000 * self.state[3] # 可操作性
+                        ) 
+                self.prev_shaping = tmp_shaping
+                reward = 0
+                # self.prev_shaping = tmp_shaping
+            elif self.state[2] != 1 and self.reachable_tmp == 1:
+                tmp_shaping = (
+                            + 2000 * self.state[3] # 可操作性
+                        ) 
+                self.prev_shaping = tmp_shaping
+                reward = 0
+                # self.prev_shaping = tmp_shaping
+            else:
+                shaping = (
+                            + 2000 * self.state[3] # 可操作性
+                        ) 
+                if self.prev_shaping != None:
+                    reward = shaping - self.prev_shaping
+                self.prev_shaping = shaping
+            # 防止功耗計算爆掉
+            if self.state[1] > 2000:
+                reward = 0
+            self.reachable_tmp = self.state[2]
 
-        if self.state[2] == 1 and self.reachable_tmp == 1:
-            shaping = (
-                        # - self.state[6]/5 # 馬達扭矩成本
-                        - self.state[1]/5 # 功耗
-                        + 2000 * self.state[3] # 可操作性
-                    ) 
-            if self.prev_shaping != None:
-                reward = shaping - self.prev_shaping
-            self.prev_shaping = shaping
-        elif self.state[2] == 1 and self.reachable_tmp != 1:
-            tmp_shaping = (
-                        # - self.state[6]/5  # 馬達扭矩成本
-                        - self.state[1]/5 # 功耗
-                        + 2000 * self.state[3] # 可操作性
-                    ) 
-            self.prev_shaping = tmp_shaping
-            reward = 0
-            # self.prev_shaping = tmp_shaping
-        elif self.state[2] != 1 and self.reachable_tmp == 1:
-            tmp_shaping = (
-                        + 2000 * self.state[3] # 可操作性
-                    ) 
-            self.prev_shaping = tmp_shaping
-            reward = 0
-            # self.prev_shaping = tmp_shaping
-        else:
-            shaping = (
-                        + 2000 * self.state[3] # 可操作性
-                    ) 
-            if self.prev_shaping != None:
-                reward = shaping - self.prev_shaping
-            self.prev_shaping = shaping
-        # 防止功耗計算爆掉
-        if self.state[1] > 2000:
-            reward = 0
-        self.reachable_tmp = self.state[2]
+            rospy.loginfo("-------------------------")
+            rospy.loginfo("shaping reward: %s", reward)
 
-        rospy.loginfo("-------------------------")
-        rospy.loginfo("shaping reward: %s", reward)
-
-        terminated = False
-        
-        # TODO: case 3
-        if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
-            terminated = True
-            reward += -200
-        percent = 100 - self.state[2] * 100
-        reward += -percent
-        # ratio_score = self.state[0]
-        torque_score = self.state[0]
-        # reward -= ratio_score * 3
-        reward -= torque_score * 3
-        # reachable == 1
-        if percent == 0:
+            terminated = False
+            if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
+                terminated = True
+                reward += -200
+            percent = 100 - self.state[2] * 100
+            reward += -percent
             # ratio_score = self.state[0]
             torque_score = self.state[0]
             # reward -= ratio_score * 3
-            # reward -= torque_score * 3
-            if torque_score == 0:
-                reward += 50
-                for x in range(6):
-                    if self.torque_sum_list[x] == self.state[6]:
-                        reward += x * 10
-                # terminated = True
-                # self.counts = 0
+            reward -= torque_score * 3
+            # reachable == 1
+            if percent == 0:
+                # ratio_score = self.state[0]
+                torque_score = self.state[0]
+                # reward -= ratio_score * 3
+                # reward -= torque_score * 3
+                if torque_score == 0:
+                    reward += 50
+                    for x in range(6):
+                        if self.torque_sum_list[x] == self.state[6]:
+                            reward += x * 10
+                    # terminated = True
+                    # self.counts = 0
+        # TODO: case 2 only manipulability
+        if self.train_flag == 2: 
+            shaping = (
+                        + 2000 * self.state[3] # 可操作性
+                    ) 
+            self.prev_shaping = shaping
+            reward = shaping - self.prev_shaping
+            # 防止功耗計算爆掉
+            if self.state[1] > 2000:
+                reward = 0
+            self.reachable_tmp = self.state[2]
+
+            rospy.loginfo("-------------------------")
+            rospy.loginfo("shaping reward: %s", reward)
+
+            terminated = False
+            if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
+                terminated = True
+                reward += -200
+            percent = 100 - self.state[2] * 100
+            reward += -percent
+
+        # TODO: case 3 only consuption
+        if self.train_flag == 3: 
+            if self.state[2] == 1 and self.reachable_tmp == 1:
+                shaping = (
+                            - self.state[1]/5 # 功耗
+                        ) 
+                if self.prev_shaping != None:
+                    reward = shaping - self.prev_shaping
+                self.prev_shaping = shaping
+            elif self.state[2] == 1 and self.reachable_tmp != 1:
+                tmp_shaping = (
+                            - self.state[1]/5 # 功耗
+                        ) 
+                self.prev_shaping = tmp_shaping
+                reward = 0
+                # self.prev_shaping = tmp_shaping
+            elif self.state[2] != 1 and self.reachable_tmp == 1:
+                tmp_shaping = (
+                            + 0
+                        ) 
+                self.prev_shaping = tmp_shaping
+                reward = 0
+                # self.prev_shaping = tmp_shaping
+            else:
+                shaping = (
+                            + 0
+                        ) 
+                if self.prev_shaping != None:
+                    reward = shaping - self.prev_shaping
+                self.prev_shaping = shaping
+            # 防止功耗計算爆掉
+            if self.state[1] > 2000:
+                reward = 0
+            self.reachable_tmp = self.state[2]
+
+            rospy.loginfo("-------------------------")
+            rospy.loginfo("shaping reward: %s", reward)
+
+            terminated = False
+            if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
+                terminated = True
+                reward += -200
+            percent = 100 - self.state[2] * 100
+            reward += -percent
+        # TODO: case 4 only torque score
+        if self.train_flag == 4: 
+            terminated = False
+            if self.state[4] <= self.MIN_LENGTH or self.state[5] <= self.MIN_LENGTH  or self.state[4] >= self.MAX_LENGTH or self.state[5] >= self.MAX_LENGTH:
+                terminated = True
+                reward += -200
+            percent = 100 - self.state[2] * 100
+            reward += -percent
+            # ratio_score = self.state[0]
+            torque_score = self.state[0]
+            # reward -= ratio_score * 3
+            reward -= torque_score * 3
+            # reachable == 1
+            if percent == 0:
+                # ratio_score = self.state[0]
+                torque_score = self.state[0]
+                # reward -= ratio_score * 3
+                # reward -= torque_score * 3
+                if torque_score == 0:
+                    reward += 50
+                    for x in range(6):
+                        if self.torque_sum_list[x] == self.state[6]:
+                            reward += x * 10
+
+        # TODO: train case end
         if self.counts == 50: # max_steps
             terminated = True
             self.counts = 0
