@@ -261,6 +261,7 @@ class RobotOptEnv(gym.Env):
         self.state[1], self.state[2] = self.reach_manipulability_evaluate(self.model_select)
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
         shaping = (
@@ -339,7 +340,7 @@ class RobotOptEnv(gym.Env):
             self.payload_position = np.array(self.op_payload_position)
             self.robot.payload(self.payload, self.payload_position)  # set payload
             torque = self.dynamics_torque_limit()
-            self.motor_type_axis_2 = 5.1
+            self.motor_type_axis_2 = 25.3
             self.motor_type_axis_3 = 5.1
             torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
             self.state[0] = torque_over
@@ -786,6 +787,7 @@ class RobotOptEnv_3dof(gym.Env):
         self.state[1], self.state[2] = self.reach_manipulability_evaluate(self.model_select)
         self.state[3] = self.std_L2
         self.state[4] = self.std_L3
+        self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
         self.counts += 1
         reward = 0
         shaping = (
