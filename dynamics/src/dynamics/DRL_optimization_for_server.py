@@ -987,7 +987,9 @@ if __name__ == "__main__":
                 #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
                 drl.env.mission_time = t
                 print(curr_time)
-                origin_return = drl.env.original_design(26.036,23.964,44.7,25.1,drl.env.op_payload,drl.env.mission_time)
+                origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(26.036,23.964,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(30,30,44.7,25.3,drl.env.op_payload,drl.env.mission_time)
                 # 迭代矩陣的每一個元素，並填入工作表中
                 for l in range(len(origin_return)):
                     sheet_original_design.cell(row=i+1, column=1).value = curr_time
