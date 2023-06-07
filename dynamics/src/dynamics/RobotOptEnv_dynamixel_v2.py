@@ -2054,7 +2054,73 @@ class RobotOptEnv_5dof(gym.Env):
                 return(0, 0, 0, final_score, manipulability_index[0]) # 回傳 manipulability[0]
             else:
                 return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
-
+    # def performance_evaluate(self,model_select,axis2_motor_type, axis3_motor_type):
+    #     if model_select == "train":
+    #         # import xlsx
+    #         df = load_workbook("./xlsx/task_point.xlsx")
+    #     elif model_select == "test":
+    #         df = load_workbook(self.point_test_excel)
+    #     sheets = df.worksheets
+    #     sheet1 = sheets[0]
+    #     rows = sheet1.rows
+    #     T_tmp = []
+    #     T_traj = []
+    #     ik_q_traj = []
+    #     ratio_over = 0
+    #     torque_over = 0
+    #     num_torque = np.array([np.zeros(shape=6)])
+    #     total_time = self.mission_time
+    #     # 采样间隔
+    #     sample_interval = 0.2
+    #     manipulability_index = []
+    #     i = 0
+    #     count = 0
+    #     max_diff = []
+    #     max_diff_tol = 0
+    #     traj_time = []
+    #     diff = np.array([np.zeros(shape=6)])
+    #     for row in rows:
+    #         row_val = [col.value for col in row]
+    #         T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+    #         ik_q = self.robot.ikine_LMS(T=T_tmp[i])
+    #         if ik_q.success == True:
+    #             count += 1
+    #             T_traj.append(T_tmp[i])
+    #             ik_q_traj.append(ik_q.q)
+    #             manipulability_index.append(self.robot.manipulability(q=ik_q.q))
+    #             if count >= 2: # 兩個點位以上開始計算
+    #                 diff = np.abs(np.subtract(ik_q_traj[-2], ik_q_traj[-1]))
+    #                 max_diff_tol = max_diff_tol + np.max(diff)
+    #                 max_diff.append(np.max(diff))
+    #         i = i + 1
+    #     for k in range(len(max_diff)):
+    #         traj_time.append(max_diff[k] / max_diff_tol * total_time)
+    #     for m in range(len(max_diff)):
+    #         time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
+    #         traj = self.robot.jtraj(T_traj[m],T_traj[m+1],time_vector)
+    #         if np.amax(traj.sd) > 3.04:
+    #             ratio_over = ratio_over + 1
+    #         torque = self.robot.rne(traj.s,traj.sd,traj.sdd)
+    #         row = abs(torque[:,1]) # 取出第2行
+    #         result_2 = row[row > axis2_motor_type] # 取出大于阈值的数字
+    #         row = abs(torque[:,2]) # 取出第3行
+    #         result_3 = row[row > axis3_motor_type] # 取出大于阈值的数字
+    #         if len(result_2)>0 or len(result_3) >0:
+    #             torque_over = torque_over + 1
+    #         num_torque = np.append(num_torque, torque)
+    #     total_energy = 0
+    #     for j in range(len(num_torque)):
+    #         energy = abs(num_torque[j]) * sample_interval
+    #         total_energy += energy
+                
+    #     if count == 0:
+    #         return(0, 0, 0,0,0)
+    #     else:
+    #         final_score = count / i
+    #         if count == 1:
+    #             return(0, 0, 0, final_score, manipulability_index[0]) # 回傳 manipulability[0]
+    #         else:
+    #             return(ratio_over, torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
 if __name__ == '__main__':
     env = RobotOptEnv()
     
