@@ -914,6 +914,7 @@ if __name__ == "__main__":
         # 多種任務測試
         if ros_topic.cmd_run == 4:
             ros_topic.cmd_run = 0
+            arm_structure_dof = 6
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'   # 選擇模型的路径
