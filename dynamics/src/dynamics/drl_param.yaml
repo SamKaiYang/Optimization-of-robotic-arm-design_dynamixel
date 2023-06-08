@@ -1,9 +1,9 @@
-op_function: case1
-arm_structure_dof: 6
+op_function: case2
+arm_structure_dof: 3
 DRL_algorithm: 'DDQN'
 cmd_run: 4
-test_model_name: 'DDQN-6-variable-20230602-055743'
-op_dof: 6
+test_model_name: 'DDQN-6-variable-20230521-064836'
+op_dof: 3
 op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
 mission_time: 30
