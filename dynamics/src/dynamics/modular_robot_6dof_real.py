@@ -45,7 +45,7 @@ class modular_robot_6dof(DHRobot):
 
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/modular_robot_6dof.urdf")
         # robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/random.urdf")
-        robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/single_arm_v12.urdf")
+        robot = URDF.from_xml_file(os.path.dirname(os.path.realpath(__file__))+"/urdf"+"/single_arm_v19.urdf")
         if symbolic:
             import spatialmath.base.symbolic as sym
             zero = sym.zero()
@@ -58,22 +58,24 @@ class modular_robot_6dof(DHRobot):
         inch = 0.0254
 
         self.length_1 = robot.joints[3].origin.xyz[1]
-        self.length_2 = robot.joints[4].origin.xyz[1]
+        self.length_2 = robot.joints[4].origin.xyz[2]
         self.length_3 = robot.joints[5].origin.xyz[2]
 
         # robot length values (metres)
         # a = [0, -0.314, -0.284, 0, 0, 0] #m # teco
-        a = [0, robot.joints[3].origin.xyz[0], robot.joints[4].origin.xyz[0], 0, 0, 0]
+        # TODO:
+        a = [0, robot.joints[3].origin.xyz[0], robot.joints[4].origin.xyz[1], 0, 0, 0]
         # a = [0, -j3.y, -j4.y, 0, 0, 0]
         # d = [0.1301, 0, 0, 0.1145, 0.090, 0.048] #m # teco 
+        # TODO:
         d = [robot.joints[1].origin.xyz[2]+robot.joints[2].origin.xyz[2],
             # 0.068,
             0,
             0,
             # robot.joints[2].origin.xyz[1]-robot.joints[4].origin.xyz[2], 
-            robot.joints[5].origin.xyz[1] + robot.joints[5].origin.xyz[2],  
-            robot.joints[5].origin.xyz[1] + robot.joints[5].origin.xyz[2],
-            robot.joints[6].origin.xyz[1]
+            -robot.joints[5].origin.xyz[1] + robot.joints[5].origin.xyz[2],  
+            -robot.joints[5].origin.xyz[1] + robot.joints[5].origin.xyz[2],
+            -robot.joints[6].origin.xyz[0]
         ]
         # d = [j1.z, 0, 0, j2.y-j4.z , j5.z, j6.z] #m
         alpha = [pi/2, 0, zero, pi/2, -pi/2, zero]
@@ -186,6 +188,7 @@ if __name__ == '__main__':    # pragma nocover
     deg = pi / 180
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     q_test =  np.r_[0, 90, -0, 0, 0, 0]*deg
+
 
     # df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
     # sheets = df.worksheets

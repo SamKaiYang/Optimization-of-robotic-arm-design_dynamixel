@@ -753,6 +753,8 @@ if __name__ == "__main__":
             from RobotOptEnv_dynamixel_v2 import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         elif op_function_flag == "case3":
             from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+        elif op_function_flag == "case2_real":
+            from RobotOptEnv_dynamixel_v2_real import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         if ros_topic.arm_structure_dof == 6:
             drl.env = RobotOptEnv()
             rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
