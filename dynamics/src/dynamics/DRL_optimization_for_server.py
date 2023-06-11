@@ -754,8 +754,10 @@ if __name__ == "__main__":
         elif op_function_flag == "case3":
             from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         elif op_function_flag == "case1_real":
+            op_function_flag = "case1"
             from RobotOptEnv_dynamixel_real import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         elif op_function_flag == "case2_real":
+            op_function_flag = "case2"
             from RobotOptEnv_dynamixel_v2_real import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         if ros_topic.arm_structure_dof == 6:
             drl.env = RobotOptEnv()

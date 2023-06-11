@@ -53,6 +53,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.13081
         self.L2_volume = self.L2_volume*1000
         self.L2_inertia = self.L2_inertia*1000
         print("============================================================")
@@ -63,6 +64,7 @@ class stl_conv_urdf():
         print("                                          {0}".format(self.L2_inertia[2,:]))
 
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663
         self.L3_volume = self.L3_volume*1000
         self.L3_inertia = self.L3_inertia*1000
         print("============================================================")
@@ -205,7 +207,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
+        vol = (1.13081 - 1.04174)/1000
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
@@ -213,7 +215,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol2 = volume_2 - volume_1
+        vol2 = (1.07663 - 0.98756)/1000
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
 
@@ -226,6 +228,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.13081/1000
         # random axis 2 length
         # TODO: fixed -------
         random_axis_2_length = random.uniform(self.axis_2_length - 9.0, self.axis_2_length + 21.0) # 上下邊長極限
@@ -247,6 +250,7 @@ class stl_conv_urdf():
         print("                                          {0}".format(self.L2_inertia[2,:]))
 
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663/1000
         # random axis 3 length
         # TODO: fixed -------
         random_axis_3_length = random.uniform(self.axis_3_length - 9.0, self.axis_3_length + 21.0)
@@ -314,7 +318,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
+        vol = (1.13081 - 1.04174)/1000
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
@@ -322,7 +326,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol2 = volume_2 - volume_1
+        vol2 = (1.07663 - 0.98756)/1000
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
 
@@ -335,6 +339,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.13081/1000
         # random axis 2 length
         # TODO: fixed -------
         random_axis_2_length = random.uniform(self.axis_2_length - 9.0, self.axis_2_length + 21.0)
@@ -351,6 +356,7 @@ class stl_conv_urdf():
         self.L2_inertia = self.L2_inertia*1000
         
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663/1000
         # random axis 3 length
         # TODO: fixed -------
         random_axis_3_length = random.uniform(self.axis_3_length - 9.0, self.axis_3_length + 21.0)
@@ -404,7 +410,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
+        vol = (1.13081 - 1.04174)/1000
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
@@ -412,7 +418,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol2 = volume_2 - volume_1
+        vol2 = (1.07663 - 0.98756)/1000
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
 
@@ -425,6 +431,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.13081/1000
         # random axis 2 length
         # TODO: fixed -------
         # random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
@@ -442,6 +449,7 @@ class stl_conv_urdf():
         self.L2_inertia = self.L2_inertia*1000
         
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663/1000
         # random axis 3 length
         # TODO: fixed -------
         # random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
@@ -489,7 +497,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
+        vol = (1.13081 - 1.04174)/1000
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
@@ -497,7 +505,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol2 = volume_2 - volume_1
+        vol2 = (1.07663 - 0.98756)/1000
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
 
@@ -510,6 +518,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.3081/1000
         # random axis 2 length
         # TODO: fixed -------
         # random_axis_2_length = random.uniform(self.axis_2_length - 7.0, self.axis_2_length + 28.0)
@@ -527,6 +536,7 @@ class stl_conv_urdf():
         self.L2_inertia = self.L2_inertia*1000
         
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663/1000
         # random axis 3 length
         # TODO: fixed -------
         # random_axis_3_length = random.uniform(self.axis_3_length - 7.0, self.axis_3_length + 28.0)
@@ -668,7 +678,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol = volume_2 - volume_1
+        vol = (1.13081 - 1.04174)/1000
         cog = cog_2 - cog_1
         inertia = inertia_2 - inertia_1
 
@@ -676,7 +686,7 @@ class stl_conv_urdf():
         volume_1, cog_1, inertia_1 = your_mesh.get_mass_properties()
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_3_19.0.STL')
         volume_2, cog_2, inertia_2 = your_mesh.get_mass_properties()
-        vol2 = volume_2 - volume_1
+        vol2 = (1.07663 - 0.98756)/1000
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
 
@@ -688,6 +698,7 @@ class stl_conv_urdf():
         self.mesh_3_name = self.robot_name + "_3_"+ str(self.axis_3_length) + ".STL"
 
         self.L2_volume, self.L2_cog, self.L2_inertia = self.robot_stl_axis_2.get_mass_properties()
+        self.L2_volume = 1.3081/1000
         # specified axis 2 length
         specified_axis_2_length = L2
         diff_axis_2_length = specified_axis_2_length - self.axis_2_length
@@ -701,6 +712,7 @@ class stl_conv_urdf():
         self.L2_inertia = self.L2_inertia*1000
         
         self.L3_volume, self.L3_cog, self.L3_inertia = self.robot_stl_axis_3.get_mass_properties()
+        self.L3_volume = 1.07663/1000
         # specified axis 3 length
         specified_axis_3_length = L3
         diff_axis_3_length = specified_axis_3_length - self.axis_3_length
