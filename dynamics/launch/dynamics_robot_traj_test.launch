@@ -1,0 +1,7 @@
+<launch>
+  <node name="stl_cal" pkg="dynamics" type="stl_conv_6dof_urdf.py" respawn="false" output="screen" cwd="node" >
+  </node>
+  <node name="optimization" pkg="dynamics" type="modular_robot_6dof_traj_test.py" respawn="false" output="screen" cwd="node" >
+  </node>
+  
+</launch>
