@@ -107,6 +107,7 @@ files = None
 
 file_path = curr_path + "/outputs/"
 curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
+curr_time_real = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
 # curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 # tempdir = curr_path + "/C51_outputs/" + \
 #             '/' + curr_time + '/models/'  # 保存模型的路径
@@ -524,9 +525,9 @@ class Tester(object):
                         sheet_traj.cell(row=m+1, column=n+9).value = motor_config_state_traj[m][n]
                 num = num + 1  # 要更改的数字
                 new_str = "_{}_".format(num)
-                if not os.path.exists(self.model_path + "tested_state_traj/"):
-                    os.makedirs(self.model_path + "tested_state_traj/")
-                file_name_traj = self.model_path + "tested_state_traj/tested_state_traj" + new_str + curr_time +".xlsx"
+                if not os.path.exists(self.model_path + "tested_state_traj" + curr_time_real +"/"):
+                    os.makedirs(self.model_path + "tested_state_traj" + curr_time_real +"/")
+                file_name_traj = self.model_path + "tested_state_traj" + curr_time_real +"/tested_state_traj" + new_str + curr_time +".xlsx"
                 excel_file_traj.save(file_name_traj)
             # TODO: 清空
             else:
@@ -540,9 +541,9 @@ class Tester(object):
         #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
         
         # add curr_time
-        if not os.path.exists(self.model_path + "tested_reward_state/"):
-                    os.makedirs(self.model_path + "tested_reward_state/")
-        file_name = self.model_path + "tested_reward_state/tested_reward_state_" + curr_time +".xlsx"
+        if not os.path.exists(self.model_path + "tested_reward_state/" + curr_time_real +""):
+                    os.makedirs(self.model_path + "tested_reward_state/" + curr_time_real +"")
+        file_name = self.model_path + "tested_reward_state" + curr_time_real +"/tested_reward_state_" + curr_time +".xlsx"
         excel_file.save(file_name)
 
         
@@ -954,8 +955,8 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 elif w == 'C': 
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
-                # elif w == 'D': 
-                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
+                elif w == 'D': 
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
                 drl.env.mission_time = t
                 # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
                 log_dir = f"logs/"+ op_function_flag +"/"+ str(ros_topic.test_model_name)+"/"+str(curr_time)+"/"
@@ -990,8 +991,8 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
                 elif w == 'C': 
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
-                # elif w == 'D': 
-                #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
+                elif w == 'D': 
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
                 drl.env.mission_time = t
                 print(curr_time)
                 origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
