@@ -90,7 +90,7 @@ class motion_model(object):
                 i = i + 1
 
     def reset_robot_urdf(self, std_L2, std_L3):
-        robot_urdf = stl_conv_urdf("single_arm_v22","test")
+        robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
         robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
 
     def stl_trimesh_scaling(self, std_L2_scale, std_L3_scale):
@@ -100,21 +100,26 @@ class motion_model(object):
         mesh = trimesh.load(HERE+'/meshes/original_single_arm_v22_axis_2.STL')
         # mesh.show()
         # 获取需要缩放的组件和其他组件
-        scaled_mesh = mesh.split()[1]  # 第二个组件
+        # axis2 共有 10個組件 其中需要縮放3
+            # base_meshes 1 5 8 9 10
+            # other meshes 2 4 6 7
+        
+        scaled_mesh = mesh.split()[2]  # 第2个组件
 
         # 0 2 7 8
         # base_meshes = mesh.split()[:1]
-        base_meshes = trimesh.util.concatenate(mesh.split()[3]+mesh.split()[4]+mesh.split()[5]+mesh.split()[6])
-        other_meshes = trimesh.util.concatenate(mesh.split()[0]+mesh.split()[2]+mesh.split()[7]+mesh.split()[8])
+        base_meshes = trimesh.util.concatenate(mesh.split()[0]+mesh.split()[4]+mesh.split()[7]+mesh.split()[8]+mesh.split()[9])
+        other_meshes = trimesh.util.concatenate(mesh.split()[1]+mesh.split()[3]+mesh.split()[5]+mesh.split()[6])
         
         # 将 STL 模型沿 X 轴方向偏移 1 厘米
-        x_cm = scale - 12 # 沿 X 轴方向的偏移量（单位：厘米）
+        x_cm = scale - 19 # 沿 X 轴方向的偏移量（单位：厘米）
         x_m = x_cm / 100.0  # 将单位从厘米转换为米
         other_meshes.apply_translation([x_m, 0, 0])
 
         # 在X方向上缩放
-        scale_factor = scale/12
-
+        scale = scale - 9.169
+        scale_factor = scale/9.831
+        
         scaled_mesh.apply_scale([scale_factor, 1, 1])  # 只更改x軸的長度
         
         offset_x = -x_cm/2*0.01 # 将单位从厘米转换为米
@@ -131,20 +136,24 @@ class motion_model(object):
         mesh = trimesh.load(HERE+'/meshes/original_single_arm_v22_axis_3.STL')
         # mesh.show()
         # 获取需要缩放的组件和其他组件
-        scaled_mesh = mesh.split()[3]  # 第四个组件
+        # axis3 共有 8個組件 其中需要縮放5
+                # base_meshes 1 4 6 7 8
+                # other meshes 2 3
+        scaled_mesh = mesh.split()[4]  # 第5个组件
 
         # 0 2 7 8
         # base_meshes = mesh.split()[:1]
-        base_meshes = trimesh.util.concatenate(mesh.split()[0]+mesh.split()[1]+mesh.split()[2]+mesh.split()[5])
-        other_meshes = trimesh.util.concatenate(mesh.split()[4]+mesh.split()[6])
+        base_meshes = trimesh.util.concatenate(mesh.split()[0]+mesh.split()[3]+mesh.split()[5]+mesh.split()[6]+mesh.split()[7])
+        other_meshes = trimesh.util.concatenate(mesh.split()[1]+mesh.split()[2])
         
         # 将 STL 模型沿 X 轴方向偏移 1 厘米
-        x_cm = scale - 12 # 沿 X 轴方向的偏移量（单位：厘米）
+        x_cm = scale - 19 # 沿 X 轴方向的偏移量（单位：厘米）
         x_m = x_cm / 100.0  # 将单位从厘米转换为米
         other_meshes.apply_translation([x_m, 0, 0])
 
         # 在X方向上缩放
-        scale_factor = scale/12
+        scale = scale - 8.3
+        scale_factor = scale/10.7
 
         scaled_mesh.apply_scale([scale_factor, 1, 1])  # 只更改x軸的長度
         
@@ -437,8 +446,8 @@ if __name__ == "__main__":
     wait_for_duration(100)
     '''
     motion_bullet= motion_model()
-    motion_bullet.reset_robot_urdf(30.4267000820369,29.5732999179631)
-    motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
+    motion_bullet.reset_robot_urdf(20,20)
+    motion_bullet.stl_trimesh_scaling(20, 20)
     # # TODO: add target_points
     # target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
     # distance_points = 0.05

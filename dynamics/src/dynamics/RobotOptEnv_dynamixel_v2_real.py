@@ -11,10 +11,10 @@ from interface_control.msg import optimal_design
 from dynamics.arm_workspace import arm_workspace_plane
 # from robot_urdf import RandomRobot
 from dynamics.motor_module import motor_data
-from dynamics.modular_robot_3dof import modular_robot_3dof
+from dynamics.modular_robot_3dof_real import modular_robot_3dof
 from dynamics.modular_robot_4dof import modular_robot_4dof
-from dynamics.modular_robot_5dof import modular_robot_5dof
-from dynamics.modular_robot_6dof import modular_robot_6dof
+from dynamics.modular_robot_5dof_real import modular_robot_5dof
+from dynamics.modular_robot_6dof_real import modular_robot_6dof
 # from dynamics.stl_conv_6dof_urdf import stl_conv_urdf
 from dynamics.stl_conv_6dof_urdf_dynamixel_real import stl_conv_urdf # version v19 to real robot arm
 import rospy

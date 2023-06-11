@@ -1,4 +1,4 @@
-op_function: case2
+op_function: case2_real
 arm_structure_dof: 3
 DRL_algorithm: 'DDQN'
 cmd_run: 4
