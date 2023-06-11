@@ -401,7 +401,31 @@ class RobotOptEnv(gym.Env):
             self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
-
+    def original_design(self,std_L2,std_L3, motor_1, motor_2, payload, mission_time):
+        #  指定手臂長度
+        print("aaaaa")
+        self.robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
+        self.robot.__init__() # 重製機器人
+        motor_type_axis_2 = motor_1
+        motor_type_axis_3 = motor_2
+        self.payload = payload
+        op_payload_position = [0, 0, 0.04]
+        # self.payload_position = [np.array(op_payload_position)]
+        self.robot.payload(self.payload, op_payload_position)  # set payload
+        # mission_time = 30
+        model_select = "test"
+        torque = self.dynamics_torque_limit()
+        torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
+        self.state[0] = torque_over
+        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+        self.random_select_point() # 先隨機抽樣30個點位
+        reach_score = self.reachability_performance_evaluate(self.model_select)
+        if reach_score == 1:
+            reach_score, motion_score = self.motion_planning_performance_evaluate(std_L2, std_L3, model_select, motor_type_axis_2, motor_type_axis_3)
+        else:
+            motion_score = 0
+        origin_return = [torque_over, reach_score, motion_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        return origin_return
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None
@@ -996,7 +1020,7 @@ class RobotOptEnv_3dof(gym.Env):
             self.state[5] = self.motor_type_axis_2 + self.motor_type_axis_3
             self.counts = 0
             return self.state        
-        
+    
     
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
@@ -1184,6 +1208,7 @@ class RobotOptEnv_3dof(gym.Env):
         if axis3_motor_type <= torque[2]:
             torque_over = torque_over +1
         return torque_over
+    
 class RobotOptEnv_5dof(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],

@@ -2,13 +2,32 @@ import trimesh
 import numpy as np
 
 # 加载包含三个组件的STL
-mesh = trimesh.load('original_single_arm_axis_3.STL')
+mesh = trimesh.load('original_single_arm_v22_axis_2.STL')
+# mesh = trimesh.load('original_single_arm_axis_2.STL')
 mesh.show()
 # # 获取需要缩放的组件和其他组件
-# # 0 2 7 8
-# 4 6
-scaled_mesh = mesh.split()[3]  # 第二个组件
-scaled_mesh.show()
+# axis2 共有 10個組件 其中需要縮放3
+    # base_meshes 1 5 8 9 10
+    # other meshes 2 4 6 7
+
+print("axis_2 mesh 組件量:",len(mesh.split()))
+for i in range(len(mesh.split())):
+    print(i)
+    scaled_mesh = mesh.split()[i]
+    scaled_mesh.show()
+
+# 加载包含三个组件的STL
+mesh = trimesh.load('original_single_arm_v22_axis_3.STL')
+mesh.show()
+# # 获取需要缩放的组件和其他组件
+# axis3 共有 8個組件 其中需要縮放5
+        # base_meshes 1 4 6 7 8
+        # other meshes 2 3
+print("axis_3 mesh 組件量:",len(mesh.split()))
+for i in range(len(mesh.split())):
+    scaled_mesh = mesh.split()[i]
+    scaled_mesh.show()
+
 
 # # 切割機構為單獨的構件
 # components = mesh.split()
