@@ -43,8 +43,8 @@ import spatialmath as sm
 from modular_robot_6dof_real import modular_robot_6dof
 
 HERE = os.path.dirname(__file__)
-SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v19_motion.urdf')
-SINGLE_ARM_3DOF = os.path.join(HERE,'urdf', 'single_arm_v19_motion_3dof.urdf')
+SINGLE_ARM = os.path.join(HERE,'urdf', 'single_arm_v22_19cm_motion.urdf')
+SINGLE_ARM_3DOF = os.path.join(HERE,'urdf', 'single_arm_v22_19cm_motion_3dof.urdf')
 class motion_model(object):
     def __init__(self):
         self.length_1 = 0.1
@@ -90,14 +90,14 @@ class motion_model(object):
                 i = i + 1
 
     def reset_robot_urdf(self, std_L2, std_L3):
-        robot_urdf = stl_conv_urdf("single_arm_v19","test")
+        robot_urdf = stl_conv_urdf("single_arm_v22","test")
         robot_urdf.specified_generate_write_urdf(std_L2, std_L3)
 
     def stl_trimesh_scaling(self, std_L2_scale, std_L3_scale):
         # 加载包含三个组件的STL
         # if axis == 2:
         scale = std_L2_scale
-        mesh = trimesh.load(HERE+'/meshes/original_single_arm_v19_axis_2.STL')
+        mesh = trimesh.load(HERE+'/meshes/original_single_arm_v22_axis_2.STL')
         # mesh.show()
         # 获取需要缩放的组件和其他组件
         scaled_mesh = mesh.split()[1]  # 第二个组件
@@ -124,11 +124,11 @@ class motion_model(object):
         new_mesh = trimesh.util.concatenate(base_meshes +scaled_mesh + other_meshes)
 
         # 保存为新的STL文件
-        new_mesh.export(HERE+'/meshes/merged_single_arm_v19_axis_2.STL')
+        new_mesh.export(HERE+'/meshes/merged_single_arm_v22_axis_2.STL')
         # new_mesh.show()
         # elif axis == 3:
         scale = std_L3_scale
-        mesh = trimesh.load(HERE+'/meshes/original_single_arm_v19_axis_3.STL')
+        mesh = trimesh.load(HERE+'/meshes/original_single_arm_v22_axis_3.STL')
         # mesh.show()
         # 获取需要缩放的组件和其他组件
         scaled_mesh = mesh.split()[3]  # 第四个组件
@@ -155,7 +155,7 @@ class motion_model(object):
         new_mesh = trimesh.util.concatenate(base_meshes +scaled_mesh + other_meshes)
 
         # 保存为新的STL文件
-        new_mesh.export(HERE+'/meshes/merged_single_arm_v19_axis_3.STL')
+        new_mesh.export(HERE+'/meshes/merged_single_arm_v22_axis_3.STL')
         # new_mesh.show()
 
     def motion_planning_init(self, viewer=True):
@@ -191,9 +191,9 @@ class motion_model(object):
         arm='right'
         set_camera(yaw=0, pitch=-70, distance=2, target_position=(0, 0, 0))
         arm_tag = arm[0]
-        arm_joint_names = ['Joint1',
-                            'Joint2',
-                            'Joint3']
+        arm_joint_names = ['joint1',
+                            'joint2',
+                            'joint3']
         self.arm_joints = joints_from_names(self.Robot, arm_joint_names)
         self.sample_fn = get_sample_fn(self.Robot, self.arm_joints)
         print("ffffuuucccckkk")

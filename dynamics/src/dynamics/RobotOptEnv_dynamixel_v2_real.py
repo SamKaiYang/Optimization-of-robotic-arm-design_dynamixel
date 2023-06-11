@@ -40,7 +40,7 @@ class RobotOptEnv(gym.Env):
     }
     def __init__(self):
         self.robot = modular_robot_6dof()
-        self.robot_urdf = stl_conv_urdf("single_arm_v19","test")
+        self.robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
         # self.robot_urdf.init_dynamixel_diff_inertia()
         # callback:Enter the parameters of the algorithm to be optimized on the interface
         self.sub_optimal_design = rospy.Subscriber(
@@ -825,7 +825,7 @@ class RobotOptEnv_3dof(gym.Env):
     }
     def __init__(self):
         self.robot = modular_robot_3dof() # TODO: fixed 3dof
-        self.robot_urdf = stl_conv_urdf("single_arm_v19","test")
+        self.robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
         
         # callback:Enter the parameters of the algorithm to be optimized on the interface
         self.sub_optimal_design = rospy.Subscriber(
@@ -1552,7 +1552,7 @@ class RobotOptEnv_5dof(gym.Env):
     }
     def __init__(self):
         self.robot = modular_robot_5dof() # TODO: fixed 5dof
-        self.robot_urdf = stl_conv_urdf("single_arm_v19","test")
+        self.robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
         self.sub_optimal_design = rospy.Subscriber(
             "/optimal_design", optimal_design, self.optimal_design_callback
         )

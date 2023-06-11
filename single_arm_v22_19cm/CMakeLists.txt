@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(single_arm_v19)
+project(single_arm_v22_19cm)
 
 find_package(catkin REQUIRED)
 

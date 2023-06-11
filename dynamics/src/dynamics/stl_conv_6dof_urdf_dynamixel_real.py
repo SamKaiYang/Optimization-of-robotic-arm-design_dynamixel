@@ -111,11 +111,10 @@ class stl_conv_urdf():
             inertia_lines = int(self.L2_line + 7)
             mesh_lines = int(self.L2_line + 20)
             joint_pos = int(self.J3_line + 2)
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             std_L2 = self.axis_2_length
             self.axis_2_length = 190.000000000000 - self.axis_2_length*10
-            joint3_pos_x = 0.232400000000000 - self.axis_2_length*0.001
+            joint3_pos_x = 0.19 - self.axis_2_length*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -125,9 +124,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            # TODO:
-            self.lines[joint_pos] = ("      xyz=\"0 {0} -0.039\"\n".format(joint3_pos_x))
-            # xyz="0.214 0 -0.0325"
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint3_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -138,13 +135,10 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # 以軸長12cm為基準
-            # rospy.loginfo("dynamixel_axis_2_length: %s", self.axis_3_length)
-            # # rospy.self.axis_3_length
-            # TODO:
+            # 以軸長19cm為基準
             std_L3 = self.axis_3_length
             self.axis_3_length = 190.000000000000 - self.axis_3_length*10
-            joint4_pos_x = 0.267500000000000 - self.axis_3_length*0.001
+            joint4_pos_x = 0.19 - self.axis_3_length*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -154,9 +148,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            # TODO:
-            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint4_pos_x))
-            # xyz="0.214 0 0.0325"
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 0.039\"\n".format(joint4_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -170,13 +162,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L2_line + 7)
             mesh_lines = int(self.L2_line + 20)
             joint_pos = int(self.J3_line + 2)
-            # lines = []
-            
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             std_L2 = 190.000000000000 - std_L2*10
-            joint3_pos_x = 0.232400000000000 - std_L2*0.001
-            joint3_pos_x = 0.232400000000000 - std_L2*0.001
+            joint3_pos_x = 0.19 - std_L2*0.001
             lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -185,13 +173,7 @@ class stl_conv_urdf():
             lines[inertia_lines+3] = ("        iyy=\"{0[1][1]}\"\n".format(self.L2_inertia))
             lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
-            # self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            # lines[joint_pos] = ("      xyz=\"0 {0} -0.039\"\n".format(joint3_pos_x))
-            # TODO:
-            lines[joint_pos] = ("      xyz=\"0 {0} -0.039\"\n".format(joint3_pos_x))
-            
-            # xyz="0 0.2324 -0.039"
-            # xyz="0.214 0 -0.0325"
+            lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint3_pos_x))
             for motion_data in lines:
                 urdf_config.write(motion_data)
             urdf_config.flush()
@@ -202,13 +184,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # lines = []
-            # lines = urdf_config.readlines()
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             std_L3 = 190.000000000000 - std_L3*10
-            # joint4_pos_x = 0.267500000000000 - std_L3*0.001
-            joint4_pos_x = 0.267500000000000 - std_L3*0.001
+            joint4_pos_x = 0.19 - std_L3*0.001
             lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -217,11 +195,7 @@ class stl_conv_urdf():
             lines[inertia_lines+3] = ("        iyy=\"{0[1][1]}\"\n".format(self.L3_inertia))
             lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
-            # self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            # lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint4_pos_x))
-            # TODO:
-            lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint4_pos_x))
-            # xyz="0.214 0 0.0325"
+            lines[joint_pos] = ("      xyz=\"{0} 0 0.039\"\n".format(joint4_pos_x))
             for motion_data in lines:
                 urdf_config.write(motion_data)
             urdf_config.flush()
@@ -583,12 +557,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L2_line + 7)
             mesh_lines = int(self.L2_line + 20)
             joint_pos = int(self.J3_line + 2)
-            
-            # self.axis_2_length = 281.5 - self.axis_2_length*10
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             L2 = 190.000000000000 - L2*10
-            joint3_pos_x = 0.232400000000000 - L2*0.001
+            joint3_pos_x = 0.19 - L2*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -598,8 +569,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            # TODO:
-            self.lines[joint_pos] = ("      xyz=\"0 {0} -0.039\"\n".format(joint3_pos_x))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint3_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -610,9 +580,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # TODO:
+
             L3 = 190.000000000000 - L3*10
-            joint4_pos_x = 0.267500000000000 - L3*0.001
+            joint4_pos_x = 0.19 - L3*0.001
             self.lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             self.lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             self.lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -622,8 +592,7 @@ class stl_conv_urdf():
             self.lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             self.lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
             self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            # TODO:
-            self.lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint4_pos_x))
+            self.lines[joint_pos] = ("      xyz=\"{0} 0 0.039\"\n".format(joint4_pos_x))
             for data in self.lines:
                 urdf_config.write(data)
             urdf_config.flush()
@@ -636,12 +605,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L2_line + 7)
             mesh_lines = int(self.L2_line + 20)
             joint_pos = int(self.J3_line + 2)
-            # lines = []
-            
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             std_L2 = 190.000000000000 - std_L2*10
-            joint3_pos_x = 0.232400000000000 - std_L2*0.001
+            joint3_pos_x = 0.19 - std_L2*0.001
             lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L2_cog))
             lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L2_volume))
             lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L2_inertia))
@@ -650,10 +616,7 @@ class stl_conv_urdf():
             lines[inertia_lines+3] = ("        iyy=\"{0[1][1]}\"\n".format(self.L2_inertia))
             lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L2_inertia))
             lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L2_inertia))
-            # self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_2_name))
-            # TODO:
-            lines[joint_pos] = ("      xyz=\"0 {0} -0.039\"\n".format(joint3_pos_x))
-            # xyz="0.214 0 -0.0325"
+            lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint3_pos_x))
             for motion_data in lines:
                 urdf_config.write(motion_data)
             urdf_config.flush()
@@ -664,12 +627,9 @@ class stl_conv_urdf():
             inertia_lines = int(self.L3_line + 7)
             mesh_lines = int(self.L3_line + 20)
             joint_pos = int(self.J4_line + 2)
-            # lines = []
-            # lines = urdf_config.readlines()
-            # 以軸長12cm為基準
-            # TODO:
+            # 以軸長19cm為基準
             std_L3 = 190.000000000000 - std_L3*10
-            joint4_pos_x = 0.267500000000000 - std_L3*0.001
+            joint4_pos_x = 0.19 - std_L3*0.001
             lines[cog_lines] = ("        xyz=\"{0[0]} {0[1]} {0[2]}\"\n".format(self.L3_cog))
             lines[mass_lines] = ("        value=\"{0}\"  />\n".format(self.L3_volume))
             lines[inertia_lines] = ("        ixx=\"{0[0][0]}\"\n".format(self.L3_inertia))
@@ -678,10 +638,7 @@ class stl_conv_urdf():
             lines[inertia_lines+3] = ("        iyy=\"{0[1][1]}\"\n".format(self.L3_inertia))
             lines[inertia_lines+4] = ("        iyz=\"{0[1][2]}\"\n".format(self.L3_inertia))
             lines[inertia_lines+5] = ("        izz=\"{0[2][2]}\" />\n".format(self.L3_inertia))
-            # self.lines[mesh_lines] = ("          filename=\"package://dynamics/src/dynamics/meshes/{0}\" />\n".format(self.mesh_3_name))
-            # TODO:
-            lines[joint_pos] = ("      xyz=\"{0} 0 -0.039\"\n".format(joint4_pos_x))
-            # xyz="0.214 0 0.0325"
+            lines[joint_pos] = ("      xyz=\"{0} 0 0.039\"\n".format(joint4_pos_x))
             for motion_data in lines:
                 urdf_config.write(motion_data)
             urdf_config.flush()
@@ -705,7 +662,6 @@ class stl_conv_urdf():
                     break
                 else:
                     continue
-    # TODO: fixed -------               
     def specified_generate_write_urdf(self,L2, L3):
         # 比較求取等差間距
         your_mesh = mesh.Mesh.from_file(path.dirname(path.realpath(__file__)) + "/meshes/" + self.robot_name + '_2_12.0.STL')
@@ -723,8 +679,7 @@ class stl_conv_urdf():
         vol2 = volume_2 - volume_1
         cog2 = cog_2 - cog_1
         inertia2 = inertia_2 - inertia_1
-        # ===================================
-        # TODO: fixed -------
+
         self.axis_2_length = 19.0
         self.axis_3_length = 19.0
         self.robot_stl_axis_2 = mesh.Mesh.from_file(path.dirname(path.realpath(__file__))+"/meshes/" + self.robot_name + "_2_"+ str(self.axis_2_length) + ".STL")
@@ -766,8 +721,7 @@ class stl_conv_urdf():
 if __name__ == '__main__':
 
     rospy.init_node('stl_cal')
-    # TODO: fixed -------
-    stl_cal = stl_conv_urdf("single_arm_v19","test")
+    stl_cal = stl_conv_urdf("single_arm_v22_19cm","test")
 
     while not rospy.is_shutdown():
         stl_cal.task_set()
