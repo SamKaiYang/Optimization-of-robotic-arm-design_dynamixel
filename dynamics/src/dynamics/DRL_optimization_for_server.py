@@ -107,6 +107,7 @@ files = None
 
 file_path = curr_path + "/outputs/"
 curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
+curr_time_real = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 获取当前时间
 # curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 # tempdir = curr_path + "/C51_outputs/" + \
 #             '/' + curr_time + '/models/'  # 保存模型的路径
@@ -524,9 +525,9 @@ class Tester(object):
                         sheet_traj.cell(row=m+1, column=n+9).value = motor_config_state_traj[m][n]
                 num = num + 1  # 要更改的数字
                 new_str = "_{}_".format(num)
-                if not os.path.exists(self.model_path + "tested_state_traj/"):
-                    os.makedirs(self.model_path + "tested_state_traj/")
-                file_name_traj = self.model_path + "tested_state_traj/tested_state_traj" + new_str + curr_time +".xlsx"
+                if not os.path.exists(self.model_path + "tested_state_traj_" + curr_time_real +"/"):
+                    os.makedirs(self.model_path + "tested_state_traj_" + curr_time_real +"/")
+                file_name_traj = self.model_path + "tested_state_traj_" + curr_time_real +"/tested_state_traj" + new_str + curr_time +".xlsx"
                 excel_file_traj.save(file_name_traj)
             # TODO: 清空
             else:
@@ -540,9 +541,9 @@ class Tester(object):
         #         '/' + str(ros_topic.test_model_name) + '/models/'  # 保存模型的路径
         
         # add curr_time
-        if not os.path.exists(self.model_path + "tested_reward_state/"):
-                    os.makedirs(self.model_path + "tested_reward_state/")
-        file_name = self.model_path + "tested_reward_state/tested_reward_state_" + curr_time +".xlsx"
+        if not os.path.exists(self.model_path + "tested_reward_state_" + curr_time_real +"/"):
+                    os.makedirs(self.model_path + "tested_reward_state_" + curr_time_real +"/")
+        file_name = self.model_path + "tested_reward_state_" + curr_time_real +"/tested_reward_state_" + curr_time +".xlsx"
         excel_file.save(file_name)
 
         
@@ -753,6 +754,12 @@ if __name__ == "__main__":
             from RobotOptEnv_dynamixel_v2 import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         elif op_function_flag == "case3":
             from RobotOptEnv_dynamixel_v3_motion import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+        elif op_function_flag == "case1_real":
+            op_function_flag = "case1"
+            from RobotOptEnv_dynamixel_real import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
+        elif op_function_flag == "case2_real":
+            op_function_flag = "case2"
+            from RobotOptEnv_dynamixel_v2_real import RobotOptEnv, RobotOptEnv_3dof, RobotOptEnv_5dof
         if ros_topic.arm_structure_dof == 6:
             drl.env = RobotOptEnv()
             rospy.loginfo('arm_structure_dof: {}'.format(ros_topic.arm_structure_dof))
@@ -914,6 +921,7 @@ if __name__ == "__main__":
         # 多種任務測試
         if ros_topic.cmd_run == 4:
             ros_topic.cmd_run = 0
+            arm_structure_dof = 6
             if ros_topic.DRL_algorithm == 'DQN':
                 select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
                 '/' + str(ros_topic.test_model_name) + '/models/'   # 選擇模型的路径
@@ -941,12 +949,17 @@ if __name__ == "__main__":
             for p, w, t in itertools.product(payload, work_space, mission_time):
                 curr_time = f'{p}-{w}-{t}'
                 drl.env.op_payload = p
-                if w == 'A':  # 圓形環門
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
-                elif w == 'B': # 複雜點位
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
-                elif w == 'C': 
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                # if w == 'A':  # 圓形環門
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+                # elif w == 'B': # 複雜點位
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                # elif w == 'C': # 複雜點位 2
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                if w == 'A':  # 圓形還門 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
+                elif w == 'B': # 複雜點位 2 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
+                
                 # elif w == 'D': 
                 #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
                 drl.env.mission_time = t
@@ -977,17 +990,23 @@ if __name__ == "__main__":
             for p, w, t in itertools.product(payload, work_space, mission_time):
                 curr_time = f'{p}-{w}-{t}'
                 drl.env.op_payload = p
-                if w == 'A':  # 圓形環門
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
-                elif w == 'B': # 複雜點位
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
-                elif w == 'C': 
-                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                # if w == 'A':  # 圓形環門
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+                # elif w == 'B': # 複雜點位
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                # elif w == 'C': 
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                if w == 'A':  # 圓形還門 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
+                elif w == 'B': # 複雜點位 2 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
                 # elif w == 'D': 
                 #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
                 drl.env.mission_time = t
                 print(curr_time)
-                origin_return = drl.env.original_design(26.036,23.964,44.7,25.1,drl.env.op_payload,drl.env.mission_time)
+                origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(26.036,23.964,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(30,30,44.7,25.3,drl.env.op_payload,drl.env.mission_time)
                 # 迭代矩陣的每一個元素，並填入工作表中
                 for l in range(len(origin_return)):
                     sheet_original_design.cell(row=i+1, column=1).value = curr_time

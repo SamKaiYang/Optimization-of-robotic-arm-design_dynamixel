@@ -50,7 +50,9 @@ class RobotOptEnv(gym.Env):
         self.payload = 5.0
         self.payload_position = np.array([0, 0, 0.04])
         self.vel = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194, 2.356194])
+        self.vel = np.array([0.52, 0.52, 0.52, 0.52, 0.52, 0.52])
         self.acc = np.array([2.356194, 2.356194, 2.356194, 2.356194, 2.356194, 2.356194])
+        self.acc = np.array([1.57, 1.57, 1.57, 1.57, 1.57, 1.57])
         self.total_weight = 20 # Kg
         self.total_cost = 1800 # 元
         self.reachable_tmp = 0
@@ -353,7 +355,7 @@ class RobotOptEnv(gym.Env):
             self.payload_position = np.array(self.op_payload_position)
             self.robot.payload(self.payload, self.payload_position)  # set payload
             torque = self.dynamics_torque_limit()
-            self.motor_type_axis_2 = 25.3
+            self.motor_type_axis_2 = 5.1
             self.motor_type_axis_3 = 5.1
             # torque_over = self.torque_score_result(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3, torque)
             # self.state[0] = torque_over
