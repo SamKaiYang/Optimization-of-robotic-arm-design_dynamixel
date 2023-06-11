@@ -16,4 +16,4 @@ action_select: 'variable'
 point_test_excel: './xlsx/task_point_6dof_tested.xlsx'
 test_episodes: 20
 policy_num: 40000
-train_flag: 3
+train_flag: 1
