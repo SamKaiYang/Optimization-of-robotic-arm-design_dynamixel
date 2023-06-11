@@ -13,23 +13,23 @@ from urdf_parser_py.urdf import URDF
 import os
 # import pandas as pd
 from openpyxl import load_workbook
-from stl_conv_6dof_urdf_dynamixel import stl_conv_urdf
-from modular_robot_6dof import modular_robot_6dof
+from stl_conv_6dof_urdf_dynamixel_real import stl_conv_urdf
+from modular_robot_6dof_real import modular_robot_6dof
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotTraj():
     def __init__(self):
         self.robot = modular_robot_6dof()
-        self.robot_urdf = stl_conv_urdf("single_arm_v12","test")
+        self.robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
         self.payload = 1.1
         self.payload_position = [0, 0, 0.04]
         self.motor_type_axis_2 = 44.7
         self.motor_type_axis_3 = 25.3
         self.model_select = "test"
-        self.std_L2 = 26
-        self.std_L3 = 24
-        self.point_test_excel = "./xlsx/task_point_6dof_traj_points.xlsx"
-        self.mission_time = 30
+        self.std_L2 = 26.036
+        self.std_L3 = 23.964
+        self.point_test_excel = "./xlsx/task_point_6dof_tested_d.xlsx"
+        self.mission_time = 10
     def only_reachable_manipulability(model_select):
         pass
     def performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3):
@@ -67,7 +67,9 @@ if __name__ == '__main__':    # pragma nocover
         for row in rows:
             row_val = [col.value for col in row]
             T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
+            # ik_q = Traj_robot.robot.ikine_min(T=T_tmp[i],qlim=True)
             ik_q = Traj_robot.robot.ikine_LMS(T=T_tmp[i])
+            # ikine_min(qlim=True)
 
             if ik_q.success == True:
                 count += 1

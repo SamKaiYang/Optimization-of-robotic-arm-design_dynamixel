@@ -119,12 +119,21 @@ class modular_robot_6dof(DHRobot):
                 [robot.links[6].inertial.inertia.ixx, robot.links[6].inertial.inertia.iyy, robot.links[6].inertial.inertia.izz, robot.links[6].inertial.inertia.ixy,robot.links[6].inertial.inertia.iyz, robot.links[6].inertial.inertia.ixz],
                 [robot.links[7].inertial.inertia.ixx, robot.links[7].inertial.inertia.iyy, robot.links[7].inertial.inertia.izz, robot.links[7].inertial.inertia.ixy,robot.links[7].inertial.inertia.iyz, robot.links[7].inertial.inertia.ixz]
             ]
-        # qlim = [
+        # rad = deg/180*pi
+        q_lim = [
+            [-pi,pi],
+            [0,pi],
+            [-150/180*pi,150/180*pi],
+            [-pi,pi],
+            [-pi,pi],
+            [-pi,pi]
+        ]
+        # q_lim = [
         #     [-pi,pi],
-        #     [-pi,pi],
-        #     [-pi,pi],
-        #     [-pi,pi],
-        #     [-pi,pi],
+        #     [-150/180*pi,150/180*pi],
+        #     [-150/180*pi,150/180*pi],
+        #     [-150/180*pi,150/180*pi],
+        #     [-150/180*pi,150/180*pi],
         #     [-pi,pi]
         # ]
         # qlim = [
@@ -145,9 +154,9 @@ class modular_robot_6dof(DHRobot):
                 m=mass[j],
                 r=center_of_mass[j],
                 I=inertia[j],
-                G=G[j]
+                G=G[j],
                 # B=B[j]
-                # qlim=qlim[j]
+                qlim=q_lim[j]
             )
             links.append(link)
     
@@ -187,7 +196,7 @@ if __name__ == '__main__':    # pragma nocover
     q =  np.r_[0, 0, 0, 0, 0, 0]*deg
     q_test =  np.r_[0, 90, -0, 0, 0, 0]*deg
 
-
+    robot.teach()
     # df = load_workbook("./xlsx/task_point_6dof_tested_ori_random.xlsx")
     # sheets = df.worksheets
     # sheet1 = sheets[0]
