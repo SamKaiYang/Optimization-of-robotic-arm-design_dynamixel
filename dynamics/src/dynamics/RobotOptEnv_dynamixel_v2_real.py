@@ -508,8 +508,10 @@ class RobotOptEnv(gym.Env):
             self.total_weight = self.op_weight # Kg
             self.total_cost = self.op_cost # 元
             self.reach_distance = self.op_radius # 使用者設定可達半徑最小值
-            self.motor_type_axis_2 = 5.1
-            self.motor_type_axis_3 = 5.1
+            # self.motor_type_axis_2 = 5.1
+            # self.motor_type_axis_3 = 5.1
+            self.motor_type_axis_2 = 44.7
+            self.motor_type_axis_3 = 44.7
             # ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(self.model_select, self.motor_type_axis_2, self.motor_type_axis_3)
             reach_score, manipulability_score = self.only_reachable_manipulability(self.model_select)
             if reach_score == 1:
