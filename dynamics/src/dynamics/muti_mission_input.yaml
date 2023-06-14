@@ -1,7 +1,9 @@
-payload: [0, 1, 2, 3, 4, 5] # case1
-# payload: [0, 0.5, 1, 1.1, 3, 5, 6] # case2
+# payload: [0, 1, 2, 3, 4, 5] # case1
+payload: [0, 0.5, 1, 3, 5, 6] # case2
+# payload: [5] # case2 only
 # payload: [1.1]
 # work_space: ['A','B','C']
 work_space: ['A','B']
-mission_time: [0] # case1
-# mission_time: [10,30] # case2
+# mission_time: [0] # case1
+mission_time: [10,30] # case2
+# mission_time: [30] # case2 only
