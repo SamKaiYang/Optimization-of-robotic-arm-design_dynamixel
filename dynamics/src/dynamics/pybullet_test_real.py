@@ -390,14 +390,37 @@ class motion_model(object):
         wait_for_duration(100)
 
     def show_point(self):
-        q_test = [np.array([ 0.7000,	0.5000,	0	,-180	,0	,-180]), \
-            np.array([ 0.6414	,0.6414	,0	,-180	,0	,-180]), \
-            np.array([ 0.5000	,0.7000	,0	,-180	,0	,-180]), \
-            np.array([ 0.3586	,0.6414	,0	,-180	,0	,-180]), \
-            np.array([ 0.3000	,0.5000	,0	,-180	,0	,-180]), \
-            np.array([ 0.3586	,0.3586	,0	,-180	,0	,-180]), \
-            np.array([ 0.5000	,0.3000	,0	,-180	,0	,-180]), \
-            np.array([ 0.6414	,0.3586	,0	,-180	,0	,-180])]
+        # q_test = [np.array([ 0.7000,	0.5000,	0	,-180	,0	,-180]), \
+        #     np.array([ 0.6414	,0.6414	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.5000	,0.7000	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.3586	,0.6414	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.3000	,0.5000	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.3586	,0.3586	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.5000	,0.3000	,0	,-180	,0	,-180]), \
+        #     np.array([ 0.6414	,0.3586	,0	,-180	,0	,-180])]
+
+        # 複雜工作點位
+        # q_test = [np.array([ 0.04,	-0.13,	-0.34,	-31,	56,	-78]), \
+        #     np.array([ -0.27,	-0.05,	0.30,	-104,	-50,	0]), \
+        #     np.array([ 0.07,	-0.24,	-0.27,	1,	39,	-28]), \
+        #     np.array([ 0.27,	-0.11,	0.17,	130,	0,	46]), \
+        #     np.array([ -0.03,	-0.11,	0.77,	-70,	10,	60]), \
+        #     np.array([ 0.06,	0.03,	0.16,	-64,	80,	70]), \
+        #     np.array([ 0.17,	-0.09,	-0.18,	101,	33,	-34]), \
+        #     np.array([ 0.22,	-0.44,	0.46,	69,	-2,	0]), \
+        #     np.array([ -0.35,	-0.33,	0.39,	90,	25,	-74]), \
+        #     np.array([ 0.08,	-0.03,	0.29,	-94,	-42,	22])]
+
+        # 圓周點位
+        q_test = [np.array([ 0.40,	0,	0.35	,180	,0	,0]), \
+            np.array([ 0.28,	0.28,	0.35	,180	,0	,0]), \
+            np.array([ 0.00,	0.40,	0.35	,180	,0	,0]), \
+            np.array([ -0.28,	0.28,	0.35	,180	,0	,0]), \
+            np.array([ 0.50,	0.00,	0.35	,180	,0	,0]), \
+            np.array([ 0.35,	0.35,	0.35	,180	,0	,0]), \
+            np.array([ 0.00,	0.50,	0.35	,180	,0	,0]), \
+            np.array([ -0.35,	0.35,	0.35	,180	,0	,0])]
+
 
         # q_test = [np.array([ 0.06	,-0.17	,-0.45	,-31	,56	,-138]), \
         #     np.array([ -0.36	,-0.06	,0.40	,-104	,-50	,-159]), \
@@ -427,7 +450,7 @@ if __name__ == "__main__":
     rospy.init_node("pybullet_test")
     # origin design compare
     print("start")
-    '''
+    ''' 測試 case3 
     original_design_test = RobotOptEnv()
     # original_design_test.original_design(41.565,38.435,44.7,44.7,1,30)
     # original_design_test.original_design(67.69459,12.30541,44.7,5.1,3,30)
@@ -438,7 +461,7 @@ if __name__ == "__main__":
     origin_return = original_design_test.original_design(29,29,44.7,44.7,3,30)
     print(origin_return)
     '''
-    '''
+    ''' 設定軸長 3dof
     motion_bullet= motion_model()
     # motion_bullet.reset_robot_urdf(30.4267000820369,12)
     # motion_bullet.stl_trimesh_scaling(30.4267000820369, 29.5732999179631)
@@ -448,6 +471,8 @@ if __name__ == "__main__":
     motion_bullet= motion_model()
     motion_bullet.reset_robot_urdf(20,20)
     motion_bullet.stl_trimesh_scaling(20, 20)
+
+    ''' 測試motion planning
     # # TODO: add target_points
     # target_points = [(0.5, 0.5, 0.5), (0.3, 0.7, 0.4), (0.8, 0.2, 0.1)]
     # distance_points = 0.05
@@ -467,17 +492,29 @@ if __name__ == "__main__":
     # motion_bullet.motion_planning_init(True)
     # motion_bullet.plane_call()
     # motion_bullet.test_point()
+    '''
     
+    ''' 開啟 motion planning init
     
+    '''
     q1 = [0,0,0,0,0,0]
-    q2 = [0.7,0.7,0.7,0.7,0.7,0.7]
+    # for complex
+    q2 = [1.57,2.57,-0.7,0.7,0,0]
+    # for circle
+    q2 = [1.57, 0.7 ,0.7,0.7,0,0]
     motion_bullet.motion_planning_init(True)
+
+    '''
+    '''
     # wait_for_duration(5)
-    # motion_bullet.random_obstacle()
     # motion_bullet.motion_planning_test(q1, q2, wait_duration = True)
-    
     # motion_bullet.motion_planning_init(True)
-    # motion_bullet.show_point()
+
+    '''
+        顯示工作點位
+    '''
+    set_joint_positions(motion_bullet.Robot, motion_bullet.arm_joints, q2)
+    motion_bullet.show_point()
     wait_for_duration(100)
 
     '''
