@@ -1,12 +1,13 @@
-op_function: case2_real
+op_function: case1_real
 arm_structure_dof: 6
 DRL_algorithm: 'DDQN'
 cmd_run: 4
-test_model_name: 'DDQN-6-variable-20230521-064836'
+test_model_name: 'DDQN-6-variable-20230602-055743'
 op_dof: 6
 op_payload: 3
 op_payload_position: [0 ,0 , 0.04]
 mission_time: 30
+
 op_vel: [1.57, 1.57, 1.57, 1.57, 1.57, 1.57]
 op_acc: [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
 op_radius: 50

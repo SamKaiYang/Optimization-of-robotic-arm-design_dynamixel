@@ -1005,6 +1005,9 @@ if __name__ == "__main__":
                 drl.env.mission_time = t
                 print(curr_time)
                 origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(27.56563,29.43437,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(22.9566,34.0433,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
+
                 # origin_return = drl.env.original_design(26.036,23.964,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
                 # origin_return = drl.env.original_design(30,30,44.7,25.3,drl.env.op_payload,drl.env.mission_time)
                 # 迭代矩陣的每一個元素，並填入工作表中
@@ -1038,6 +1041,64 @@ if __name__ == "__main__":
             train = Trainer(train_agent, train_env, model_path)
             train.train(train_eps = ddqn_train_eps)
 
+            break
+
+        # 多種任務測試
+        if ros_topic.cmd_run == 7:
+            ros_topic.cmd_run = 0
+            arm_structure_dof = 6
+            # only manipulator, only consumption, only torque limit  
+            ros_topic.test_model_name = ['DDQN-6-variable-20230529-144041','DDQN-6-variable-20230530-044116','DDQN-6-variable-20230531-054016']
+            for i in range(len(ros_topic.test_model_name)):
+                drl.env.train_flag = i+2
+                if ros_topic.DRL_algorithm == 'DQN':
+                    select_path = curr_path + '/train_results' + '/DQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                    '/' + str(ros_topic.test_model_name[i]) + '/models/'   # 選擇模型的路径
+                elif ros_topic.DRL_algorithm == 'DDQN':
+                    select_path = curr_path + '/train_results' + '/DDQN_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                    '/' + str(ros_topic.test_model_name[i]) + '/models/'  # 選擇模型的路径
+                elif ros_topic.DRL_algorithm == 'C51':
+                    select_path = curr_path + '/train_results' + '/C51_outputs/' + op_function_flag + '/' + str(arm_structure_dof) + \
+                    '/' + str(ros_topic.test_model_name[i]) + '/models/'  # 選擇模型的路径
+                
+                drl.env.model_select = "test"
+                model_path = select_path
+                # test_episodes = 50
+
+                with open(curr_path+'/muti_mission_input.yaml', 'r') as f:
+                    config = yaml.load(f, Loader=yaml.Loader)
+                payload = config['payload']
+                rospy.loginfo('Input payload: {}'.format(payload))
+                work_space = config['work_space']
+                rospy.loginfo('Input work_space: {}'.format(work_space))
+                mission_time = config['mission_time']
+                rospy.loginfo('Input mission_time: {}'.format(mission_time))
+                combinations = list(itertools.product(payload, work_space, mission_time))
+                rospy.loginfo('Input combinations: {}'.format(combinations))
+                for p, w, t in itertools.product(payload, work_space, mission_time):
+                    curr_time = f'{p}-{w}-{t}'
+                    drl.env.op_payload = p
+                    # if w == 'A':  # 圓形環門
+                    #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+                    # elif w == 'B': # 複雜點位
+                    #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                    # elif w == 'C': # 複雜點位 2
+                    #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                    if w == 'A':  # 圓形還門 real
+                        drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
+                    elif w == 'B': # 複雜點位 2 real
+                        drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
+                    
+                    # elif w == 'D': 
+                    #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
+                    drl.env.mission_time = t
+                    # 指定 TensorBoard 日志的存储路径，并将作为日志文件名的一部分
+                    log_dir = f"logs/"+ op_function_flag +"/"+ str(ros_topic.test_model_name)+"/"+str(curr_time)+"/"
+                    tb = tensorboardX.SummaryWriter(log_dir = log_dir) # reset tb
+                    # curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")  # 改為任務編號
+                    test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
+                    test = Tester(test_env, model_path, drl.env, num_episodes = test_episodes) # 20230309  change 300-> 200 #20230326 mini-test 20
+                    test.test()
             break
         else:
             pass
