@@ -93,8 +93,9 @@ if __name__ == '__main__':    # pragma nocover
         traj_num = 1
         for m in range(len(max_diff)):
             time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
+            print("time_vector:",time_vector)
             traj_tmp = Traj_robot.robot.jtraj(T_traj[m],T_traj[m+1],time_vector)
-            print(traj_tmp.s)
+            # print(traj_tmp.s)
             # if np.amax(traj.sd) > 3.04:
             #     ratio_over = ratio_over + 1
             torque = Traj_robot.robot.rne(traj_tmp.s,traj_tmp.sd,traj_tmp.sdd)
@@ -112,7 +113,8 @@ if __name__ == '__main__':    # pragma nocover
             # 迭代矩陣的每一個元素，並填入工作表中
             for k in range(len(traj_tmp.s)):
                 for l in range(len(traj_tmp.s[k])):
-                    sheet_traj.cell(row=k+1, column=l+1).value = traj_tmp.s[k][l]
+                    sheet_traj.cell(row=k+1, column=1).value = time_vector[k]
+                    sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
             
             traj_num = traj_num + 1  # 要更改的数字
             new_str = "_{}_".format(traj_num)
