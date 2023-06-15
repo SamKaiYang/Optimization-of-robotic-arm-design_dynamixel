@@ -26,8 +26,8 @@ class RobotTraj():
         self.motor_type_axis_2 = 44.7
         self.motor_type_axis_3 = 25.3
         self.model_select = "test"
-        self.std_L2 = 26.036
-        self.std_L3 = 23.964
+        self.std_L2 = 26.754
+        self.std_L3 = 23.246
         self.point_test_excel = "./xlsx/task_point_6dof_tested_d.xlsx"
         self.mission_time = 10
     def only_reachable_manipulability(model_select):
