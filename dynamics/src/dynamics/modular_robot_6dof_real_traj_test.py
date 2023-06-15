@@ -16,6 +16,10 @@ from openpyxl import load_workbook
 from stl_conv_6dof_urdf_dynamixel_real import stl_conv_urdf
 from modular_robot_6dof_real import modular_robot_6dof
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
+import spatialmath.base.symbolic as sym
+zero = sym.zero()
+pi = sym.pi()
+deg = pi / 180
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotTraj():
     def __init__(self):
@@ -64,6 +68,7 @@ if __name__ == '__main__':    # pragma nocover
         traj_time = []
         traj = []
         diff = np.array([np.zeros(shape=6)])
+        total_time_traj = 0
         for row in rows:
             row_val = [col.value for col in row]
             T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]) * SE3.RPY([np.deg2rad(row_val[3]), np.deg2rad(row_val[4]), np.deg2rad(row_val[5])]))
@@ -87,15 +92,16 @@ if __name__ == '__main__':    # pragma nocover
             traj_time.append(max_diff[k] / max_diff_tol * total_time)
         
         
-        # TODO: save traj
-        excel_file_traj = Workbook()
-        sheet_traj = excel_file_traj.active
-        traj_num = 1
+        traj_num = 0
         for m in range(len(max_diff)):
+            # TODO: save traj
+            excel_file_traj = Workbook()
+            sheet_traj = excel_file_traj.active
+            
             time_vector = np.linspace(0, traj_time[m], int(traj_time[m]/sample_interval) + 1)
-            print("time_vector:",time_vector)
+            # print("time_vector:",time_vector)
             traj_tmp = Traj_robot.robot.jtraj(T_traj[m],T_traj[m+1],time_vector)
-            # print(traj_tmp.s)
+            
             # if np.amax(traj.sd) > 3.04:
             #     ratio_over = ratio_over + 1
             torque = Traj_robot.robot.rne(traj_tmp.s,traj_tmp.sd,traj_tmp.sdd)
@@ -112,10 +118,29 @@ if __name__ == '__main__':    # pragma nocover
             Traj_robot.robot.plot(traj_tmp.s)
             # 迭代矩陣的每一個元素，並填入工作表中
             for k in range(len(traj_tmp.s)):
+                # sheet_traj.cell(row=k+1, column=1).value = traj_tmp.t[k] + total_time_traj
+                sheet_traj.cell(row=k+1, column=1).value = traj_tmp.t[k]
+
+                # print("traj_tmp.s length",len(traj_tmp.s))
+                # print("traj_tmp.t length",len(traj_tmp.t))
+                
+                print(traj_tmp.t[k] + total_time_traj)
                 for l in range(len(traj_tmp.s[k])):
-                    sheet_traj.cell(row=k+1, column=1).value = time_vector[k]
-                    sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
-            
+                    # TODO: 将第三、五、六轴的值加上负号
+                    if l == 0: # 第一軸改角度
+                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
+                    elif l == 1: # 第二軸改角度
+                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    elif l == 2: # 第三軸改角度
+                        sheet_traj.cell(row=k+1, column=l+2).value = (traj_tmp.s[k][l])
+                    elif l == 4: # 第五軸改角度
+                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    elif l == 5: # 第六軸改角度
+                        sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
+                    else:
+                        sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
+            total_time_traj += traj_tmp.t[-1]
+            # print("total_time_traj:",total_time_traj)
             traj_num = traj_num + 1  # 要更改的数字
             new_str = "_{}_".format(traj_num)
             if not os.path.exists(curr_path + "/tested_state_traj/"):
