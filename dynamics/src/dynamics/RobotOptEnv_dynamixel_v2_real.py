@@ -1316,11 +1316,11 @@ class RobotOptEnv_3dof(gym.Env):
         op_payload_position = [0, 0, 0.04]
         self.robot.payload(self.payload, op_payload_position)  # set payload
         model_select = "test"
-        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-        self.random_select_point() # 先隨機抽樣30個點位
+        # self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+        # self.random_select_point() # 先隨機抽樣30個點位
         self.mission_time = mission_time
-        ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
-        origin_return = [ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
+        origin_return = [torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
         return origin_return
     
     # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
@@ -2039,11 +2039,11 @@ class RobotOptEnv_5dof(gym.Env):
         op_payload_position = [0, 0, 0.04]
         self.robot.payload(self.payload, op_payload_position)  # set payload
         model_select = "test"
-        self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
-        self.random_select_point() # 先隨機抽樣30個點位
+        # self.point_Workspace_cal_Monte_Carlo() # 在當前reset出來的機械手臂構型下, 生成點位
+        # self.random_select_point() # 先隨機抽樣30個點位
         self.mission_time = mission_time
-        ratio_over, torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
-        origin_return = [ratio_over, torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
+        torque_over, consumption, reach_score, manipulability_score = self.performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3)
+        origin_return = [torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
         return origin_return
     
     def render(self, mode='human'):
