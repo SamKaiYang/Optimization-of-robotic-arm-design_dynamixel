@@ -133,8 +133,11 @@ if __name__ == '__main__':    # pragma nocover
                         sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
                     elif l == 2: # 第三軸改角度
                         sheet_traj.cell(row=k+1, column=l+2).value = (traj_tmp.s[k][l])
-                    elif l == 4: # 第五軸改角度
+                    elif l == 3: # 第四軸改角度
                         sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    elif l == 4: # 第五軸改角度
+                        # sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
                     elif l == 5: # 第六軸改角度
                         sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
                     else:
