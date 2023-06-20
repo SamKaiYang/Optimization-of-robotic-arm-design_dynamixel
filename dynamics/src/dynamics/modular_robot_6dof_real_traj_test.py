@@ -33,7 +33,7 @@ class RobotTraj():
         self.std_L2 = 26.754
         self.std_L3 = 23.246
         self.point_test_excel = "./xlsx/task_point_6dof_tested_d.xlsx"
-        self.mission_time = 10
+        self.mission_time = 30
     def only_reachable_manipulability(model_select):
         pass
     def performance_evaluate(model_select, motor_type_axis_2, motor_type_axis_3):
@@ -126,20 +126,22 @@ if __name__ == '__main__':    # pragma nocover
                 
                 print(traj_tmp.t[k] + total_time_traj)
                 for l in range(len(traj_tmp.s[k])):
-                    # TODO: 将第三、五、六轴的值加上负号
-                    if l == 0: # 第一軸改角度
+                    # # TODO: 将第三、五、六轴的值加上负号
+                    # if l == 0: # 第一軸改角度
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
+                    # elif l == 1: # 第二軸改角度
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    # elif l == 2: # 第三軸改角度
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = (traj_tmp.s[k][l])
+                    # elif l == 3: # 第四軸改角度
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    # elif l == 4: # 第五軸改角度
+                    #     # sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
+                    # elif l == 5: # 第六軸改角度
+                    #     sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
+                    if l == 2: # 第三軸
                         sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
-                    elif l == 1: # 第二軸改角度
-                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
-                    elif l == 2: # 第三軸改角度
-                        sheet_traj.cell(row=k+1, column=l+2).value = (traj_tmp.s[k][l])
-                    elif l == 3: # 第四軸改角度
-                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
-                    elif l == 4: # 第五軸改角度
-                        # sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l]-np.deg2rad(90))
-                        sheet_traj.cell(row=k+1, column=l+2).value = -(traj_tmp.s[k][l])
-                    elif l == 5: # 第六軸改角度
-                        sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
                     else:
                         sheet_traj.cell(row=k+1, column=l+2).value = traj_tmp.s[k][l]
             total_time_traj += traj_tmp.t[-1]
