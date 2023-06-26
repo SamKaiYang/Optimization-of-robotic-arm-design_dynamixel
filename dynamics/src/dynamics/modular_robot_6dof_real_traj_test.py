@@ -17,6 +17,7 @@ from stl_conv_6dof_urdf_dynamixel_real import stl_conv_urdf
 from modular_robot_6dof_real import modular_robot_6dof
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 import spatialmath.base.symbolic as sym
+import matplotlib.pyplot as plt
 zero = sym.zero()
 pi = sym.pi()
 deg = pi / 180
@@ -25,14 +26,18 @@ class RobotTraj():
     def __init__(self):
         self.robot = modular_robot_6dof()
         self.robot_urdf = stl_conv_urdf("single_arm_v22_19cm","test")
-        self.payload = 1.1
+        self.payload = 1.0
         self.payload_position = [0, 0, 0.04]
         self.motor_type_axis_2 = 44.7
         self.motor_type_axis_3 = 25.3
         self.model_select = "test"
-        self.std_L2 = 26.754
-        self.std_L3 = 23.246
-        self.point_test_excel = "./xlsx/task_point_6dof_tested_d.xlsx"
+        self.std_L2 = 28.984
+        self.std_L3 = 28.015
+        # self.std_L2 = 26.036
+        # self.std_L3 = 23.964
+        # self.point_test_excel = "./xlsx/task_point_6dof_tested_d.xlsx"
+        self.point_test_excel = "./xlsx/task_point_6dof_tested_c_real_traj.xlsx"
+        
         self.mission_time = 30
     def only_reachable_manipulability(model_select):
         pass
@@ -112,7 +117,9 @@ if __name__ == '__main__':    # pragma nocover
             if len(result_2)>0 or len(result_3) >0:
                 torque_over = torque_over + 1
             num_torque = np.append(num_torque, torque)
-            
+            # plt.plot(traj_tmp.t, torque[:,1])
+            # plt.savefig('books_read.png')
+            # plt.show()
             # traj.append(traj_tmp)
             # TODO: add save traj to sheet
             Traj_robot.robot.plot(traj_tmp.s)
