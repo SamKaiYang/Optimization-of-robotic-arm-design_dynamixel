@@ -959,7 +959,8 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
                 elif w == 'B': # 複雜點位 2 real
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
-                
+                elif w == 'C': # complex real traj
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real_traj.xlsx'
                 # elif w == 'D': 
                 #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
                 drl.env.mission_time = t
@@ -1000,6 +1001,8 @@ if __name__ == "__main__":
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
                 elif w == 'B': # 複雜點位 2 real
                     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
+                elif w == 'C': # complex real traj
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real_traj.xlsx'
                 # elif w == 'D': 
                 #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
                 drl.env.mission_time = t
@@ -1088,7 +1091,8 @@ if __name__ == "__main__":
                         drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
                     elif w == 'B': # 複雜點位 2 real
                         drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
-                    
+                    elif w == 'C': # complex real traj
+                        drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real_traj.xlsx'
                     # elif w == 'D': 
                     #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random_v2.xlsx'
                     drl.env.mission_time = t
