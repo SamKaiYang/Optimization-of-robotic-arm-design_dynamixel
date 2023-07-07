@@ -32,6 +32,9 @@ import os
 from openpyxl import load_workbook
 from openpyxl import Workbook
 
+from dynamics.puma560 import Puma560
+from dynamics.UR_robot import UR5, UR3
+from dynamics.TM_robot import TM5_700
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotOptEnv(gym.Env):
     metadata = {
@@ -819,7 +822,43 @@ class RobotOptEnv(gym.Env):
             else:
                 return(torque_over, total_energy, final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
 
-
+    def other_manipulator_design(self, payload, mission_time):
+        # robot = Puma560(0.4318,0.4318)
+        # robot = UR5()
+        robot = UR3()
+        # robot = TM5_700()
+        op_payload_position = [0, 0, 0.04]
+        robot.payload(payload, op_payload_position)  # set payload
+        model_select = "test"
+        reach_score, manipulability_score = self.other_manipulator_performance_evaluate(robot, mission_time)
+        origin_return = [reach_score, manipulability_score]
+        return origin_return
+    # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
+    def other_manipulator_performance_evaluate(self, robot, mission_time):
+        df = load_workbook(self.point_test_excel)
+        sheets = df.worksheets
+        sheet1 = sheets[0]
+        rows = sheet1.rows
+        T_tmp = []
+        i = 0
+        count = 0
+        manipulability_index = []
+        for row in rows:
+            row_val = [col.value for col in row]
+            T_tmp.append(SE3(row_val[0], row_val[1], row_val[2]))# TODO: fixed 3dof
+            ik_q = robot.ikine_LMS(T=T_tmp[i], mask = [1,1,1,0,0,0])# TODO: fixed 3dof
+            
+            if ik_q.success == True:
+                count += 1
+                manipulability_index.append(robot.manipulability(q=ik_q.q))
+            i = i + 1
+        final_score = count / i
+        if count == 0:
+            return(0, 0)
+        if count == 1:
+            return(final_score, manipulability_index[0]) # 回傳 manipulability[0]
+        else:
+            return(final_score, np.mean(manipulability_index)) # 回傳 manipulability 取平均
 class RobotOptEnv_3dof(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -1323,7 +1362,6 @@ class RobotOptEnv_3dof(gym.Env):
         origin_return = [torque_over, consumption, reach_score, manipulability_score, std_L2, std_L3, motor_type_axis_2, motor_type_axis_3]
         return origin_return
     
-    # 視覺化呈現，它只會回應出呼叫那一刻的畫面給你，要它持續出現，需要寫個迴圈
     def render(self, mode='human'):
         return None
         

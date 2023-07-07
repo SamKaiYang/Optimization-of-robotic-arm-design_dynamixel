@@ -1007,7 +1007,9 @@ if __name__ == "__main__":
                 #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
                 drl.env.mission_time = t
                 print(curr_time)
-                origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+                # origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+
+                origin_return = drl.env.original_design(28.190,27.810,44.7,25.3,drl.env.op_payload,drl.env.mission_time)
                 # origin_return = drl.env.original_design(27.56563,29.43437,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
                 # origin_return = drl.env.original_design(22.9566,34.0433,44.7,44.7,drl.env.op_payload,drl.env.mission_time)
 
@@ -1103,6 +1105,52 @@ if __name__ == "__main__":
                     test_env, test_agent = drl.env_agent_config(cfg, ros_topic.DRL_algorithm, seed=10)
                     test = Tester(test_env, model_path, drl.env, num_episodes = test_episodes) # 20230309  change 300-> 200 #20230326 mini-test 20
                     test.test()
+            break
+            # other robot manipulators compare
+        if ros_topic.cmd_run == 8:
+            with open(curr_path+'/muti_mission_input.yaml', 'r') as f:
+                config = yaml.load(f, Loader=yaml.Loader)
+            payload = config['payload']
+            rospy.loginfo('Input payload: {}'.format(payload))
+            work_space = config['work_space']
+            rospy.loginfo('Input work_space: {}'.format(work_space))
+            mission_time = config['mission_time']
+            rospy.loginfo('Input mission_time: {}'.format(mission_time))
+            combinations = list(itertools.product(payload, work_space, mission_time))
+            rospy.loginfo('Input combinations: {}'.format(combinations))
+
+            original_design = Workbook()
+            sheet_original_design = original_design.active
+            i = 0
+            for p, w, t in itertools.product(payload, work_space, mission_time):
+                curr_time = f'{p}-{w}-{t}'
+                drl.env.op_payload = p
+                # if w == 'A':  # 圓形環門
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_circle.xlsx'
+                # elif w == 'B': # 複雜點位
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_ori_random.xlsx'
+                # elif w == 'C': 
+                #     drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c.xlsx'
+                if w == 'A':  # 圓形還門 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_d.xlsx'
+                elif w == 'B': # 複雜點位 2 real
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real.xlsx'
+                elif w == 'C': # complex real traj
+                    drl.env.point_test_excel = './xlsx/task_point_6dof_tested_c_real_traj.xlsx'
+                # elif w == 'D': 
+                #     drl.env.point_test_excel = './xlsx/task_point_d.xlsx'
+                drl.env.mission_time = t
+                print(curr_time)
+                # origin_return = drl.env.original_design(26.036,23.964,25.3,25.3,drl.env.op_payload,drl.env.mission_time)
+
+                origin_return = drl.env.other_manipulator_design(drl.env.op_payload,drl.env.mission_time)
+                # 迭代矩陣的每一個元素，並填入工作表中
+                for l in range(len(origin_return)):
+                    sheet_original_design.cell(row=i+1, column=1).value = curr_time
+                    sheet_original_design.cell(row=i+1, column=l+2).value = origin_return[l]
+                i = i + 1
+            file_name_original_design = "./xlsx/UR3_tested_state_original_design_" + op_function_flag + ".xlsx"
+            original_design.save(file_name_original_design)
             break
         else:
             pass

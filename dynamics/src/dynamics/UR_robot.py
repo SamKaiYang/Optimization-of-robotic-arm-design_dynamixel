@@ -2,7 +2,72 @@ import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
 
+class UR3(DHRobot):
+    
+    def __init__(self, symbolic=False):
 
+        if symbolic:
+            import spatialmath.base.symbolic as sym
+            zero = sym.zero()
+            pi = sym.pi()
+        else:
+            from math import pi
+            zero = 0.0
+
+        deg = pi / 180
+        inch = 0.0254
+
+
+        self.length_1 = 0.24365
+        self.length_2 = 0.21325
+        self.length_3 = 0.09465
+
+        # robot length values (metres)
+        a = [0, -0.24365, -0.21325, 0, 0, 0]
+        d = [0.1519, 0, 0, 0.11235, 0.08535, 0.0819]
+
+        alpha = [pi/2, zero, zero, pi/2, -pi/2, zero]
+
+        # mass data, no inertia available
+        mass = [3.7000, 8.3930, 2.33, 1.2190, 1.2190, 0.1897]
+        center_of_mass = [
+                [0,     -0.02561,  0.00193],
+                [0.2125, 0,        0.11336],
+                [0.15,   0,        0.0265],
+                [0,     -0.0018,   0.01634],
+                [0,     -0.0018,   0.01634],
+                [0,      0,       -0.001159]
+            ]
+        links = []
+
+        for j in range(6):
+            link = RevoluteDH(
+                d=d[j],
+                a=a[j],
+                alpha=alpha[j],
+                m=mass[j],
+                r=center_of_mass[j],
+                G=1
+            )
+            links.append(link)
+    
+        super().__init__(
+            links,
+            name="UR5",
+            manufacturer="Universal Robotics",
+            keywords=('dynamics', 'symbolic'),
+            symbolic=symbolic
+        )
+    
+        # zero angles
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
+        # horizontal along the x-axis
+        self.addconfiguration("qr", np.r_[180, 0, 0, 0, 90, 0]*deg)
+
+        # nominal table top picking pose
+        self.addconfiguration("qn", np.array([0, 0, 0, 0, 0, 0]))
+    def return_configuration(self):
+        return self.length_1, self.length_2, self.length_3
 class UR5(DHRobot):
     """
     Class that models a Universal Robotics UR5 manipulator
