@@ -35,6 +35,8 @@ from openpyxl import Workbook
 from dynamics.puma560 import Puma560
 from dynamics.UR_robot import UR5, UR3
 from dynamics.TM_robot import TM5_700
+from dynamics.KR5_robot import KR5
+from dynamics.denso_robot import denso
 # TODO: 初版 只考慮 6 dof 機器人的關節長度變化, 觀察各軸馬達極限之輸出最大torque值
 class RobotOptEnv(gym.Env):
     metadata = {
@@ -826,7 +828,9 @@ class RobotOptEnv(gym.Env):
         # robot = Puma560(0.4318,0.4318)
         # robot = UR5()
         # robot = UR3()
-        robot = TM5_700()
+        # robot = TM5_700()
+        robot = denso()
+        # robot = KR5()
         op_payload_position = [0, 0, 0.04]
         robot.payload(payload, op_payload_position)  # set payload
         # model_select = "test"

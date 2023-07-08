@@ -1149,7 +1149,7 @@ if __name__ == "__main__":
                     sheet_original_design.cell(row=i+1, column=1).value = curr_time
                     sheet_original_design.cell(row=i+1, column=l+2).value = origin_return[l]
                 i = i + 1
-            file_name_original_design = "./xlsx/TM5_700_tested_state_original_design_" + op_function_flag + ".xlsx"
+            file_name_original_design = "./xlsx/denso_tested_state_original_design_" + op_function_flag + ".xlsx"
             original_design.save(file_name_original_design)
             break
         else:
